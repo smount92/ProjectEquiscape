@@ -1,11 +1,14 @@
 "use client";
 
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useEffect, useId, useSyncExternalStore } from "react";
 import { Button } from "@/components/ui/button";
+import { NativeSelect } from "@/components/ui/native-select";
 import {
     DESK_GROUP_LABELS,
     DESK_GROUP_ORDER,
+    addableFields,
     buildDeskFields,
+    deskChanges,
     type DeskFieldEdit,
     type DeskFieldGroup,
     type DeskSource,
@@ -13,10 +16,11 @@ import {
 import { referenceHref } from "@/lib/catalog/referenceUrl";
 import { CATEGORY_LABELS } from "@/lib/catalog/taxonomy";
 import type { DeskRelease } from "@/app/actions/registry-desk";
-import DeskField from "@/components/desk/DeskField";
+import DeskField, { deskFieldId } from "@/components/desk/DeskField";
 import FlagChips from "@/components/desk/FlagChips";
 import SuggestedFixes from "@/components/desk/SuggestedFixes";
 import ConflictNotice from "@/components/desk/ConflictNotice";
+import { isMacLike } from "@/components/desk/useDeskKeys";
 
 const FOLDED: ReadonlySet<DeskFieldGroup> = new Set(["import", "record"]);
 
@@ -34,10 +38,22 @@ function linkNote(entry: DeskRelease): string {
         : "No horses or want lists point at this release, so it can be removed if it is junk.";
 }
 
+const noSubscribe = () => () => {};
+
+/** "⌘S" on a Mac, "Ctrl+S" elsewhere; read after the page has loaded, so the server and browser agree first. */
+function useSaveKeyWords(): string {
+    return useSyncExternalStore(
+        noSubscribe,
+        () => (isMacLike(typeof navigator === "undefined" ? undefined : navigator) ? "⌘S" : "Ctrl+S"),
+        () => "Ctrl+S",
+    );
+}
+
 /**
  * The full record of one row, every field, ready to edit and save. The
  * Mold view owns the drafts (so they survive moving between releases) and
- * hands this editor the one in view.
+ * hands this editor the one in view; Save, Prev and Next live in the Mold
+ * view's bar, outside this editor, so they keep focus while it changes.
  */
 export default function ItemEditor({
     entry,
@@ -46,15 +62,14 @@ export default function ItemEditor({
     displays,
     onChange,
     onUseFix,
-    onSave,
-    saving,
     conflict,
     onKeepMine,
     onUseTheirs,
-    position,
-    onPrev,
-    onNext,
     onRemove,
+    fieldKeys = [],
+    added = [],
+    onAddField,
+    error = null,
 }: {
     entry: DeskRelease;
     parentTitle: string | null;
@@ -62,26 +77,40 @@ export default function ItemEditor({
     displays: Record<string, string>;
     onChange: (key: string, value: string, display?: string) => void;
     onUseFix: (changes: Record<string, string>) => void;
-    onSave: () => void;
-    saving: boolean;
     conflict: DeskSource | null;
     onKeepMine: () => void;
     onUseTheirs: () => void;
-    position: { index: number; total: number };
-    onPrev: () => void;
-    onNext: () => void;
     onRemove?: () => void;
+    /** Every attribute key the Registry keeps: "Add a field" offers those not shown. */
+    fieldKeys?: readonly string[];
+    /** Keys added with "Add a field" on this row. */
+    added?: readonly string[];
+    onAddField?: (key: string) => void;
+    /** The field the last save refused, and why. */
+    error?: { field: string | null; message: string } | null;
 }) {
     const row = entry.row;
-    const fields = buildDeskFields(row, { parentTitle });
+    const fields = buildDeskFields(row, { parentTitle, added });
     const valueOf = (f: DeskFieldEdit) => (f.key in draft ? draft[f.key] : f.original);
-    const changed = fields.filter((f) => !f.readOnly && valueOf(f).trim() !== f.original.trim()).length;
+    const changes = deskChanges(fields, draft);
+    const changedKeys = new Set(Object.keys(changes));
+    const changed = [...changedKeys].filter((k) => k in draft).length;
     const isMold = row.item_type === "plastic_mold";
     const title = (draft.title ?? row.title) || "Untitled";
     const idPrefix = `desk-${row.id.slice(0, 8)}`;
+    const addId = useId();
+    const saveKey = useSaveKeyWords();
+    const offered = onAddField ? addableFields(fields, fieldKeys) : [];
+    const errorField = error?.field ? fields.find((f) => f.key === error.field) : undefined;
+
+    // A refused value: its box is marked and takes focus.
+    useEffect(() => {
+        if (!error?.field) return;
+        document.getElementById(deskFieldId(idPrefix, error.field))?.focus();
+    }, [error, idPrefix]);
 
     const groups = DESK_GROUP_ORDER.map((g) => ({ g, list: fields.filter((f) => f.group === g) })).filter(
-        (x) => x.list.length > 0,
+        (x) => x.list.length > 0 || (x.g === "extras" && offered.length > 0),
     );
 
     return (
@@ -104,8 +133,8 @@ export default function ItemEditor({
                                 {changed} unsaved change{changed === 1 ? "" : "s"}
                             </span>
                         )}
-                        <span className="hidden text-muted-foreground md:inline">
-                            J and K move between releases · Ctrl+S saves
+                        <span className="hidden text-muted-foreground md:inline" data-testid="key-hint">
+                            J and K move between releases · {saveKey} saves
                         </span>
                     </div>
                 </div>
@@ -114,6 +143,12 @@ export default function ItemEditor({
 
             {conflict && (
                 <ConflictNotice theirs={conflict} draft={draft} onKeepMine={onKeepMine} onUseTheirs={onUseTheirs} />
+            )}
+
+            {error && !errorField && (
+                <p role="alert" className="m-0 rounded-lg bg-destructive/10 px-3 py-2 text-sm text-destructive">
+                    {error.message}
+                </p>
             )}
 
             <SuggestedFixes fixes={entry.fixes} onUse={onUseFix} />
@@ -128,6 +163,8 @@ export default function ItemEditor({
                                 value={valueOf(f)}
                                 display={displays[f.key] ?? f.display}
                                 idPrefix={idPrefix}
+                                dirty={!f.readOnly && changedKeys.has(f.key) && f.key in draft}
+                                error={error?.field === f.key ? error.message : null}
                                 onChange={(v, d) => onChange(f.key, v, d)}
                             />
                         ))}
@@ -148,7 +185,39 @@ export default function ItemEditor({
                         <legend className="mb-2 font-serif text-base font-bold text-forest">
                             {DESK_GROUP_LABELS[g]}
                         </legend>
-                        {body}
+                        {list.length > 0 && body}
+                        {g === "extras" && offered.length > 0 && onAddField && (
+                            <div className="flex flex-col gap-1 sm:max-w-sm">
+                                <label htmlFor={addId} className="text-sm font-semibold text-foreground">
+                                    Add a field
+                                </label>
+                                <NativeSelect
+                                    id={addId}
+                                    value=""
+                                    data-testid="add-field"
+                                    onChange={(e) => {
+                                        const key = e.target.value;
+                                        if (!key) return;
+                                        onAddField(key);
+                                        // The new box takes focus once it is drawn.
+                                        requestAnimationFrame(() =>
+                                            document.getElementById(deskFieldId(idPrefix, key))?.focus(),
+                                        );
+                                    }}
+                                >
+                                    <option value="">Pick one the Registry keeps ...</option>
+                                    {offered.map((o) => (
+                                        <option key={o.key} value={o.key}>
+                                            {o.label}
+                                        </option>
+                                    ))}
+                                </NativeSelect>
+                                <span className="text-xs text-muted-foreground">
+                                    Every field the Registry keeps can be filled in here, whatever kind of entry this
+                                    is.
+                                </span>
+                            </div>
+                        )}
                     </fieldset>
                 );
             })}
@@ -161,29 +230,6 @@ export default function ItemEditor({
                     </Button>
                 </div>
             )}
-
-            <div
-                className="sticky bottom-0 z-10 flex items-center justify-between gap-2 rounded-md border border-input bg-card/95 px-3 py-2 backdrop-blur"
-                data-testid="editor-bar"
-            >
-                <Button type="button" variant="outline" onClick={onPrev} disabled={position.index <= 0}>
-                    <ChevronLeft aria-hidden="true" /> Prev
-                </Button>
-                <span className="text-xs text-muted-foreground tabular-nums">
-                    {position.index + 1} of {position.total}
-                </span>
-                <Button type="button" onClick={onSave} disabled={saving || changed === 0}>
-                    {saving ? "Saving ..." : "Save"}
-                </Button>
-                <Button
-                    type="button"
-                    variant="outline"
-                    onClick={onNext}
-                    disabled={position.index >= position.total - 1}
-                >
-                    Next <ChevronRight aria-hidden="true" />
-                </Button>
-            </div>
         </section>
     );
 }

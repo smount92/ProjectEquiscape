@@ -37,7 +37,7 @@ function stateOf(e: HistoryEntry): { label: string; tone: string } {
     if (e.status === "failed") return { label: "Didn't go through", tone: "bad" };
     if (e.looksRightBy) return { label: `Looks right · @${e.looksRightBy}`, tone: "good" };
     if (e.secondLookBy) return { label: `Second look by @${e.secondLookBy}`, tone: "good" };
-    return { label: "In", tone: "plain" };
+    return { label: "Done", tone: "plain" };
 }
 
 const TONE: Record<string, string> = {
@@ -97,7 +97,10 @@ export default function HistoryRow({ entry }: { entry: HistoryEntry }) {
                         {entry.catalogItemId && entry.kind !== "remove" && entry.kind !== "merge" && (
                             <>
                                 {" · "}
-                                <Link href={`/catalog/${entry.catalogItemId}`} className="font-semibold text-forest">
+                                <Link
+                                    href={`/catalog/desk/mold/${entry.catalogItemId}`}
+                                    className="font-semibold text-forest"
+                                >
                                     Open
                                 </Link>
                             </>

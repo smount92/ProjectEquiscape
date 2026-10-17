@@ -15,16 +15,18 @@ import { FLAG_LABELS } from "@/lib/registry/checks";
 import { Button } from "@/components/ui/button";
 
 /**
- * Where a row opens: the Mold view for anything on a mold. A release with
- * no mold opens in the Desk editor on its own (the Mold view takes a
+ * Where a row opens: the Mold view for anything on a mold, on "Needs
+ * work" with a link back to this list (and this page of it). A release
+ * with no mold opens in the Desk editor on its own (the Mold view takes a
  * release's id), where it can be re-filed under its mold.
  */
-function openHref(row: TodoRow): string {
+export function openHref(row: TodoRow, back: string): string {
     if (row.kind === "near_name") return `/catalog?q=${encodeURIComponent(row.title.split(" / ")[0])}`;
+    const keep = `filter=needs&back=${encodeURIComponent(back)}`;
     if (row.moldId && row.id && row.moldId !== row.id)
-        return `/catalog/desk/mold/${row.moldId}?release=${encodeURIComponent(row.id)}`;
-    if (row.moldId) return `/catalog/desk/mold/${row.moldId}`;
-    return row.id ? `/catalog/desk/mold/${encodeURIComponent(row.id)}` : "/catalog";
+        return `/catalog/desk/mold/${row.moldId}?release=${encodeURIComponent(row.id)}&${keep}`;
+    if (row.moldId) return `/catalog/desk/mold/${row.moldId}?${keep}`;
+    return row.id ? `/catalog/desk/mold/${encodeURIComponent(row.id)}?${keep}` : "/catalog";
 }
 
 function claimWords(c: ClaimView | null): string | null {
@@ -98,7 +100,10 @@ export default function TodoListTable({
                             >
                                 <div className="min-w-0">
                                     <Link
-                                        href={openHref(row)}
+                                        href={openHref(
+                                            row,
+                                            `/catalog/desk/todo/${list.key}${page > 1 ? `?page=${page}` : ""}`,
+                                        )}
                                         className="font-semibold break-words text-foreground hover:text-forest"
                                     >
                                         {row.title}

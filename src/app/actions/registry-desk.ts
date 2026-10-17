@@ -13,8 +13,8 @@
  * readable only by their authors under RLS, and the claim columns and the
  * history tables (242) are service-role only by design. Every Registry
  * WRITE goes through src/lib/catalog/write.ts or suggestionApply.ts, the
- * one writer; this file never writes catalog_items or catalog_changelog.
- * The only rows it writes itself are the 30-minute claims on suggestions.
+ * one writer; this file never writes catalog_items or catalog_changelog,
+ * and the 30-minute claims on suggestions are the engine's too.
  */
 
 import { revalidatePath } from "next/cache";
@@ -24,17 +24,27 @@ import { AuthError, SUSPENDED_AUTH_ERROR, requireRegistryModerator } from "@/lib
 import { ACCOUNT_SUSPENDED, NOT_LOGGED_IN, fail, safeError, type ActionResult } from "@/lib/actions/result";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { sanitizeText } from "@/lib/utils/validation";
-import { deskFieldLabel, type DeskSource } from "@/lib/catalog/editableFields";
+import { buildDeskFields, deskFieldLabel, type DeskSource } from "@/lib/catalog/editableFields";
 import {
     confirmMerge as writeConfirmMerge,
     declineMerge as writeDeclineMerge,
     insertItem,
+    knownAttributeKeys,
     linkCounts,
     removeItem as writeRemoveItem,
-    requestMerge as writeRequestMerge,
     updateItem,
 } from "@/lib/catalog/write";
-import { decideSuggestion } from "@/lib/catalog/suggestionApply";
+// TEMP: these four come from write.ts / suggestionApply.ts once r3-engine-fixes merges.
+import {
+    additionDrops,
+    claimSuggestion as engineClaimSuggestion,
+    decideSuggestion,
+    releaseSuggestionClaim,
+    requestMerge as writeRequestMerge,
+    undoReady,
+    type Dropped,
+    type SuggestionExpectation,
+} from "@/lib/catalog/desk-engine-interfaces";
 import {
     FLAG_LABELS,
     moldFlags,
@@ -76,6 +86,14 @@ export interface QueueItem {
     changes: QueueChange[];
     /** The member's field_changes, as filed; Edit then approve starts from these. */
     fields: Record<string, unknown>;
+    /**
+     * The entry's values now, keyed like the Desk's fields (a correction
+     * only): Edit then approve can add a field the member didn't touch,
+     * starting from what the Registry says.
+     */
+    current: Record<string, string> | null;
+    /** A new entry's values the Registry won't keep, and why: shown before anyone approves it. */
+    willDrop: Dropped[];
     claim: { by: string; mine: boolean; until: string } | null;
     keep: { id: string; title: string } | null;
     note: string | null;
@@ -111,6 +129,11 @@ export interface DeskRelease {
 export interface MoldViewData {
     mold: DeskRelease;
     releases: DeskRelease[];
+    /**
+     * Every attribute key the Registry keeps (write.ts knownAttributeKeys):
+     * the editor's "Add a field" offers the ones a row doesn't show yet.
+     */
+    fieldKeys: string[];
 }
 
 export interface MoldHit {
@@ -121,11 +144,43 @@ export interface MoldHit {
     releases: number;
 }
 
+/** Any Registry entry found by name or model number. */
+export interface EntryHit {
+    id: string;
+    title: string;
+    itemType: string;
+    maker: string | null;
+    scale: string | null;
+    modelNumber: string | null;
+    moldTitle: string | null;
+    href: string;
+}
+
+export interface DeskCounts {
+    /** Open suggestions across Corrections, New entries and Duplicates. */
+    queue: number;
+    secondLooks: number;
+    /** Rules proposed and waiting for agreement (0 before 244). */
+    rules: number;
+}
+
 export type DeskLinks = Awaited<ReturnType<typeof linkCounts>>;
 
+export type { Dropped };
+
 export type SaveResult =
-    | { success: true; item: DeskSource }
-    | { success: false; error: string; conflict?: DeskSource | null };
+    | {
+          success: true;
+          item: DeskSource;
+          /** The row as saved, with its fresh flags, fixes and links: no second read (null if those failed). */
+          entry: DeskRelease | null;
+          /** The History entry, for Undo (null before update 242). */
+          actionId: string | null;
+      }
+    | { success: false; error: string; field?: string; conflict?: DeskSource | null };
+
+/** One field's change: text, or a list typed as comma-separated words. */
+export type DeskChangeValue = string | string[];
 
 // ── The gate ──
 
@@ -173,7 +228,6 @@ function isMissingSchema(error: DbError): boolean {
 const ROW_COLUMNS =
     "id, item_type, parent_id, title, maker, maker_slug, slug, scale, artist, manufacturer, attributes, created_at, updated_at";
 
-const CLAIM_MINUTES = 30;
 const OPEN_STATUSES = ["pending", "under_review"];
 const CHUNK = 150;
 
@@ -208,6 +262,16 @@ function deskHrefFor(row: { id: string; item_type: string; parent_id: string | n
     if (row.item_type === "plastic_mold") return `/catalog/desk/mold/${row.id}`;
     if (row.parent_id) return `/catalog/desk/mold/${row.parent_id}?release=${row.id}`;
     return `/catalog/desk/mold/${row.id}`;
+}
+
+/** A row's editable values as the Desk's boxes show them (text; a list as "a, b"). */
+function currentValues(row: DeskSource | null | undefined): Record<string, string> | null {
+    if (!row) return null;
+    return Object.fromEntries(
+        buildDeskFields(row)
+            .filter((f) => !f.readOnly)
+            .map((f) => [f.key, f.original]),
+    );
 }
 
 async function aliasesFor(db: SupabaseClient, ids: string[]): Promise<Map<string, string>> {
@@ -386,6 +450,8 @@ export async function getQueue(tab: QueueTab): Promise<ActionResult<{ queue: Que
                 keep: null,
                 note: null,
                 canEdit: false,
+                current: null,
+                willDrop: [],
             }));
             return { success: true, queue: { tab, items, counts, notice: null } };
         }
@@ -415,15 +481,13 @@ export async function getQueue(tab: QueueTab): Promise<ActionResult<{ queue: Que
             if (typeof fc.parent_catalog_id === "string") itemIds.add(fc.parent_catalog_id);
         }
         const items = new Map<string, { id: string; title: string; item_type: string; parent_id: string | null }>();
+        const fullRows = new Map<string, DeskSource>();
         for (const part of chunks([...itemIds])) {
-            const { data } = await db.from("catalog_items").select("id, title, item_type, parent_id").in("id", part);
-            for (const it of (data ?? []) as {
-                id: string;
-                title: string;
-                item_type: string;
-                parent_id: string | null;
-            }[]) {
+            const { data } = await db.from("catalog_items").select(ROW_COLUMNS).in("id", part);
+            for (const raw of (data ?? []) as Record<string, unknown>[]) {
+                const it = toSource(raw);
                 items.set(it.id, it);
+                fullRows.set(it.id, it);
             }
         }
         const moldIds = [...items.values()].map((i) => i.parent_id).filter((p): p is string => !!p && !items.has(p));
@@ -507,8 +571,24 @@ export async function getQueue(tab: QueueTab): Promise<ActionResult<{ queue: Que
                 note: r.admin_notes,
                 canEdit:
                     tab !== "auto_applied" && (r.suggestion_type === "correction" || r.suggestion_type === "addition"),
+                current: currentValues(
+                    r.suggestion_type === "correction" && r.catalog_item_id ? fullRows.get(r.catalog_item_id) : null,
+                ),
+                willDrop: [],
             };
         });
+        // What each new entry would lose, before anyone approves it. A failed
+        // check is no reason to hide the Queue: that card shows no list.
+        await Promise.all(
+            out.map(async (item, i) => {
+                if (item.kind !== "addition" || tab === "auto_applied") return;
+                try {
+                    item.willDrop = await additionDrops(rows[i].field_changes ?? {});
+                } catch {
+                    item.willDrop = [];
+                }
+            }),
+        );
         return { success: true, queue: { tab, items: out, counts, notice } };
     } catch (e) {
         return safeError("RegistryDesk.getQueue", e, "The Queue could not be read. Please try again.");
@@ -517,7 +597,11 @@ export async function getQueue(tab: QueueTab): Promise<ActionResult<{ queue: Que
 
 type ReviewCheck = { ok: true; row: SuggestionRow } | { ok: false; failure: { success: false; error: string } };
 
-/** The checks before anyone decides a suggestion: it exists, is open, isn't theirs, isn't someone else's to decide right now. */
+/**
+ * The checks before anyone decides a suggestion: it exists, is open, isn't
+ * theirs (the site owner may decide their own, as the engine allows: the
+ * owner is the last word), isn't someone else's to decide right now.
+ */
 async function reviewable(db: SupabaseClient, actor: RegistryActor, id: string): Promise<ReviewCheck> {
     let res = await db
         .from("catalog_suggestions")
@@ -530,7 +614,7 @@ async function reviewable(db: SupabaseClient, actor: RegistryActor, id: string):
     if (res.error) return { ok: false, failure: safeError("RegistryDesk.reviewable", res.error) };
     const row = res.data as unknown as SuggestionRow | null;
     if (!row) return { ok: false, failure: fail("That suggestion is gone.") };
-    if (row.user_id === actor.userId) {
+    if (row.user_id === actor.userId && actor.role !== "owner") {
         return { ok: false, failure: fail("This is your own suggestion. Another moderator decides it.") };
     }
     if (!OPEN_STATUSES.includes(row.status)) {
@@ -545,13 +629,9 @@ async function reviewable(db: SupabaseClient, actor: RegistryActor, id: string):
 }
 
 /** Lets go of a claim this moderator holds (quietly: before 242 there is nothing to let go). */
-async function dropClaim(db: SupabaseClient, actor: RegistryActor, id: string): Promise<void> {
-    const { error } = await db
-        .from("catalog_suggestions")
-        .update({ claimed_by: null, claimed_until: null })
-        .eq("id", id)
-        .eq("claimed_by", actor.userId);
-    if (error && !isMissingSchema(error)) safeError("RegistryDesk.dropClaim", error);
+async function dropClaim(actor: RegistryActor, id: string): Promise<void> {
+    const r = await releaseSuggestionClaim(actor, id);
+    if (!r.success && r.code !== "not_ready") safeError("RegistryDesk.dropClaim", r.error);
 }
 
 function refreshQueue(): void {
@@ -559,9 +639,34 @@ function refreshQueue(): void {
     revalidatePath("/catalog/suggestions");
 }
 
+/** What the card showed: a decision is refused if the member changed it since (engine code "changed"). */
+function expectation(input: unknown): SuggestionExpectation | undefined {
+    if (!input || typeof input !== "object") return undefined;
+    const e = input as { fieldChanges?: unknown; catalogItemId?: unknown };
+    if (!("fieldChanges" in e)) return undefined;
+    return {
+        fieldChanges: e.fieldChanges ?? null,
+        catalogItemId: typeof e.catalogItemId === "string" ? e.catalogItemId : null,
+    };
+}
+
+const CHANGED_SINCE =
+    "The member changed this suggestion while you were looking at it. Reload the Queue to see what they sent now.";
+
+type DecisionFailure = { success: false; error: string; changed?: boolean; dropped?: Dropped[] };
+
+function decisionFailure(d: { error: string; code?: string; dropped?: Dropped[] }): DecisionFailure {
+    if (d.code === "changed") return { success: false, error: CHANGED_SINCE, changed: true };
+    return d.dropped?.length
+        ? { success: false, error: d.error, dropped: d.dropped }
+        : { success: false, error: d.error };
+}
+
 /**
  * Opening a suggestion holds it for 30 minutes so two moderators don't
- * decide the same one. A claim whose time is up is free to take.
+ * decide the same one. A claim whose time is up is free to take. The hold
+ * itself is the engine's (claimSuggestion), guarded so that of two
+ * moderators clicking at once only one gets it.
  */
 export async function claimSuggestion(id: string): Promise<ActionResult<{ claimed: boolean; until: string | null }>> {
     const gate = await deskGate();
@@ -571,31 +676,23 @@ export async function claimSuggestion(id: string): Promise<ActionResult<{ claime
     const check = await reviewable(db, actor, id);
     if (!check.ok) return check.failure;
 
-    const now = new Date();
-    const until = new Date(now.getTime() + CLAIM_MINUTES * 60 * 1000).toISOString();
-    // Guarded: only while it is free, expired, or already ours. Two
-    // moderators clicking at once: one update wins, the other gets 0 rows.
-    const { data, error } = await db
-        .from("catalog_suggestions")
-        .update({ claimed_by: actor.userId, claimed_until: until })
-        .eq("id", id)
-        .or(`claimed_by.is.null,claimed_until.lt.${now.toISOString()},claimed_by.eq.${actor.userId}`)
-        .select("id");
-    if (error) {
-        if (isMissingSchema(error)) return { success: true, claimed: false, until: null };
-        return safeError("RegistryDesk.claimSuggestion", error);
+    try {
+        const r = await engineClaimSuggestion(actor, id);
+        // The engine's own words (who holds it, for how long).
+        if (!r.success) return fail(r.error);
+        // Before 242 there are no holds: it opens without one.
+        if (!r.claimedUntil) return { success: true, claimed: false, until: null };
+        return { success: true, claimed: true, until: r.claimedUntil };
+    } catch (e) {
+        return safeError("RegistryDesk.claimSuggestion", e);
     }
-    if (!data || (data as unknown[]).length === 0) {
-        return fail("Another moderator picked this one up a moment ago.");
-    }
-    return { success: true, claimed: true, until };
 }
 
 /** Lets go of a claim, so another moderator can pick it up. */
 export async function releaseClaim(id: string): Promise<ActionResult> {
     const gate = await deskGate();
     if (!gate.ok) return gate.failure;
-    await dropClaim(gate.db, gate.actor, id);
+    await dropClaim(gate.actor, id);
     return { success: true };
 }
 
@@ -603,12 +700,16 @@ export async function releaseClaim(id: string): Promise<ActionResult> {
  * Approve, as filed or as the moderator fixed it ("Edit, then approve").
  * `edited` is the moderator's copy of field_changes, same shape; the
  * member's original is kept and their notice shows what changed.
+ * `expected` is what the card showed (the member's field_changes and the
+ * entry): if the member changed it since, nothing is decided. `dropped`
+ * lists values the Registry refused and left out of a new entry.
  */
 export async function approveSuggestion(
     id: string,
     edited?: Record<string, unknown> | null,
     note?: string | null,
-): Promise<ActionResult<{ status: "applied" | "awaiting_second_look" }>> {
+    expected?: SuggestionExpectation | null,
+): Promise<{ success: true; status: "applied" | "awaiting_second_look"; dropped: Dropped[] } | DecisionFailure> {
     const gate = await deskGate();
     if (!gate.ok) return gate.failure;
     const { db, actor } = gate;
@@ -628,13 +729,15 @@ export async function approveSuggestion(
             verdict: "approved",
             note: cleanNote ?? undefined,
             edited: edited && Object.keys(edited).length > 0 ? edited : undefined,
+            expected: expectation(expected),
         });
-        if (!decided.success) return fail(decided.error);
-        await dropClaim(db, actor, id);
+        if (!decided.success) return decisionFailure(decided);
+        await dropClaim(actor, id);
         refreshQueue();
         return {
             success: true,
             status: decided.status === "awaiting_second_look" ? "awaiting_second_look" : "applied",
+            dropped: decided.dropped ?? [],
         };
     } catch (e) {
         return safeError("RegistryDesk.approveSuggestion", e, "It could not be approved. Please try again.");
@@ -642,7 +745,11 @@ export async function approveSuggestion(
 }
 
 /** Say no, with a reason the member reads (5 letters or more). */
-export async function rejectSuggestion(id: string, reason: string): Promise<ActionResult> {
+export async function rejectSuggestion(
+    id: string,
+    reason: string,
+    expected?: SuggestionExpectation | null,
+): Promise<{ success: true } | DecisionFailure> {
     const gate = await deskGate();
     if (!gate.ok) return gate.failure;
     const { db, actor } = gate;
@@ -653,9 +760,14 @@ export async function rejectSuggestion(id: string, reason: string): Promise<Acti
     if (!check.ok) return check.failure;
 
     try {
-        const decided = await decideSuggestion(id, { reviewer: actor, verdict: "rejected", note: words });
-        if (!decided.success) return fail(decided.error);
-        await dropClaim(db, actor, id);
+        const decided = await decideSuggestion(id, {
+            reviewer: actor,
+            verdict: "rejected",
+            note: words,
+            expected: expectation(expected),
+        });
+        if (!decided.success) return decisionFailure(decided);
+        await dropClaim(actor, id);
         refreshQueue();
         return { success: true };
     } catch (e) {
@@ -787,10 +899,16 @@ async function sameNumberRows(db: SupabaseClient, rows: DeskSource[], maker: str
     }));
 }
 
+/**
+ * Flags, fixes and links for some releases under one mold. `siblings` are
+ * all the rows filed under that mold (the duplicate checks compare against
+ * them); by default, the releases given.
+ */
 async function describeReleases(
     db: SupabaseClient,
     mold: DeskSource | null,
     releases: DeskSource[],
+    siblings: DeskSource[] = releases,
 ): Promise<DeskRelease[]> {
     const ids = releases.map((r) => r.id);
     const [horses, wants, rules, sameNumber] = await Promise.all([
@@ -799,6 +917,7 @@ async function describeReleases(
         rulesInEffect(db),
         sameNumberRows(db, releases, mold?.maker ?? null),
     ]);
+    const siblingChecks = siblings.map(asCheck);
     const byNumber = new Map<string, DeskMate[]>();
     for (const r of sameNumber) {
         const n = asText((r.attributes ?? {}).model_number).trim();
@@ -808,7 +927,7 @@ async function describeReleases(
         const n = asText((row.attributes ?? {}).model_number).trim();
         const keys = releaseFlags(asCheck(row), {
             mold: mold ? asCheck(mold) : null,
-            siblings: releases.map(asCheck),
+            siblings: siblingChecks,
             sameNumber: n ? (byNumber.get(n) ?? []).filter((r) => r.id !== row.id) : [],
         });
         return {
@@ -858,34 +977,69 @@ export async function getMoldView(moldId: string): Promise<ActionResult<{ view: 
             );
         }
         const releaseRows = ((kids ?? []) as Record<string, unknown>[]).map(toSource);
-        const [described, rules, moldLinks] = await Promise.all([
+        const [described, moldEntry] = await Promise.all([
             describeReleases(db, mold, releaseRows),
-            rulesInEffect(db),
-            Promise.all([countLinks(db, "user_horses", [mold.id]), countLinks(db, "user_wishlists", [mold.id])]),
+            describeMold(db, mold, releaseRows),
         ]);
-        const moldKeys = moldFlags(asCheck(mold), releaseRows.map(asCheck));
         return {
             success: true,
-            view: {
-                mold: {
-                    row: mold,
-                    flags: wordsFor(moldKeys),
-                    fixes: fixesFor(mold, moldKeys, rules, null),
-                    horses: moldLinks[0].get(mold.id) ?? 0,
-                    wantLists: moldLinks[1].get(mold.id) ?? 0,
-                },
-                releases: described,
-            },
+            view: { mold: moldEntry, releases: described, fieldKeys: [...knownAttributeKeys()].sort() },
         };
     } catch (e) {
         return safeError("RegistryDesk.getMoldView", e, "That mold could not be read. Please try again.");
     }
 }
 
+/** A mold's own flags, fixes and links, judged against the releases filed under it. */
+async function describeMold(db: SupabaseClient, mold: DeskSource, releaseRows: DeskSource[]): Promise<DeskRelease> {
+    const [rules, horses, wants] = await Promise.all([
+        rulesInEffect(db),
+        countLinks(db, "user_horses", [mold.id]),
+        countLinks(db, "user_wishlists", [mold.id]),
+    ]);
+    const moldKeys = moldFlags(asCheck(mold), releaseRows.map(asCheck));
+    return {
+        row: mold,
+        flags: wordsFor(moldKeys),
+        fixes: fixesFor(mold, moldKeys, rules, null),
+        horses: horses.get(mold.id) ?? 0,
+        wantLists: wants.get(mold.id) ?? 0,
+    };
+}
+
+/**
+ * One row as the Mold view shows it, read fresh after a save: a release
+ * judged against its mold and the rows beside it, a mold against its
+ * releases. One round trip, so the editor never has to ask again.
+ */
+async function freshEntry(db: SupabaseClient, row: DeskSource): Promise<DeskRelease> {
+    if (row.item_type === "plastic_mold") {
+        const { data } = await db.from("catalog_items").select(ROW_COLUMNS).eq("parent_id", row.id).limit(2000);
+        return describeMold(db, row, ((data ?? []) as Record<string, unknown>[]).map(toSource));
+    }
+    let mold: DeskSource | null = null;
+    let siblings: DeskSource[] = [row];
+    if (row.parent_id) {
+        const [m, kids] = await Promise.all([
+            readRow(db, row.parent_id),
+            db.from("catalog_items").select(ROW_COLUMNS).eq("parent_id", row.parent_id).limit(2000),
+        ]);
+        mold = m;
+        siblings = ((kids.data ?? []) as Record<string, unknown>[])
+            .map(toSource)
+            .map((s) => (s.id === row.id ? row : s));
+        if (!siblings.some((s) => s.id === row.id)) siblings.push(row);
+    }
+    const [entry] = await describeReleases(db, mold, [row], siblings);
+    return entry;
+}
+
 /** One row for the editor, with its mold's title and everything that points at it. */
 export async function getItemForEdit(
     id: string,
-): Promise<ActionResult<{ item: DeskRelease; parentTitle: string | null; links: DeskLinks | null }>> {
+): Promise<
+    ActionResult<{ item: DeskRelease; parentTitle: string | null; links: DeskLinks | null; fieldKeys: string[] }>
+> {
     const gate = await deskGate();
     if (!gate.ok) return gate.failure;
     const { db } = gate;
@@ -911,30 +1065,49 @@ export async function getItemForEdit(
         } catch {
             links = null;
         }
-        return { success: true, item: described, parentTitle: mold?.title ?? null, links };
+        return {
+            success: true,
+            item: described,
+            parentTitle: mold?.title ?? null,
+            links,
+            fieldKeys: [...knownAttributeKeys()].sort(),
+        };
     } catch (e) {
         return safeError("RegistryDesk.getItemForEdit", e, "It could not be read. Please try again.");
     }
 }
 
+/** A change as the writer takes it: text trimmed to size, a list as its words. */
+function cleanChange(v: unknown): DeskChangeValue {
+    if (Array.isArray(v)) {
+        return v
+            .map((x) => (typeof x === "string" ? x.trim().slice(0, 500) : ""))
+            .filter((x) => x !== "")
+            .slice(0, 100);
+    }
+    return typeof v === "string" ? v.slice(0, 5000) : "";
+}
+
 /**
  * Save the editor's changes. Guarded by the row's updated_at: if someone
  * saved it since the editor opened, nothing is written and their version
- * comes back so the moderator can compare.
+ * comes back so the moderator can compare. A refused value names its
+ * field, so the editor can mark that box. On success the row comes back
+ * with its fresh flags, fixes and links, so the editor needs no second
+ * read. The reference pages' cache tag is cleared by the writer; the Desk's
+ * own pages are not re-rendered for a save (nothing else on them changed).
  */
 export async function saveItem(input: {
     id: string;
     updatedAt: string;
-    changes: Record<string, string>;
+    changes: Record<string, DeskChangeValue>;
     note?: string;
 }): Promise<SaveResult> {
     const gate = await deskGate();
     if (!gate.ok) return gate.failure;
-    const { actor } = gate;
+    const { actor, db } = gate;
 
-    const changes = Object.fromEntries(
-        Object.entries(input.changes ?? {}).map(([k, v]) => [k, typeof v === "string" ? v.slice(0, 5000) : v]),
-    );
+    const changes = Object.fromEntries(Object.entries(input.changes ?? {}).map(([k, v]) => [k, cleanChange(v)]));
     if (Object.keys(changes).length === 0) return fail("Nothing has changed yet.");
     try {
         const r = await updateItem(actor, {
@@ -952,10 +1125,17 @@ export async function saveItem(input: {
                     conflict: r.current ? toSource(r.current as unknown as Record<string, unknown>) : null,
                 };
             }
-            return fail(r.error);
+            return r.field ? { success: false, error: r.error, field: r.field } : fail(r.error);
         }
-        revalidatePath("/catalog/desk", "layout");
-        return { success: true, item: toSource(r.item as unknown as Record<string, unknown>) };
+        const item = toSource(r.item as unknown as Record<string, unknown>);
+        let entry: DeskRelease | null = null;
+        try {
+            entry = await freshEntry(db, item);
+        } catch {
+            // The save is in; only the fresh flags failed. The editor keeps what it had.
+            entry = null;
+        }
+        return { success: true, item, entry, actionId: r.actionId ?? null };
     } catch (e) {
         return safeError("RegistryDesk.saveItem", e, "It could not be saved. Please try again.");
     }
@@ -1018,7 +1198,11 @@ async function readRow(db: SupabaseClient, id: string): Promise<DeskSource | nul
     return data ? toSource(data as Record<string, unknown>) : null;
 }
 
-/** Both entries side by side, with what points at each, before a merge. */
+/**
+ * Both entries side by side, with what points at each, before a merge.
+ * `undoReady` is false until update 243 is in: then only the owner can
+ * merge, and the merge can't be undone, which the dialog says first.
+ */
 export async function previewMerge(
     keepId: string,
     removeId: string,
@@ -1026,6 +1210,7 @@ export async function previewMerge(
     ActionResult<{
         keep: { row: DeskSource; links: DeskLinks | null };
         remove: { row: DeskSource; links: DeskLinks | null };
+        undoReady: boolean;
     }>
 > {
     const gate = await deskGate();
@@ -1033,19 +1218,32 @@ export async function previewMerge(
     const { db } = gate;
     if (keepId === removeId) return fail("Pick two different entries.");
     try {
-        const [keep, remove] = await Promise.all([readRow(db, keepId), readRow(db, removeId)]);
+        const [keep, remove, ready] = await Promise.all([
+            readRow(db, keepId),
+            readRow(db, removeId),
+            undoReady().catch(() => false),
+        ]);
         if (!keep || !remove) return fail("One of them is not in the Registry any more.");
         const [keepLinks, removeLinks] = await Promise.all([
             linkCounts(keepId).catch(() => null),
             linkCounts(removeId).catch(() => null),
         ]);
-        return { success: true, keep: { row: keep, links: keepLinks }, remove: { row: remove, links: removeLinks } };
+        return {
+            success: true,
+            keep: { row: keep, links: keepLinks },
+            remove: { row: remove, links: removeLinks },
+            undoReady: ready,
+        };
     } catch (e) {
         return safeError("RegistryDesk.previewMerge", e);
     }
 }
 
-/** Ask for a merge: the owner's applies at once; a moderator's waits for a second look. */
+/**
+ * Ask for a merge, release into release or mold into mold (a mold's
+ * releases move to the kept mold and take its scale): the owner's applies
+ * at once; a moderator's waits for a second look.
+ */
 export async function requestMerge(
     keepId: string,
     removeId: string,
@@ -1104,17 +1302,35 @@ export async function declineMerge(actionId: string, note: string): Promise<Acti
     }
 }
 
-/** What points at a row, and whether it can be removed (nothing may). */
+/**
+ * Whether a row can be removed. Update 243 first (removing is undoable
+ * only with it, so before it nobody removes): the dialog says so before
+ * anyone types a reason. Then what points at it: nothing may.
+ */
 export async function previewRemove(
     id: string,
-): Promise<ActionResult<{ row: DeskSource; links: DeskLinks; canRemove: boolean }>> {
+): Promise<
+    ActionResult<
+        { ready: false; message: string } | { ready: true; row: DeskSource; links: DeskLinks; canRemove: boolean }
+    >
+> {
     const gate = await deskGate();
     if (!gate.ok) return gate.failure;
     try {
+        if (!(await undoReady())) {
+            return {
+                success: true,
+                ready: false,
+                message:
+                    gate.actor.role === "owner"
+                        ? "Removing opens once you add update 243 (Admin › Ops). Until then nothing can be removed."
+                        : "Removing opens once the site owner adds update 243. Until then nothing can be removed.",
+            };
+        }
         const row = await readRow(gate.db, id);
         if (!row) return fail("That entry is not in the Registry any more.");
         const links = await linkCounts(id);
-        return { success: true, row, links, canRemove: links.total === 0 };
+        return { success: true, ready: true, row, links, canRemove: links.total === 0 };
     } catch (e) {
         return safeError("RegistryDesk.previewRemove", e);
     }
@@ -1133,5 +1349,114 @@ export async function removeItem(id: string, reason: string): Promise<ActionResu
         return { success: true, actionId: r.actionId };
     } catch (e) {
         return safeError("RegistryDesk.removeItem", e, "It could not be removed. Please try again.");
+    }
+}
+
+// ── Finding any entry, the Desk link, the tab counts ──
+
+/**
+ * Any Registry entry by name or model number: releases with no mold,
+ * resins, tack, props ... everything the mold picker can't reach. Each hit
+ * opens in the Desk editor (a release on its mold, anything else on its own).
+ */
+export async function searchEntries(term: string): Promise<ActionResult<{ entries: EntryHit[] }>> {
+    const gate = await deskGate();
+    if (!gate.ok) return gate.failure;
+    const { db } = gate;
+
+    const words = sanitizeText(term ?? "").slice(0, 100);
+    if (words.length < 2) return { success: true, entries: [] };
+    const number = words.replace(/^#\s*/, "").trim();
+    const cols = "id, title, item_type, maker, scale, parent_id, attributes";
+    try {
+        const [byTitle, byNumber] = await Promise.all([
+            db
+                .from("catalog_items")
+                .select(cols)
+                .ilike("title", `%${escapeLike(words)}%`)
+                .order("title")
+                .limit(40),
+            /^[A-Za-z0-9][A-Za-z0-9.\-/ ]{0,30}$/.test(number)
+                ? db.from("catalog_items").select(cols).eq("attributes->>model_number", number).limit(20)
+                : Promise.resolve({ data: [], error: null }),
+        ]);
+        if (byTitle.error)
+            return safeError("RegistryDesk.searchEntries", byTitle.error, "The search did not work. Please try again.");
+        const seen = new Set<string>();
+        const rows: Record<string, unknown>[] = [];
+        // A model number match first: it is the exact one.
+        const found = [
+            ...((byNumber.data ?? []) as Record<string, unknown>[]),
+            ...((byTitle.data ?? []) as Record<string, unknown>[]),
+        ];
+        for (const r of found) {
+            const id = String(r.id);
+            if (seen.has(id)) continue;
+            seen.add(id);
+            rows.push(r);
+        }
+        const parentIds = [...new Set(rows.map((r) => r.parent_id).filter((p): p is string => typeof p === "string"))];
+        const molds = new Map<string, string>();
+        for (const part of chunks(parentIds)) {
+            const { data } = await db.from("catalog_items").select("id, title").in("id", part);
+            for (const m of (data ?? []) as { id: string; title: string }[]) molds.set(m.id, m.title);
+        }
+        return {
+            success: true,
+            entries: rows.map((r) => {
+                const row = {
+                    id: String(r.id),
+                    item_type: String(r.item_type ?? ""),
+                    parent_id: (r.parent_id as string | null) ?? null,
+                };
+                const n = asText(((r.attributes as Record<string, unknown> | null) ?? {}).model_number).trim();
+                return {
+                    id: row.id,
+                    title: String(r.title ?? ""),
+                    itemType: row.item_type,
+                    maker: (r.maker as string | null) ?? null,
+                    scale: (r.scale as string | null) ?? null,
+                    modelNumber: n || null,
+                    moldTitle: row.parent_id ? (molds.get(row.parent_id) ?? null) : null,
+                    href: deskHrefFor(row),
+                };
+            }),
+        };
+    } catch (e) {
+        return safeError("RegistryDesk.searchEntries", e, "The search did not work. Please try again.");
+    }
+}
+
+/**
+ * Whether to show "Edit in the Desk" to this viewer. A cached reference
+ * page asks from the browser, so the page stays the same for everyone;
+ * anyone who isn't a moderator gets the Desk's usual refusal and no link.
+ */
+export async function canOpenDesk(): Promise<ActionResult<{ role: "owner" | "moderator" }>> {
+    const gate = await deskGate();
+    if (!gate.ok) return gate.failure;
+    return { success: true, role: gate.actor.role === "owner" ? "owner" : "moderator" };
+}
+
+/** The numbers on the Desk's tabs and the "waiting for a second look" chip. */
+export async function getDeskCounts(): Promise<ActionResult<{ counts: DeskCounts }>> {
+    const gate = await deskGate();
+    if (!gate.ok) return gate.failure;
+    const { db } = gate;
+    try {
+        const [queue, rules] = await Promise.all([
+            queueCounts(db),
+            db.from("registry_style_rules").select("id", { count: "exact", head: true }).eq("status", "proposed"),
+        ]);
+        return {
+            success: true,
+            counts: {
+                queue: queue.corrections + queue.additions + queue.duplicates,
+                secondLooks: queue.second_looks,
+                rules: rules.error ? 0 : (rules.count ?? 0),
+            },
+        };
+    } catch (e) {
+        return safeError("RegistryDesk.getDeskCounts", e);
     }
 }

@@ -50,11 +50,15 @@ function item(over: Partial<QueueItem> = {}): QueueItem {
         keep: null,
         note: null,
         canEdit: true,
+        current: { title: "Saddlebred", model_number: "", release_year_end: "1975" },
+        willDrop: [],
         ...over,
     };
 }
 
 const onDone = vi.fn();
+/** What the card showed, passed with every decision. */
+const SEEN = { fieldChanges: { release_year_end: { from: "1975", to: "1988" } }, catalogItemId: "r1" };
 
 beforeEach(() => {
     vi.clearAllMocks();
@@ -86,7 +90,7 @@ describe("QueueItemCard", () => {
         render(<QueueItemCard item={item()} role="moderator" onDone={onDone} />);
         fireEvent.click(screen.getByRole("button", { name: "Approve" }));
         await waitFor(() => expect(onDone).toHaveBeenCalledWith("s1", "Approved. @BayLeaf has been told."));
-        expect(desk.approveSuggestion).toHaveBeenCalledWith("s1");
+        expect(desk.approveSuggestion).toHaveBeenCalledWith("s1", null, null, SEEN);
     });
 
     it("claims before editing, then approves the moderator's fixed copy keeping the member's original", async () => {
@@ -104,6 +108,7 @@ describe("QueueItemCard", () => {
                 "s1",
                 { release_year_end: { from: "1975", to: "1987" } },
                 "JAH 1988 says 1987.",
+                SEEN,
             ),
         );
         expect(onDone).toHaveBeenCalledWith("s1", expect.stringMatching(/^Approved as fixed/));
@@ -139,7 +144,7 @@ describe("QueueItemCard", () => {
         expect(send.disabled).toBe(false);
         fireEvent.click(send);
         await waitFor(() =>
-            expect(desk.rejectSuggestion).toHaveBeenCalledWith("s1", "The 1998 one is a different horse."),
+            expect(desk.rejectSuggestion).toHaveBeenCalledWith("s1", "The 1998 one is a different horse.", SEEN),
         );
     });
 
@@ -205,6 +210,119 @@ describe("QueueItemCard", () => {
                 reason: "Wrong year, see JAH.",
             }),
         );
+    });
+
+    it("lets the site owner decide their own suggestion, and says so", () => {
+        render(<QueueItemCard item={item({ mine: true })} role="owner" onDone={onDone} />);
+        expect(screen.getByText("Your own suggestion: as site owner you can decide it.")).toBeTruthy();
+        for (const name of ["Approve", "Edit, then approve", /Say no/]) {
+            expect((screen.getByRole("button", { name }) as HTMLButtonElement).disabled).toBe(false);
+        }
+    });
+
+    it("puts focus in the reason box when saying no, and in the first box when editing", async () => {
+        render(<QueueItemCard item={item()} role="moderator" onDone={onDone} />);
+        fireEvent.click(screen.getByRole("button", { name: /Say no, with a reason/ }));
+        expect(document.activeElement).toBe(screen.getByLabelText(/the member reads it/));
+        fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
+        fireEvent.click(screen.getByRole("button", { name: "Edit, then approve" }));
+        const first = await screen.findByLabelText(/^Last year/);
+        await waitFor(() => expect(document.activeElement).toBe(first));
+    });
+
+    it("moves “#5038” out of a new entry's name into an empty Model number box", async () => {
+        const added = item({
+            tab: "additions",
+            kind: "addition",
+            kindLabel: "New entry",
+            title: "#5038 Morgan Mare",
+            itemId: null,
+            changes: [
+                { key: "title", label: "Name", from: "", to: "#5038 Morgan Mare" },
+                { key: "year", label: "First year", from: "", to: "1975" },
+            ],
+            fields: { title: "#5038 Morgan Mare", year: "1975", maker: "Breyer" },
+            current: null,
+        });
+        render(<QueueItemCard item={added} role="moderator" onDone={onDone} />);
+        fireEvent.click(screen.getByRole("button", { name: "Edit, then approve" }));
+        fireEvent.change(await screen.findByLabelText(/^Name/), { target: { value: "Morgan Mare" } });
+        const picker = screen.getByTestId("eta-add-field") as HTMLSelectElement;
+        // The year is already there (as the new entry's own key), so it isn't offered twice.
+        expect([...picker.options].map((o) => o.textContent)).not.toContain("First year");
+        fireEvent.change(picker, { target: { value: "model_number" } });
+        fireEvent.change(screen.getByLabelText(/^Model number/), { target: { value: "5038" } });
+        fireEvent.click(screen.getByRole("button", { name: "Approve as fixed" }));
+        await waitFor(() =>
+            expect(desk.approveSuggestion).toHaveBeenCalledWith(
+                "s1",
+                { title: "Morgan Mare", year: "1975", maker: "Breyer", model_number: "5038" },
+                null,
+                { fieldChanges: added.fields, catalogItemId: null },
+            ),
+        );
+    });
+
+    it("adds a field the member didn't touch to a correction, starting from what the entry says", async () => {
+        render(<QueueItemCard item={item()} role="moderator" onDone={onDone} />);
+        fireEvent.click(screen.getByRole("button", { name: "Edit, then approve" }));
+        fireEvent.change(await screen.findByTestId("eta-add-field"), { target: { value: "title" } });
+        const name = screen.getByLabelText(/^Name/) as HTMLInputElement;
+        expect(name.value).toBe("Saddlebred");
+        fireEvent.change(name, { target: { value: "Saddlebred (G1)" } });
+        fireEvent.click(screen.getByRole("button", { name: "Approve as fixed" }));
+        await waitFor(() =>
+            expect(desk.approveSuggestion).toHaveBeenCalledWith(
+                "s1",
+                {
+                    release_year_end: { from: "1975", to: "1988" },
+                    title: { from: "Saddlebred", to: "Saddlebred (G1)" },
+                },
+                null,
+                SEEN,
+            ),
+        );
+    });
+
+    it("shows a new entry's values the Registry won't keep before anyone approves it", () => {
+        const added = item({
+            tab: "additions",
+            kind: "addition",
+            kindLabel: "New entry",
+            itemId: null,
+            willDrop: [{ key: "run_type", label: "Run type", value: "Store Special", error: "not a run type." }],
+        });
+        render(<QueueItemCard item={added} role="moderator" onDone={onDone} />);
+        expect(screen.getByTestId("will-drop").textContent).toContain("Run type “Store Special”: not a run type.");
+        expect(desk.approveSuggestion).not.toHaveBeenCalled();
+    });
+
+    it("shows the values the Registry left out before moving on", async () => {
+        desk.approveSuggestion.mockResolvedValue({
+            success: true,
+            status: "applied",
+            dropped: [{ key: "run_type", value: "Store Special", error: "not a run type the Registry knows." }],
+        });
+        render(<QueueItemCard item={item()} role="moderator" onDone={onDone} />);
+        fireEvent.click(screen.getByRole("button", { name: "Approve" }));
+        const box = await screen.findByTestId("dropped");
+        expect(box.textContent).toContain("Run type “Store Special”: not a run type the Registry knows.");
+        expect(onDone).not.toHaveBeenCalled();
+        fireEvent.click(screen.getByRole("button", { name: "Got it" }));
+        expect(onDone).toHaveBeenCalledWith("s1", "Approved. @BayLeaf has been told.");
+    });
+
+    it("decides nothing when the member changed it meanwhile, and offers a reload", async () => {
+        desk.approveSuggestion.mockResolvedValue({
+            success: false,
+            changed: true,
+            error: "The member changed this suggestion while you were looking at it.",
+        });
+        render(<QueueItemCard item={item()} role="moderator" onDone={onDone} />);
+        fireEvent.click(screen.getByRole("button", { name: "Approve" }));
+        expect((await screen.findByRole("alert")).textContent).toMatch(/changed this suggestion/);
+        expect(screen.getByRole("button", { name: "Reload the Queue" })).toBeTruthy();
+        expect(onDone).not.toHaveBeenCalled();
     });
 
     it("words the time plainly", () => {
