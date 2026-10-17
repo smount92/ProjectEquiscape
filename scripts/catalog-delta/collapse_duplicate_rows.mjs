@@ -1,195 +1,45 @@
 #!/usr/bin/env node
 /**
- * Duplicate collapse — removes rows that are byte-identical to another row.
+ * RETIRED (Release 3, 2026-10-16). This script no longer runs.
  *
- * A full-catalog audit found groups of rows identical on EVERY field that
- * matters: title, maker, scale, item_type, parent mold, and the whole
- * attributes object. They are double-imports, not distinct releases.
+ * It used to collapse byte-identical duplicate rows by DELETING the extra
+ * rows after repointing four tables (horses, want lists, Help ID answers,
+ * suggestions). That loses member data: every other table that points at
+ * a Registry row went with the deleted row, among them members' sale
+ * reports and price flags (cascade), releases filed under a duplicate mold,
+ * changelog lines and old page addresses. And it could not be undone.
+ * DECISIONS.md already lists the 159-row collapse as superseded by the
+ * 2026-10-15 Registry repair.
  *
- *   node scripts/catalog-delta/collapse_duplicate_rows.mjs
- *   node scripts/catalog-delta/collapse_duplicate_rows.mjs --apply
+ * Duplicates are merged now, never deleted:
  *
- * THIS IS THE ONLY DESTRUCTIVE SCRIPT IN THIS DIRECTORY. Everything else
- * here inserts or updates. Read this before running it:
+ *   - On the site: the Registry Desk (/catalog/desk), Merge. A moderator's
+ *     merge waits for a second look; the owner's applies at once. Either
+ *     can be undone for 30 days from the Desk's History.
+ *   - In the database: public.registry_merge(keep, remove, action, actor,
+ *     reason) (migration 243), called only by src/lib/catalog/write.ts. It
+ *     moves every link in one transaction (sale reports and price flags
+ *     too), forwards the old address, and archives the duplicate whole so
+ *     public.registry_unmerge can put it back.
  *
- *   * Every foreign key into catalog_items is ON DELETE SET NULL. Deleting
- *     a row a member's horse points at does not error — it silently
- *     unlinks their model from the catalog. So the survivor of each group
- *     is chosen as THE ROW MEMBERS ALREADY REFERENCE, and references are
- *     re-counted live at run time, never trusted from a snapshot.
- *   * If any group has references spread across MORE THAN ONE row, the
- *     script refuses to run at all. Collapsing that group would orphan
- *     somebody. Repointing has to be a deliberate, separate decision.
- *   * With no references anywhere in a group, the oldest row survives.
- *   * --apply also writes a catalog_changelog 'removal' per deleted row,
- *     so the removal is visible to members rather than silent.
+ * A bulk merge of many duplicates is Registry Desk Phase 2 (batches with a
+ * second look). Until then, merge them on the Desk.
+ *
+ * The old code is in git history (before this commit) if it is ever needed
+ * for reference. Do not restore it to run against the live Registry.
  */
 
-import { readFileSync } from "node:fs";
-import path from "node:path";
-import { createClient } from "@supabase/supabase-js";
+const MESSAGE = `
+collapse_duplicate_rows.mjs is retired and will not run.
 
-const ROOT = process.cwd();
-const APPLY = process.argv.includes("--apply");
+It deleted duplicate Registry rows and lost members' sale reports and price
+flags with them, and its deletes could not be undone.
 
-function loadEnv() {
-    const out = {};
-    for (const line of readFileSync(path.join(ROOT, ".env.local"), "utf8").split(/\r?\n/)) {
-        const t = line.trim();
-        if (!t || t.startsWith("#")) continue;
-        const i = t.indexOf("=");
-        if (i === -1) continue;
-        out[t.slice(0, i).trim()] = t.slice(i + 1).trim().replace(/^["']|["']$/g, "");
-    }
-    return out;
-}
+Merge duplicates instead:
+  * on the Registry Desk: /catalog/desk  ->  Merge (undoable for 30 days), or
+  * through public.registry_merge (migration 243), which the Desk calls via
+    src/lib/catalog/write.ts (requestMerge / confirmMerge).
+`;
 
-/** Every table whose rows point at a catalog item. */
-const REFERENCES = [
-    ["user_horses", "catalog_id"],
-    ["user_wishlists", "catalog_id"],
-    ["id_suggestions", "catalog_id"],
-    ["catalog_suggestions", "catalog_item_id"],
-];
-
-async function main() {
-    const env = loadEnv();
-    const admin = createClient(env.NEXT_PUBLIC_SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY);
-
-    const rows = [];
-    let from = 0;
-    while (true) {
-        const { data, error } = await admin.from("catalog_items")
-            .select("id, title, maker, scale, item_type, parent_id, attributes, created_at")
-            .range(from, from + 999);
-        if (error) { console.error(error.message); process.exit(1); }
-        if (!data.length) break;
-        rows.push(...data);
-        from += 1000;
-        if (data.length < 1000) break;
-    }
-
-    // Attributes are compared by VALUE, not by JSON type. The bulk import
-    // wrote release_year_start as a number 6,029 times and as a string
-    // 1,491 times (same for run_count and release_year_end), so a strict
-    // comparison reports two rows as different when the only difference is
-    // 2003 vs "2003". That hid 5 duplicate rows until an agent noticed the
-    // pattern. Empty and null are dropped so a key present-but-blank does
-    // not read as distinct from a key that is absent.
-    const attrKey = (a) => JSON.stringify(
-        Object.entries(a ?? {})
-            .filter(([, v]) => v != null && v !== "")
-            .map(([k, v]) => [k, String(v)])
-            .sort(([x], [y]) => x.localeCompare(y))
-    );
-    const key = (r) => JSON.stringify([r.title, r.maker, r.scale, r.item_type, r.parent_id, attrKey(r.attributes)]);
-    const groups = new Map();
-    for (const r of rows) {
-        const k = key(r);
-        if (!groups.has(k)) groups.set(k, []);
-        groups.get(k).push(r);
-    }
-    /**
-     * A one-of-a-kind piece is unique BY DEFINITION, so two such rows are
-     * never the same object no matter how alike the data looks. These rows
-     * are the sparsest in the catalog — typically no model number and no
-     * colour — so once their titles were normalised to "BreyerFest 1997 —
-     * Live Auction" two genuinely different auction models collided on
-     * every field and this script offered to delete one of them.
-     *
-     * Sparse data is not evidence of duplication; it is evidence of a row
-     * nobody has filled in yet.
-     */
-    const oneOfAKind = (r) =>
-        String(r.attributes?.run_count ?? "") === "1" ||
-        String(r.attributes?.run_type ?? "") === "One of a Kind";
-
-    const dupes = [...groups.values()]
-        .filter((g) => g.length > 1)
-        .filter((g) => {
-            if (!g.some(oneOfAKind)) return true;
-            console.log(`  skipped (one-of-a-kind, ${g.length} rows): ${String(g[0].title).slice(0, 56)}`);
-            return false;
-        });
-    if (!dupes.length) { console.log("No duplicate rows."); return; }
-
-    // Live reference count — never from a snapshot.
-    const ids = dupes.flatMap((g) => g.map((r) => r.id));
-    const refCount = new Map(ids.map((id) => [id, 0]));
-    for (const [table, col] of REFERENCES) {
-        for (let i = 0; i < ids.length; i += 200) {
-            const chunk = ids.filter((_, j) => j >= i && j < i + 200);
-            const { data, error } = await admin.from(table).select(col).in(col, chunk);
-            if (error) { console.error(`cannot read ${table}.${col}: ${error.message}`); process.exit(1); }
-            for (const r of data ?? []) refCount.set(r[col], (refCount.get(r[col]) ?? 0) + 1);
-        }
-    }
-
-    // Refuse the whole run if any group would orphan a member's horse.
-    const split = dupes.filter((g) => g.filter((r) => (refCount.get(r.id) ?? 0) > 0).length > 1);
-    if (split.length) {
-        console.error(`REFUSING TO RUN: ${split.length} group(s) have members pointing at more than one row.`);
-        for (const g of split.slice(0, 10)) {
-            console.error(`  ${g[0].title}`);
-            for (const r of g) console.error(`    ${r.id}  ${refCount.get(r.id) ?? 0} reference(s)`);
-        }
-        console.error("Repoint those references first; that is a separate decision.");
-        process.exit(1);
-    }
-
-    let deleted = 0, kept = 0, keptForRef = 0;
-    for (const g of dupes) {
-        const referenced = g.filter((r) => (refCount.get(r.id) ?? 0) > 0);
-        const survivor = referenced[0]
-            ?? [...g].sort((a, b) => String(a.created_at).localeCompare(String(b.created_at)))[0];
-        if (referenced[0]) keptForRef++;
-        kept++;
-        const doomed = g.filter((r) => r.id !== survivor.id);
-
-        console.log(`  ${g[0].title.slice(0, 62)}`);
-        console.log(`      keep   ${survivor.id}${referenced[0] ? `  (${refCount.get(survivor.id)} member reference(s))` : "  (oldest)"}`);
-        for (const d of doomed) console.log(`      ${APPLY ? "DELETE" : "would delete"} ${d.id}`);
-
-        // The owner's condition, enforced per row rather than per group:
-        // a row is deleted ONLY if nothing points at it. The survivor is
-        // already chosen as the referenced row, so this should never fire —
-        // which is exactly why it is worth asserting before a DELETE.
-        for (const d of doomed) {
-            if ((refCount.get(d.id) ?? 0) > 0) {
-                console.error(`REFUSING TO RUN: ${d.id} is referenced but was selected for deletion.`);
-                process.exit(1);
-            }
-        }
-
-        if (APPLY) {
-            for (const d of doomed) {
-                // Log BEFORE deleting, and abort this row if the log fails.
-                // change_summary and contributor_alias are both NOT NULL; an
-                // earlier draft wrote `summary` and skipped the alias, which
-                // would have failed silently and deleted rows with no record.
-                const { error: logErr } = await admin.from("catalog_changelog").insert({
-                    catalog_item_id: survivor.id,
-                    change_type: "removal",
-                    change_summary: `Removed a duplicate entry for "${d.title}" — identical in every field to the entry kept here.`,
-                    contributor_alias: "Catalog maintenance",
-                });
-                if (logErr) {
-                    console.error(`      x changelog failed (${logErr.message}) — NOT deleting ${d.id}`);
-                    continue;
-                }
-                const { error } = await admin.from("catalog_items").delete().eq("id", d.id);
-                if (error) { console.error(`      x ${error.message}`); continue; }
-                deleted++;
-            }
-        } else {
-            deleted += doomed.length;
-        }
-    }
-
-    console.log(`\n${APPLY ? "APPLIED" : "DRY RUN"}: ${dupes.length} duplicate groups, ${kept} rows kept, ` +
-        `${deleted} rows ${APPLY ? "deleted" : "would be deleted"}`);
-    console.log(`  ${keptForRef} survivors chosen because a member's horse points at them`);
-    console.log(`  ${kept - keptForRef} survivors chosen as the oldest row (no references)`);
-}
-
-main().catch((e) => { console.error(e.message); process.exit(1); });
+console.error(MESSAGE);
+process.exit(1);

@@ -21,6 +21,7 @@ import {
     linkedLabel,
     missingFacts,
     shortScale,
+    yearsInput,
     yearsLabel,
     releaseName,
     type LinkerMold,
@@ -33,6 +34,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import SuggestNewEntryForm from "@/components/SuggestNewEntryForm";
 import { useLocalPref } from "@/lib/linker/prefs";
+import { reconcileTitleNumber, titleNumberProblem } from "@/lib/catalog/titleNumber";
 
 const SCALE_KEY = "mhh:linker-scale";
 const SHOW_FIRST = 4;
@@ -89,10 +91,12 @@ function FactForm({
     release,
     fact,
     onDone,
+    onCancel,
 }: {
     release: LinkerRelease;
     fact: MissingFact;
-    onDone: (msg: string) => void;
+    onDone: (autoApproved: boolean) => void;
+    onCancel: () => void;
 }) {
     const [value, setValue] = useState("");
     const [pending, start] = useTransition();
@@ -100,6 +104,7 @@ function FactForm({
     return (
         <form
             className="mt-2 flex flex-wrap items-center gap-2"
+            data-testid="linker-fact-form"
             onSubmit={(e) => {
                 e.preventDefault();
                 start(async () => {
@@ -110,14 +115,14 @@ function FactForm({
                         isSetPiece: release.isSetPiece,
                     });
                     if (!r.success) setError(r.error);
-                    else onDone(`Thanks. The ${fact} is filed for review.`);
+                    else onDone(!!r.autoApproved);
                 });
             }}
         >
             <input
                 className="h-8 min-w-0 flex-1 rounded-md border border-input bg-card px-2 text-sm"
                 placeholder={
-                    fact === "colour" ? "what it looks like" : fact === "year" ? "first year, e.g. 1976" : "e.g. 5022"
+                    fact === "colour" ? "what it looks like" : fact === "year" ? "e.g. 1976 or 1995-1997" : "e.g. 5022"
                 }
                 value={value}
                 onChange={(e) => setValue(e.target.value)}
@@ -126,10 +131,23 @@ function FactForm({
             <Button type="submit" size="sm" disabled={pending || !value.trim()}>
                 {pending ? "Filing…" : "File it"}
             </Button>
+            <Button type="button" size="sm" variant="ghost" onClick={onCancel} disabled={pending}>
+                Cancel
+            </Button>
             {error && <span className="text-xs text-destructive">{error}</span>}
         </form>
     );
 }
+
+/** What "add this piece's own row" carries over from the set row into "Add my release". */
+interface AddPrefill {
+    modelNumber?: string;
+    setName?: string;
+    yearFrom?: string;
+}
+
+/** "model number" → "model-number", for test ids. */
+const factId = (f: MissingFact) => f.replace(/\s+/g, "-");
 
 function ReleaseRow({
     mold,
@@ -137,20 +155,29 @@ function ReleaseRow({
     selected,
     onPick,
     onNotice,
+    onAddPiece,
 }: {
     mold: LinkerMold | LinkerMoldSummary | null;
     release: LinkerRelease;
     selected: boolean;
     onPick: () => void;
     onNotice: (msg: string) => void;
+    /** A set piece: open "Add my release" under this mold, filled in from the set row. */
+    onAddPiece?: () => void;
 }) {
     const [filling, setFilling] = useState<MissingFact | null>(null);
+    // Facts filed from this row in this visit (MHH-078): each one shows
+    // "Sent for review" and the member can go on to the next.
+    const [sent, setSent] = useState<Partial<Record<MissingFact, "review" | "saved">>>({});
     // A set piece is a row filed under ANOTHER mold; its stored colour is that
     // mold's piece. Never offer to fill its colour here: 14 corrections did
     // exactly that on 2026-10-13/14 and overwrote Draft Horse, Citation,
     // Native Dancer and Appaloosa colours with Silky Sullivan and Arabian
-    // Mare ones. The member's piece belongs in "Add my release" instead.
-    const gaps = missingFacts(release).filter((f) => !(release.isSetPiece && f === "colour"));
+    // Mare ones. The member's piece belongs in "Add my release" instead,
+    // which "Add this piece's own row" opens filled in.
+    const blockedColour = release.isSetPiece && !release.look;
+    const gaps = missingFacts(release).filter((f) => !(release.isSetPiece && f === "colour") && !sent[f]);
+    const sentFacts = (Object.keys(sent) as MissingFact[]).filter((f) => sent[f]);
     const years = yearsLabel(release);
     // A release with its own name ("Montana Harvest", "T-Bone") says so; the mold's name and set titles are already on screen.
     // Amanda's rule (trial, 2026-10-12): number, then the release's own name in
@@ -202,25 +229,58 @@ function ReleaseRow({
                     {release.run ? ` · ${release.run}` : ""}
                 </div>
                 {release.setName && <div className="text-xs text-muted-foreground/80">from the {release.setName}</div>}
-                {gaps.length > 0 && !filling && (
-                    <div className="text-xs text-muted-foreground">
-                        know the {gaps.join(" or ")}?{" "}
-                        <button
-                            type="button"
-                            className="cursor-pointer border-0 bg-transparent p-0 text-xs text-forest underline"
-                            onClick={() => setFilling(gaps[0])}
-                        >
-                            fill in what you know
-                        </button>
+                {(gaps.length > 0 || (blockedColour && onAddPiece)) && !filling && (
+                    <div
+                        className="flex flex-wrap items-baseline gap-x-2 gap-y-1 text-xs text-muted-foreground"
+                        data-testid="linker-fill"
+                    >
+                        {gaps.length > 0 && <span>Know it?</span>}
+                        {gaps.map((f) => (
+                            <button
+                                key={f}
+                                type="button"
+                                className="cursor-pointer border-0 bg-transparent p-0 text-xs text-forest underline"
+                                onClick={() => setFilling(f)}
+                                data-testid={`linker-fill-${factId(f)}`}
+                            >
+                                add the {f}
+                            </button>
+                        ))}
+                        {blockedColour && onAddPiece && (
+                            <button
+                                type="button"
+                                className="cursor-pointer border-0 bg-transparent p-0 text-xs text-forest underline"
+                                onClick={onAddPiece}
+                                data-testid="linker-add-piece"
+                                title="This row is the set, filed under another piece's mold. Your piece gets its own row here."
+                            >
+                                add this piece&apos;s own row
+                            </button>
+                        )}
+                    </div>
+                )}
+                {sentFacts.length > 0 && (
+                    <div className="text-xs text-forest" data-testid="linker-sent" role="status">
+                        {sentFacts
+                            .map(
+                                (f) => `The ${f}: ${sent[f] === "saved" ? "saved to the Registry" : "sent for review"}`,
+                            )
+                            .join(" · ")}
                     </div>
                 )}
                 {filling && (
                     <FactForm
                         release={release}
                         fact={filling}
-                        onDone={(m) => {
+                        onCancel={() => setFilling(null)}
+                        onDone={(autoApproved) => {
+                            setSent((s) => ({ ...s, [filling]: autoApproved ? "saved" : "review" }));
                             setFilling(null);
-                            onNotice(m);
+                            onNotice(
+                                autoApproved
+                                    ? `Thanks. The ${filling} is saved to the Registry.`
+                                    : `Thanks. The ${filling} is sent for review.`,
+                            );
                         }}
                     />
                 )}
@@ -244,15 +304,29 @@ function AddForm({
     horseLook,
     onDone,
     onCancel,
+    prefill,
 }: {
     mold: LinkerMold;
     horseLook?: string | null;
     onDone: (msg: string, moldId: string) => void;
     onCancel: () => void;
+    /** Filled in from a set row ("add this piece's own row", MHH-078). */
+    prefill?: AddPrefill;
 }) {
-    const [v, setV] = useState({ modelNumber: "", look: horseLook ?? "", yearFrom: "", setName: "", name: "" });
+    const [v, setV] = useState({
+        modelNumber: prefill?.modelNumber ?? "",
+        look: horseLook ?? "",
+        yearFrom: prefill?.yearFrom ?? "",
+        setName: prefill?.setName ?? "",
+        name: "",
+    });
     const [pending, start] = useTransition();
     const [error, setError] = useState<string | null>(null);
+    const formRef = useRef<HTMLFormElement | null>(null);
+    // Opened from a row far up the list: bring the form into view.
+    useEffect(() => {
+        formRef.current?.scrollIntoView?.({ block: "nearest", behavior: "smooth" });
+    }, []);
     const field = (k: keyof typeof v, label: string, placeholder: string) => (
         <label className="flex flex-col gap-1 text-xs font-semibold text-muted-foreground">
             {label}
@@ -264,35 +338,97 @@ function AddForm({
             />
         </label>
     );
+    // A number in front of the name that differs from the Model number box,
+    // or a bare one while the box is empty ("101 Dalmatians"): asked before
+    // anything is filed (MHH-079).
+    const [conflict, setConflict] = useState<{ inTitle: string; inBox: string; title: string } | null>(null);
+    // The name the member said keeps its leading number.
+    const [numberIsName, setNumberIsName] = useState<string | null>(null);
+    const send = (values: typeof v, keepNumber = false) => {
+        const typedName = values.name.trim() ? "name" : "setName";
+        const keep = keepNumber || numberIsName === values[typedName].trim();
+        const numbered = reconcileTitleNumber(values[typedName], values.modelNumber, { bare: keep ? "keep" : "ask" });
+        if (!numbered.ok) {
+            setConflict({ inTitle: numbered.inTitle, inBox: numbered.inBox, title: numbered.title });
+            return;
+        }
+        setConflict(null);
+        start(async () => {
+            setError(null);
+            const r = await fileReleaseUnderMold({ moldId: mold.id, ...values });
+            if (!r.success) setError(r.error);
+            else
+                onDone(
+                    r.autoApproved
+                        ? "Added to the Registry under this mold. Your horse is linked to the mold for now; pick the release once it appears."
+                        : "Filed under this mold for review. Your horse is linked to the mold for now.",
+                    mold.id,
+                );
+        });
+    };
     return (
         <form
+            ref={formRef}
             className="grid [grid-template-columns:repeat(auto-fit,minmax(150px,1fr))] gap-2 border-t border-input bg-muted/40 px-4 py-3"
             data-testid="linker-add"
             onSubmit={(e) => {
                 e.preventDefault();
-                start(async () => {
-                    setError(null);
-                    const r = await fileReleaseUnderMold({ moldId: mold.id, ...v });
-                    if (!r.success) setError(r.error);
-                    else
-                        onDone(
-                            r.autoApproved
-                                ? "Added to the Registry under this mold. Your horse is linked to the mold for now; pick the release once it appears."
-                                : "Filed under this mold for review. Your horse is linked to the mold for now.",
-                            mold.id,
-                        );
-                });
+                send(v);
             }}
         >
             <div className="col-span-full text-xs text-muted-foreground">
                 Under <strong className="text-foreground">{mold.title}</strong> · {identityLine(mold)}. Nothing here
                 needs retyping later.
+                {prefill?.setName
+                    ? ` Your piece from the ${prefill.setName} gets its own row; add what it looks like.`
+                    : ""}
             </div>
             {field("modelNumber", "Model number", "5022")}
             {field("look", "What it looks like", "dark chestnut, various socks")}
-            {field("yearFrom", "First year", "1976")}
+            {field("yearFrom", "Years", "e.g. 1976 or 1995-1997")}
             {field("name", "Name, if it had one", "Andrew")}
             {field("setName", "Came in a set?", "leave blank if sold alone")}
+            {conflict && (
+                <div className="col-span-full rounded-md border border-input bg-card px-3 py-2" role="alert">
+                    <p className="m-0 mb-2 text-sm font-semibold text-foreground">
+                        {titleNumberProblem(conflict.inTitle, conflict.inBox)}
+                    </p>
+                    <div className="flex flex-wrap gap-2" data-testid="linker-number-conflict">
+                        {[conflict.inTitle, conflict.inBox].filter(Boolean).map((n) => (
+                            <Button
+                                key={n}
+                                type="button"
+                                size="sm"
+                                variant="outline"
+                                disabled={pending}
+                                onClick={() => {
+                                    const key = v.name.trim() ? "name" : "setName";
+                                    const next = { ...v, [key]: conflict.title, modelNumber: n };
+                                    setV(next);
+                                    send(next);
+                                }}
+                            >
+                                It&apos;s #{n}
+                            </Button>
+                        ))}
+                        {!conflict.inBox && (
+                            <Button
+                                type="button"
+                                size="sm"
+                                variant="outline"
+                                disabled={pending}
+                                onClick={() => {
+                                    const key = v.name.trim() ? "name" : "setName";
+                                    setNumberIsName(v[key].trim());
+                                    send(v, true);
+                                }}
+                            >
+                                No, it&apos;s part of the name
+                            </Button>
+                        )}
+                    </div>
+                </div>
+            )}
             <div className="col-span-full flex flex-wrap items-center gap-2">
                 <Button type="submit" size="sm" disabled={pending}>
                     {pending ? "Filing…" : "Add it under this mold"}
@@ -322,7 +458,20 @@ function MoldGroup({
     horseLook?: string | null;
 }) {
     const [open, setOpen] = useState(false);
-    const [adding, setAdding] = useState(false);
+    // null: closed; otherwise open, filled in from a set row when it came from one.
+    const [adding, setAdding] = useState<AddPrefill | null>(null);
+    // Each opening is a fresh form, so a second "add this piece's own row" refills it.
+    const [addKey, setAddKey] = useState(0);
+    const openAdd = (prefill: AddPrefill) => {
+        setAdding(prefill);
+        setAddKey((k) => k + 1);
+    };
+    const addPieceFrom = (r: LinkerRelease) =>
+        openAdd({
+            modelNumber: r.model ?? "",
+            setName: r.setName ?? "",
+            yearFrom: yearsInput(r),
+        });
     const shown = open ? mold.releases : mold.releases.slice(0, SHOW_FIRST);
     const hidden = mold.releases.length - shown.length;
     const hiddenSets = mold.releases.slice(shown.length).filter((r) => r.setName || r.isSetPiece).length;
@@ -385,6 +534,7 @@ function MoldGroup({
                             selected={selectedId === r.id}
                             onPick={() => onPickRelease(r, mold)}
                             onNotice={onNotice}
+                            onAddPiece={r.isSetPiece ? () => addPieceFrom(r) : undefined}
                         />
                     ))}
                 </ul>
@@ -415,7 +565,7 @@ function MoldGroup({
                     type="button"
                     size="sm"
                     variant="outline"
-                    onClick={() => setAdding((a) => !a)}
+                    onClick={() => (adding ? setAdding(null) : openAdd({}))}
                     data-testid="linker-add-open"
                 >
                     Add my release
@@ -423,15 +573,17 @@ function MoldGroup({
             </div>
             {adding && (
                 <AddForm
+                    key={addKey}
                     mold={mold}
                     horseLook={horseLook}
+                    prefill={adding}
                     onDone={(msg, id) => {
-                        setAdding(false);
+                        setAdding(null);
                         onNotice(msg);
                         onPickMold(mold);
                         void id;
                     }}
-                    onCancel={() => setAdding(false)}
+                    onCancel={() => setAdding(null)}
                 />
             )}
             <div className="flex flex-wrap items-center justify-between gap-2 border-t border-input px-4 py-2 text-sm text-muted-foreground">

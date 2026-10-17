@@ -35,12 +35,26 @@ kept by the AI assistant across sessions, then checked against the code.
 | Q30 | A horse take-down withdraws open offers (each buyer is told the horse is no longer for sale) and refuses while a sale is past the offer (payment pending or under way): the admin resolves that in the Deal Room first. | Agent-made in the Release 2 review fixes: money and a handover are between two members, so a report card shouldn't cut across them. | Keep. |
 | Q31 | Hiding a barn thread or feed post deletes the notifications that point at it (they keep its title in every bell); hiding a reply deletes the notices that reply sent. Notifications are our words, not member data. | Agent-made in the Release 2 review fixes. Rewriting them would leave a dead link in the bell. | Keep. |
 | Q32 | The member who made a report is told the outcome without any quoted words, names or titles ("Thank you for reporting that post. ..."). Only the owner of the content is told which item, with an excerpt of their own words. | Made in the Release 2 review: a member who reported abuse must not find it repeated in their own bell, and titles and horse names are member-written too. | Keep. |
+| Q33 | A Registry search lists the rows that are, or sit on, what was typed first; sets that only list it among their pieces come last under "Sets that include …" (MHH-075). The duplicate picker puts the same mold, then the same scale, first among equally good matches, never over a better match (MHH-076). | Agent-made in Release 3. A heading reads better than sets silently last; same-mold-over-everything pushed an exact typed name to 16th. | Keep. |
+| Q34 | `catalog_items.search_key` is a stored generated column (240), not a trigger plus a backfill. | Agent-made in Release 3: same result, can't drift from the title, and a backfill UPDATE would stamp `updated_at` (233) on every row. | Keep. |
+| Q35 | Release years run from 1900 to next year plus one; a range's two-digit end takes the start's century ("1998-02" is 2002); the same year twice is one year (MHH-077). | Agent-made in Release 3. Hagen-Renaker, Hartland and Beswick predate Breyer's 1950; the old forms said 1950. | Keep. |
+| Q36 | A leading model number comes off a title when it equals the number field, moves there when the field is empty and it is written with "#", and the member is asked when they differ. A bare number with an empty field may be part of the name ("101 Dalmatians"): the forms ask, and the server guard leaves it (Release 3 review). A bare four-digit year leading a name ("2019 Holiday Horse") is a year, not a number, unless it has a "#". Molds and artist pieces keep a leading number, having no field for it (MHH-079). | Agent-made in Release 3, from STANDARDS (titles hold the name only). The form used to strip a mold's number and drop it. | Keep. |
 
 ---
 
 ## Rulings log
 
 Owner rulings, newest first. Each one is also folded into the sections below.
+
+**2026-10-16**
+- **Registry clean-up is community-driven**: the Stablemate and set clean-up is done by vetted Registry moderators with the Registry Desk, not by owner rulings plus bulk repairs. More tools, but only for vetted members.
+- **Founding moderators**: the owner hand-picks 2-3 now (the Stablemate volunteer first); applications and automatic seats come later (design doc Q1-Q4, Q15).
+- **Second look**: single edits apply at once and are undoable; merges and batches over 25 rows wait for a second moderator or the owner; all undoable for 30 days (design Q5, Q6).
+- **Removing rows**: any moderator may remove, alone, a row nothing points at (no horses, want lists, set pieces or child releases); it is hidden at once, undoable for 30 days, and listed in the owner's digest. Rows with anything attached are merged, never removed (design Q11).
+- **Registry style rules** (set titles, auction rows, generation tags, title format) are written by moderators: one proposes, the others agree, and it takes effect unless the owner vetoes.
+- **Defaults taken** for the other design questions (owner may override): public badge and name in the Registry history; "Registry moderator" and "Registry Desk"; 12-month term renewed in one click; Silver and Gold auto-approve stay; the admin Catalog tab stays until the Desk replaces it; daily digest plus alerts for merges, big batches and removals; artists can't approve suggestions about their own pieces.
+- **Financial Vault**: a private "Purchase notes" field, and links in vault notes are clickable (member request).
+- **Registry Desk mock approved** (https://claude.ai/artifact/BQuj11HRaMuYDfEy8succo), with one requirement: **every field is editable**, not only the few in the mock. The Mold view works as: pick a mold, click through its releases one by one, the release's full record opens below, edit, save.
 
 **2026-10-15**
 - **Artist names**: D'Arry Jones Frank, Sandra Winters and Pamela du Boulay are the right spellings; Maggie Jenner-Bennett is Maggie Bennett. The format repair merges the other spellings into these.
@@ -107,7 +121,8 @@ Owner rulings, newest first. Each one is also folded into the sections below.
 - **Reference pages** (`/reference/...`) are the public face; `/catalog/[id]` is the edit surface.
 - **Addresses follow maker corrections**, and old addresses forward to the new one.
 - **Curator ranks skip the queue, not the rules**: every auto-applied correction passes the format checks.
-- **Registry moderators** (planned): trusted members with the owner's Registry powers (add, merge, edit, bulk changes) in an admin-like tab. Members apply; seats open when the review queue backs up. Design first.
+- **Registry moderators**: vetted members with the owner's Registry powers (add, edit, merge, bulk changes, remove unlinked rows) on the Registry Desk; founding seats hand-picked by the owner; merges and batches over 25 rows need a second look; everything undoable for 30 days. Design: `docs/design/registry-moderators.md`. Rulings 2026-10-16.
+- **Registry style rules belong to the moderators**: proposed and agreed by moderators, owner veto. Members apply; seats open when the review queue backs up. Design first.
 - **Formats**: colour descriptions start with a capital; titles hold the name only; one spelling per maker or artist; unknown scale stays empty.
 - **eBay prices are asking prices**, never "sold". Minimum 3 listings. Currency is a label, never converted.
 

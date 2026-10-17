@@ -190,6 +190,108 @@ describe("ReferenceLinker", () => {
         expect(screen.getByTestId("linker-banner").textContent).toContain("mold only");
     });
 
+    it("offers one link per missing fact and keeps the rest reachable after filing one (MHH-078)", async () => {
+        linker.fileReleaseFact.mockResolvedValue({ success: true });
+        linker.searchLinker.mockResolvedValue({
+            ...RESULT,
+            molds: [{ ...SM, releases: [{ ...SM.releases[0], look: null, model: null, from: null }] }],
+        });
+        render(<ReferenceLinker selectedCatalogId={null} onCatalogSelect={vi.fn()} />);
+        fireEvent.change(screen.getByLabelText("Find the model"), { target: { value: "Silky Sullivan" } });
+        const row = (await screen.findAllByTestId("linker-release", {}, { timeout: 3000 }))[0];
+        expect(within(row).getByTestId("linker-fill-colour")).toBeTruthy();
+        expect(within(row).getByTestId("linker-fill-year")).toBeTruthy();
+        expect(within(row).getByTestId("linker-fill-model-number")).toBeTruthy();
+        // File the year as a range.
+        fireEvent.click(within(row).getByTestId("linker-fill-year"));
+        const box = within(row).getByPlaceholderText("e.g. 1976 or 1995-1997");
+        fireEvent.change(box, { target: { value: "1995-1997" } });
+        fireEvent.click(within(row).getByText("File it"));
+        await waitFor(() =>
+            expect(linker.fileReleaseFact).toHaveBeenCalledWith(
+                expect.objectContaining({ catalogId: "r5022", fact: "year", value: "1995-1997" }),
+            ),
+        );
+        await waitFor(() =>
+            expect(within(row).getByTestId("linker-sent").textContent).toMatch(/year.*sent for review/i),
+        );
+        // The year link is gone; the colour and the model number are still there.
+        expect(within(row).queryByTestId("linker-fill-year")).toBeNull();
+        fireEvent.click(within(row).getByTestId("linker-fill-model-number"));
+        expect(within(row).getByPlaceholderText("e.g. 5022")).toBeTruthy();
+    });
+
+    it("sends a set piece's colour to its own row, with Add my release filled in (MHH-078)", async () => {
+        render(<ReferenceLinker selectedCatalogId={null} onCatalogSelect={vi.fn()} />);
+        fireEvent.change(screen.getByLabelText("Find the model"), { target: { value: "Silky Sullivan" } });
+        const mold = await screen.findByTestId("linker-mold", {}, { timeout: 3000 });
+        const setRow = within(mold).getAllByTestId("linker-release")[1];
+        expect(within(setRow).queryByTestId("linker-fill-colour")).toBeNull();
+        fireEvent.click(within(setRow).getByTestId("linker-add-piece"));
+        const form = within(mold).getByTestId("linker-add");
+        expect((within(form).getByPlaceholderText("5022") as HTMLInputElement).value).toBe("711096");
+        expect((within(form).getByPlaceholderText("leave blank if sold alone") as HTMLInputElement).value).toBe(
+            "12-Piece Stablemates Set",
+        );
+        expect((within(form).getByPlaceholderText("e.g. 1976 or 1995-1997") as HTMLInputElement).value).toBe("1996");
+    });
+
+    it("never fills a set piece's end year in as its first year", async () => {
+        linker.searchLinker.mockResolvedValue({
+            ...RESULT,
+            molds: [{ ...SM, releases: [SM.releases[0], { ...SM.releases[1], from: null, to: 1997 }] }],
+        });
+        render(<ReferenceLinker selectedCatalogId={null} onCatalogSelect={vi.fn()} />);
+        fireEvent.change(screen.getByLabelText("Find the model"), { target: { value: "Silky Sullivan" } });
+        const mold = await screen.findByTestId("linker-mold", {}, { timeout: 3000 });
+        fireEvent.click(within(within(mold).getAllByTestId("linker-release")[1]).getByTestId("linker-add-piece"));
+        const form = within(mold).getByTestId("linker-add");
+        expect((within(form).getByPlaceholderText("e.g. 1976 or 1995-1997") as HTMLInputElement).value).toBe("");
+    });
+
+    it("asks whether a bare number in front of the name is the model number (review of MHH-079)", async () => {
+        linker.fileReleaseUnderMold.mockResolvedValue({ success: true, autoApproved: false });
+        render(<ReferenceLinker selectedCatalogId={null} onCatalogSelect={vi.fn()} />);
+        fireEvent.change(screen.getByLabelText("Find the model"), { target: { value: "Silky Sullivan" } });
+        const mold = await screen.findByTestId("linker-mold", {}, { timeout: 3000 });
+        fireEvent.click(within(mold).getByTestId("linker-add-open"));
+        const form = within(mold).getByTestId("linker-add");
+        fireEvent.change(within(form).getByPlaceholderText("dark chestnut, various socks"), {
+            target: { value: "Spotted" },
+        });
+        fireEvent.change(within(form).getByPlaceholderText("Andrew"), { target: { value: "101 Dalmatians" } });
+        fireEvent.click(within(form).getByText("Add it under this mold"));
+        const ask = await within(form).findByTestId("linker-number-conflict");
+        expect(ask.closest("[role=alert]")?.textContent).toMatch(/starts with 101.*model number\?/);
+        expect(linker.fileReleaseUnderMold).not.toHaveBeenCalled();
+        fireEvent.click(within(ask).getByRole("button", { name: /part of the name/i }));
+        await waitFor(() =>
+            expect(linker.fileReleaseUnderMold).toHaveBeenCalledWith(
+                expect.objectContaining({ moldId: "sm", name: "101 Dalmatians", modelNumber: "" }),
+            ),
+        );
+    });
+
+    it("asks which number is right when the name and the number box disagree (MHH-079)", async () => {
+        linker.fileReleaseUnderMold.mockResolvedValue({ success: true, autoApproved: false });
+        render(<ReferenceLinker selectedCatalogId={null} onCatalogSelect={vi.fn()} />);
+        fireEvent.change(screen.getByLabelText("Find the model"), { target: { value: "Silky Sullivan" } });
+        const mold = await screen.findByTestId("linker-mold", {}, { timeout: 3000 });
+        fireEvent.click(within(mold).getByTestId("linker-add-open"));
+        const form = within(mold).getByTestId("linker-add");
+        fireEvent.change(within(form).getByPlaceholderText("5022"), { target: { value: "5177" } });
+        fireEvent.change(within(form).getByPlaceholderText("Andrew"), { target: { value: "#5178 Andrew" } });
+        fireEvent.click(within(form).getByText("Add it under this mold"));
+        const ask = await within(form).findByTestId("linker-number-conflict");
+        expect(linker.fileReleaseUnderMold).not.toHaveBeenCalled();
+        fireEvent.click(within(ask).getByRole("button", { name: "It's #5178" }));
+        await waitFor(() =>
+            expect(linker.fileReleaseUnderMold).toHaveBeenCalledWith(
+                expect.objectContaining({ moldId: "sm", name: "Andrew", modelNumber: "5178" }),
+            ),
+        );
+    });
+
     it("searches a model number and lands on the release", async () => {
         linker.searchLinker.mockResolvedValue({
             term: "5022",

@@ -292,7 +292,9 @@ export default function AddHorseEngine() {
                 tier,
                 watermark,
             });
-            setPhotoWarning(outcome.warning);
+            // One warning box on the completion leaf: photos, and purchase
+            // notes saved before migration 241 is in.
+            setPhotoWarning([created.notice, outcome.warning].filter(Boolean).join(" ") || null);
 
             if (visibility === "public") {
                 notifyHorsePublic({

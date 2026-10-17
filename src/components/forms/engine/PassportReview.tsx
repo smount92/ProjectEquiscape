@@ -124,6 +124,7 @@ export default function PassportReview({
                                 key={spec.name}
                                 label={resolveLabel(spec, context.category)}
                                 value={display(spec, context.values[spec.name])}
+                                long={spec.type === "textarea"}
                             />
                         ))}
                     </dl>
@@ -137,12 +138,20 @@ export default function PassportReview({
     );
 }
 
-function PassportRow({ label, value }: { label: string; value: string }) {
+function PassportRow({ label, value, long = false }: { label: string; value: string; long?: boolean }) {
+    // A long note (purchase notes) drops under its label and keeps its
+    // line breaks, instead of squeezing into the right-aligned value slot.
     return (
-        <div className="fe-passport-row">
+        <div className={long ? "fe-passport-row flex-wrap" : "fe-passport-row"}>
             <dt>{label}</dt>
             <span className="fe-passport-leader" aria-hidden="true" />
-            <dd>{value}</dd>
+            <dd
+                className={
+                    long ? "basis-full text-left font-normal [overflow-wrap:anywhere] whitespace-pre-line" : undefined
+                }
+            >
+                {value}
+            </dd>
         </div>
     );
 }

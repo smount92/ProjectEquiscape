@@ -46,6 +46,8 @@ import { getHorseViewStats, viewStatsLabel } from "@/lib/metrics/sellerViews";
 import { resinIdentityFrom, resinMakeupLine } from "@/lib/passport/resinIdentity";
 import { colorText, readPendingColumns } from "@/lib/passport/pendingColumns";
 import { getSetPurchase } from "@/app/actions/set-purchase";
+import { selectWithPurchaseNotes } from "@/lib/vault/purchaseNotes";
+import { passportReleaseInfo } from "@/lib/catalog/cardDisplay";
 
 // Types
 interface VaultData {
@@ -55,6 +57,8 @@ interface VaultData {
     insurance_notes: string | null;
     purchase_date_text: string | null;
     is_trade: boolean | null;
+    /** 241; absent until the migration is pasted. */
+    purchase_notes?: string | null;
 }
 
 const ANGLE_LABELS: Record<string, string> = {
@@ -178,12 +182,12 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
     // Documentation — the horse's papers (148/209; owner sees all)
     const horseDocuments = await getHorseDocuments(supabase, horseId);
 
-    // Fetch financial vault (owner-only via RLS)
-    const { data: rawVault } = await supabase
-        .from("financial_vault")
-        .select("purchase_price, purchase_date, estimated_current_value, insurance_notes, purchase_date_text, is_trade")
-        .eq("horse_id", horseId)
-        .single<VaultData>();
+    // Fetch financial vault (owner-only via RLS). purchase_notes is 241;
+    // read without it until the paste so the rest of the vault still shows.
+    const { data: rawVault } = await selectWithPurchaseNotes(
+        (columns) => supabase.from("financial_vault").select(columns).eq("horse_id", horseId).maybeSingle<VaultData>(),
+        "purchase_price, purchase_date, estimated_current_value, insurance_notes, purchase_date_text, is_trade",
+    );
 
     const vault = rawVault ?? null;
     // The set this horse was bought in (224); null before the paste or when solo.
@@ -389,7 +393,6 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
                   slug: (cat as { slug?: string | null }).slug ?? null,
               }
             : null;
-    const attrs = (cat?.attributes ?? {}) as Record<string, unknown>;
     // One owner for the Mold/Manufacturer/Scale lines (lib/passport/referenceLines):
     // a release names its parent mold here, not itself.
     const refInfo = cat ? referenceLines(cat as unknown as ReferenceRow) : null;
@@ -401,16 +404,7 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
     // SELECT to nobody. Null when 175 has not been pasted: the line vanishes.
     const viewStats = viewStatsLabel(await getHorseViewStats(supabase, horseId));
 
-    const releaseInfo =
-        cat && cat.item_type === "plastic_release"
-            ? {
-                  name: cat.title,
-                  modelNumber: attrs.model_number as string | null,
-                  color: attrs.color_description as string | null,
-                  yearStart: attrs.release_year_start as number | null,
-                  yearEnd: attrs.release_year_end as number | null,
-              }
-            : null;
+    const releaseInfo = passportReleaseInfo(cat);
 
     return (
         <ExplorerLayout noHeader>
@@ -638,16 +632,13 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
                                     </div>
                                 )}
 
-                                {releaseInfo.yearStart && (
+                                {releaseInfo.years && (
                                     <div className="flex items-center justify-between border-b border-dashed border-border-tan/20 px-0 py-3 last:border-0">
                                         <span className="text-sm font-medium text-secondary-foreground">
                                             Release Years
                                         </span>
                                         <span className="max-w-[60%] text-right text-sm font-semibold text-foreground">
-                                            {releaseInfo.yearStart}
-                                            {releaseInfo.yearEnd && releaseInfo.yearEnd !== releaseInfo.yearStart
-                                                ? `–${releaseInfo.yearEnd}`
-                                                : ""}
+                                            {releaseInfo.years}
                                         </span>
                                     </div>
                                 )}

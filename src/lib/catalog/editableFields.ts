@@ -22,7 +22,17 @@
  * the vocabularies cannot drift apart.
  */
 
-import { CANONICAL_SCALES, CATALOG_CATEGORIES, CATALOG_GENDERS, RUN_TYPES } from "@/lib/catalog/taxonomy";
+import {
+    CANONICAL_SCALES,
+    CATALOG_CATEGORIES,
+    CATALOG_GENDERS,
+    CATEGORY_LABELS,
+    RUN_TYPES,
+} from "@/lib/catalog/taxonomy";
+import { referenceHref } from "@/lib/catalog/referenceUrl";
+// corrections.ts imports MATERIAL_OPTIONS from this file; both are read only
+// inside functions, so the cycle is safe at load time.
+import { fieldValueProblem } from "@/lib/catalog/corrections";
 
 export type FieldKind = "text" | "textarea" | "select" | "number";
 
@@ -232,4 +242,470 @@ export function humanizeChangeSummary(summary: string): string {
         /(^|[\s,:])([a-z]+(?:_[a-z]+)+|title|maker|scale|material|breed|gender|sculptor)(?=:\s)/g,
         (_m, pre: string, key: string) => `${pre}${fieldLabel(key)}`,
     );
+}
+
+// ── The Registry Desk's field list ────────────────────────────────────
+//
+// The moderators' editor shows EVERY field on a row (owner, 2026-10-16):
+// the real columns, the curated facts, any other attribute the row
+// carries, the import plumbing (folded away) and the record's own facts
+// (read-only). The member list above is deliberately left alone: it is
+// what the correction form offers, and the Desk is not that form.
+
+/** "list": several values typed as comma-separated words ("Leather, Brass"). */
+export type DeskFieldKind = FieldKind | "mold" | "list";
+
+export type DeskFieldGroup = "identity" | "release" | "sculpture" | "notes" | "import" | "extras" | "record";
+
+/** The order the editor lays groups out in. */
+export const DESK_GROUP_ORDER: readonly DeskFieldGroup[] = [
+    "identity",
+    "release",
+    "sculpture",
+    "notes",
+    "extras",
+    "import",
+    "record",
+];
+
+export const DESK_GROUP_LABELS: Record<DeskFieldGroup, string> = {
+    identity: "What it is",
+    release: "Release facts",
+    sculpture: "Sculpture and breed",
+    notes: "Notes",
+    extras: "Everything else",
+    import: "Import details",
+    record: "The record",
+};
+
+export interface DeskFieldDef {
+    key: string;
+    label: string;
+    kind: DeskFieldKind;
+    group: DeskFieldGroup;
+    /** "release" means every row that is not a mold (releases, resins, tack ...). */
+    appliesTo: "release" | "mold" | "all";
+    /**
+     * Shown by default only on these kinds of entry (resin, tack, props ...);
+     * on any other row only when it carries a value, or is added.
+     */
+    itemTypes?: readonly string[];
+    options?: readonly string[];
+    /** Words shown for an option value (item types are stored as keys). */
+    optionLabels?: Record<string, string>;
+    help?: string;
+    placeholder?: string;
+    readOnly?: boolean;
+    /** Shown folded away until opened. */
+    collapsed?: boolean;
+}
+
+export interface DeskFieldEdit extends DeskFieldDef {
+    /** The stored value as text ("" when empty; a list as "a, b"). */
+    original: string;
+    /** What to show instead of the raw value (a mold's title for its id). */
+    display?: string;
+    /**
+     * A year stored as text ("1975" in quotes, from the March import). It
+     * counts as a change once touched (or with any other change), so saving
+     * stores it as a number.
+     */
+    storedAsText?: boolean;
+}
+
+/** A catalog row as the Desk reads it: every column. */
+export interface DeskSource extends EditableSource {
+    id: string;
+    item_type: string;
+    parent_id: string | null;
+    artist: string | null;
+    manufacturer: string | null;
+    maker_slug: string | null;
+    slug: string | null;
+    created_at: string;
+    updated_at: string;
+}
+
+function member(key: string, over: Partial<DeskFieldDef> & Pick<DeskFieldDef, "group" | "appliesTo">): DeskFieldDef {
+    const f = CATALOG_EDITABLE_FIELDS.find((x) => x.key === key);
+    if (!f) throw new Error(`No member field ${key}`);
+    return {
+        key: f.key,
+        label: f.label,
+        kind: f.kind,
+        options: f.options,
+        help: f.help,
+        placeholder: f.placeholder,
+        ...over,
+    };
+}
+
+const IMPORT_LABELS: Record<string, string> = {
+    source: "Where it came from",
+    source_id: "Its number there",
+    source_note: "Import note",
+};
+
+const RESIN = ["artist_resin", "factory_resin"] as const;
+
+/** A field kept on resins, tack, props and scenes: under "Everything else", shown by default on its kinds. */
+function kindField(
+    key: string,
+    label: string,
+    itemTypes: readonly string[],
+    over: Partial<DeskFieldDef> = {},
+): DeskFieldDef {
+    return { key, label, kind: "text", group: "extras", appliesTo: "all", itemTypes, ...over };
+}
+
+/**
+ * The attribute keys resins, tack, props and dioramas carry (write.ts
+ * knows them all). Each shows by default on its own kinds of entry; on any
+ * other row it shows when filled, or through "Add a field".
+ */
+const KIND_FIELDS: readonly DeskFieldDef[] = [
+    kindField("cast_medium", "Cast in", RESIN, { placeholder: "Resin, pewter, bronze" }),
+    kindField("edition_size", "Edition size", RESIN, { placeholder: "50" }),
+    kindField("finish", "Finish", RESIN, { placeholder: "Unpainted, painted by the artist" }),
+    kindField("finish_type", "Finish type", RESIN),
+    kindField("coa", "Certificate of authenticity", RESIN, { help: "Whether it came with one, and from whom." }),
+    kindField("auction_sale_price", "Auction sale price", RESIN, { placeholder: "450" }),
+    kindField("species", "Species", [...RESIN, "china"], { placeholder: "Horse, donkey, dog" }),
+    kindField("tack_type", "Tack type", ["tack"], { placeholder: "Saddle, bridle, halter" }),
+    kindField("discipline", "Discipline", ["tack", "diorama"], { placeholder: "Western, English, driving" }),
+    kindField("materials", "Materials", ["tack", "prop"], {
+        kind: "list",
+        placeholder: "Leather, brass, fabric",
+        help: "Separate them with commas.",
+    }),
+    kindField("working_parts", "Working parts", ["tack"], {
+        kind: "list",
+        placeholder: "Buckles, sliding bit",
+        help: "Separate them with commas.",
+    }),
+    kindField("fits_molds", "Fits molds", ["tack"], { placeholder: "Traditional Breyer, Stone ISH" }),
+    kindField("prop_category", "Prop category", ["prop"], { placeholder: "Fence, jump, barn" }),
+    kindField("dimensions", "Dimensions", ["prop"], { placeholder: '6" x 4" x 3"' }),
+    kindField("terrain_setting", "Terrain or setting", ["prop"]),
+    kindField("scene_theme", "Scene theme", ["diorama"]),
+    kindField("components", "Components", ["diorama"], {
+        kind: "textarea",
+        placeholder: "Models, tack, props and figures in the scene",
+    }),
+    kindField("base_dimensions", "Base dimensions", ["diorama"]),
+    kindField("documentation_notes", "Documentation notes", ["diorama"], {
+        kind: "textarea",
+        help: "Reference photos, sources, the story behind the scene.",
+    }),
+];
+
+export const DESK_FIELDS: readonly DeskFieldDef[] = [
+    // What it is
+    member("title", { group: "identity", appliesTo: "all" }),
+    member("item_type", {
+        group: "identity",
+        appliesTo: "all",
+        optionLabels: CATEGORY_LABELS,
+        help: "Mold, release, artist resin and the rest.",
+    }),
+    member("maker", { group: "identity", appliesTo: "all" }),
+    {
+        key: "artist",
+        label: "Artist",
+        kind: "text",
+        group: "identity",
+        appliesTo: "all",
+        help: "The person who sculpted or painted it, for artist pieces.",
+    },
+    {
+        key: "manufacturer",
+        label: "Manufacturer",
+        kind: "text",
+        group: "identity",
+        appliesTo: "all",
+        help: "The company that made it: Breyer, Peter Stone, Hagen-Renaker ...",
+    },
+    {
+        key: "parent_id",
+        label: "Filed under mold",
+        kind: "mold",
+        group: "identity",
+        appliesTo: "release",
+        help: "Re-file it under another mold. Its scale follows the mold, and every horse stays linked.",
+    },
+    member("scale", { group: "identity", appliesTo: "all" }),
+
+    // Release facts
+    member("model_number", { group: "release", appliesTo: "release" }),
+    member("color_description", { group: "release", appliesTo: "release" }),
+    member("release_year_start", { group: "release", appliesTo: "release", label: "First year" }),
+    member("release_year_end", { group: "release", appliesTo: "release", label: "Last year" }),
+    member("run_type", { group: "release", appliesTo: "release" }),
+    {
+        key: "run_detail",
+        label: "Run details",
+        kind: "text",
+        group: "release",
+        appliesTo: "release",
+        placeholder: "Sears Holiday Catalog, 1998",
+        help: "Where it was sold or how it was given out, in the maker's or the shop's words.",
+    },
+    member("run_count", { group: "release", appliesTo: "release" }),
+    member("retail_price", { group: "release", appliesTo: "release" }),
+    {
+        key: "set_name",
+        label: "Set",
+        kind: "text",
+        group: "release",
+        appliesTo: "release",
+        placeholder: "12-Piece Stablemates Set",
+        help: "The gift set or assortment this piece came in.",
+    },
+    member("mold_name", { group: "release", appliesTo: "release" }),
+    member("material", { group: "release", appliesTo: "release" }),
+
+    // Sculpture and breed
+    member("sculptor", { group: "sculpture", appliesTo: "all" }),
+    member("release_year_start", {
+        group: "sculpture",
+        appliesTo: "mold",
+        label: "First made",
+        help: "The year the mold first appeared.",
+    }),
+    member("breed", { group: "sculpture", appliesTo: "all" }),
+    member("gender", { group: "sculpture", appliesTo: "all" }),
+    member("material", { group: "sculpture", appliesTo: "mold" }),
+
+    // Notes
+    member("registry_notes", { group: "notes", appliesTo: "all" }),
+
+    // Resin, tack, props and scenes (under Everything else).
+    ...KIND_FIELDS,
+
+    // Import details: plumbing, folded away but still editable.
+    ...[...HIDDEN_ATTRIBUTES].map(
+        (key): DeskFieldDef => ({
+            key,
+            label: IMPORT_LABELS[key] ?? key.replace(/_/g, " "),
+            kind: "text",
+            group: "import",
+            appliesTo: "all",
+            collapsed: true,
+        }),
+    ),
+
+    // The record: facts about the row itself.
+    { key: "id", label: "Record number", kind: "text", group: "record", appliesTo: "all", readOnly: true },
+    { key: "page_address", label: "Page address", kind: "text", group: "record", appliesTo: "all", readOnly: true },
+    { key: "created_at", label: "Added", kind: "text", group: "record", appliesTo: "all", readOnly: true },
+    { key: "updated_at", label: "Last changed", kind: "text", group: "record", appliesTo: "all", readOnly: true },
+];
+
+/** Keys that are columns on catalog_items rather than attributes. */
+const DESK_COLUMN_KEYS = new Set(["title", "item_type", "maker", "artist", "manufacturer", "parent_id", "scale"]);
+const DESK_RECORD_KEYS = new Set(["id", "page_address", "created_at", "updated_at"]);
+
+function deskValue(item: DeskSource, key: string): unknown {
+    if (key === "page_address") return referenceHref(item);
+    if (DESK_COLUMN_KEYS.has(key) || DESK_RECORD_KEYS.has(key)) {
+        return (item as unknown as Record<string, unknown>)[key];
+    }
+    return (item.attributes ?? {})[key];
+}
+
+/** A list shows as "a, b"; another nested value as its JSON; anything else as its text. */
+const asText = (v: unknown): string =>
+    v == null
+        ? ""
+        : Array.isArray(v)
+          ? v.map((x) => (x == null ? "" : typeof x === "object" ? JSON.stringify(x) : String(x))).join(", ")
+          : typeof v === "object"
+            ? JSON.stringify(v)
+            : String(v);
+
+function labelForKey(key: string): string {
+    return key.replace(/_/g, " ").replace(/^\w/, (c) => c.toUpperCase());
+}
+
+/** A list typed into one box: "Leather, brass ," → ["Leather", "brass"]. */
+export function splitList(text: string): string[] {
+    return text
+        .split(",")
+        .map((s) => s.trim())
+        .filter((s) => s !== "");
+}
+
+const YEAR_KEYS = new Set(["release_year_start", "release_year_end"]);
+
+/**
+ * The attribute keys that may hold a list (the engine's listAttributeKeys:
+ * these four, plus any Desk field of kind "list"). Every other value is
+ * text, so a list stored anywhere else is edited and saved as one line.
+ */
+const LIST_KEYS: ReadonlySet<string> = new Set(["components", "fits_molds", "materials", "working_parts"]);
+
+/** The editor's field for a key no box shows yet (from "Add a field"). */
+export function deskFieldFor(key: string): DeskFieldEdit {
+    const def = DESK_FIELDS.find((f) => f.key === key && !f.readOnly);
+    const base: DeskFieldDef = def
+        ? { ...def, group: def.group === "record" ? "extras" : def.group }
+        : { key, label: deskFieldLabel(key), kind: "text", group: "extras", appliesTo: "all" };
+    return { ...base, original: "" };
+}
+
+/**
+ * Every field on this row for the Desk editor, in group order: the fields
+ * that apply to its kind (mold or not, and the resin, tack and prop keys on
+ * those kinds) whether filled or not, any other known field the row
+ * happens to carry a value for, every other attribute under "Everything
+ * else", the import details and the record's facts. Each key appears once.
+ * `added` are keys the moderator added with "Add a field".
+ */
+export function buildDeskFields(
+    item: DeskSource,
+    ctx: { parentTitle?: string | null; added?: readonly string[] } = {},
+): DeskFieldEdit[] {
+    const isMold = item.item_type === "plastic_mold";
+    const attrs = item.attributes ?? {};
+    const fits = (f: DeskFieldDef) =>
+        (f.appliesTo === "all" || f.appliesTo === (isMold ? "mold" : "release")) &&
+        (!f.itemTypes || f.itemTypes.includes(item.item_type));
+    const filled = (key: string) => asText(deskValue(item, key)) !== "";
+
+    const seen = new Set<string>();
+    const out: DeskFieldEdit[] = [];
+    const take = (f: DeskFieldDef) => {
+        if (seen.has(f.key)) return;
+        seen.add(f.key);
+        const value = deskValue(item, f.key);
+        const edit: DeskFieldEdit = { ...f, original: asText(value) };
+        if (f.key === "parent_id" && value) edit.display = ctx.parentTitle ?? undefined;
+        if (f.key === "item_type" && typeof value === "string") edit.display = CATEGORY_LABELS[value] ?? value;
+        // A list stored under a list key edits as one; anywhere else the
+        // Registry keeps text, so it edits (and saves) as one line.
+        if (Array.isArray(value) && !f.readOnly && f.kind !== "mold" && LIST_KEYS.has(f.key)) edit.kind = "list";
+        if (YEAR_KEYS.has(f.key) && typeof value === "string" && value.trim() !== "") edit.storedAsText = true;
+        out.push(edit);
+    };
+
+    // Fields for this kind of row first, then known fields it carries anyway.
+    for (const f of DESK_FIELDS) if (fits(f)) take(f);
+    for (const f of DESK_FIELDS) if (!fits(f) && filled(f.key)) take(f);
+
+    // Everything else the row carries.
+    for (const [key, v] of Object.entries(attrs)) {
+        if (seen.has(key) || v == null || v === "") continue;
+        const isList = Array.isArray(v);
+        const nested = typeof v === "object" && !isList;
+        const listKey = isList && LIST_KEYS.has(key);
+        take({
+            key,
+            label: labelForKey(key),
+            kind: listKey ? "list" : "text",
+            group: "extras",
+            appliesTo: "all",
+            readOnly: nested,
+            help: listKey
+                ? "Separate the values with commas."
+                : isList
+                  ? "Stored as a list; a change is saved as one line of text."
+                  : nested
+                    ? "A value with parts of its own, shown as stored."
+                    : undefined,
+        });
+    }
+
+    // Fields added with "Add a field", empty until typed into.
+    for (const key of ctx.added ?? []) {
+        if (seen.has(key)) continue;
+        seen.add(key);
+        out.push(deskFieldFor(key));
+    }
+
+    const rank = (g: DeskFieldGroup) => DESK_GROUP_ORDER.indexOf(g);
+    // Stable sort keeps the registry order inside each group.
+    return out
+        .map((f, i) => ({ f, i }))
+        .sort((a, b) => rank(a.f.group) - rank(b.f.group) || a.i - b.i)
+        .map((x) => x.f);
+}
+
+/** Keys no box can add: the real columns (each has its own box) and the record's facts. */
+const NOT_ADDABLE = new Set([
+    ...DESK_COLUMN_KEYS,
+    ...DESK_RECORD_KEYS,
+    "slug",
+    "maker_slug",
+    "sort_key",
+    "search_key",
+    "attributes",
+]);
+
+/**
+ * "Add a field": every key the Registry keeps (write.ts knownAttributeKeys,
+ * handed to the browser by the Desk's actions) that this row's editor
+ * doesn't show yet, with the words a person reads, A to Z.
+ */
+export function addableFields(
+    shown: readonly { key: string }[],
+    known: Iterable<string>,
+): { key: string; label: string }[] {
+    const have = new Set(shown.map((f) => f.key));
+    return [...new Set(known)]
+        .filter((k) => !have.has(k) && !NOT_ADDABLE.has(k))
+        .map((key) => ({ key, label: deskFieldLabel(key) }))
+        .sort((a, b) => a.label.localeCompare(b.label));
+}
+
+/**
+ * What a save sends: each editable field whose box differs from what is
+ * stored, trimmed. An emptied box is sent as "" (the writer clears it). A
+ * list is sent as its values. A year stored as text is sent once its box
+ * is touched (a suggested fix fills it the same), or along with any other
+ * change, so the save stores it as a number.
+ */
+export function deskChanges(fields: DeskFieldEdit[], draft: Record<string, string>): Record<string, string | string[]> {
+    const changes: Record<string, string | string[]> = {};
+    const value = (f: DeskFieldEdit, text: string): string | string[] =>
+        f.kind === "list" && text !== "" ? splitList(text) : text;
+    for (const f of fields) {
+        if (f.readOnly || !(f.key in draft)) continue;
+        const next = (draft[f.key] ?? "").trim();
+        const same =
+            f.kind === "list"
+                ? splitList(next).join(", ") === splitList(f.original).join(", ")
+                : next === f.original.trim();
+        if (!same || (f.storedAsText && next !== "")) changes[f.key] = value(f, next);
+    }
+    if (Object.keys(changes).length > 0) {
+        // Only a plain year the Registry would accept rides along: "1975-1988"
+        // as text, a year out of range, or a last year before the first waits
+        // for a person, so it can't make an unrelated save fail.
+        const carried: string[] = [];
+        for (const f of fields) {
+            const year = f.original.trim();
+            if (f.storedAsText && !(f.key in draft) && /^\d{4}$/.test(year) && !fieldValueProblem(f.key, year)) {
+                changes[f.key] = year;
+                carried.push(f.key);
+            }
+        }
+        if (carried.length > 0) {
+            const yearAfter = (key: string): number | null => {
+                const v = key in changes ? changes[key] : fields.find((f) => f.key === key)?.original;
+                const t = typeof v === "string" ? v.trim() : "";
+                return /^\d{4}$/.test(t) ? Number(t) : null;
+            };
+            const start = yearAfter("release_year_start");
+            const end = yearAfter("release_year_end");
+            if (start !== null && end !== null && end < start) {
+                for (const key of carried) delete changes[key];
+            }
+        }
+    }
+    return changes;
+}
+
+/** The Desk's label for a field key ("run_detail" → "Run details"). */
+export function deskFieldLabel(key: string): string {
+    return DESK_FIELDS.find((f) => f.key === key)?.label ?? fieldLabel(key);
 }

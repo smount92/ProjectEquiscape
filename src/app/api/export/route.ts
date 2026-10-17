@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { formatMoney } from "@/lib/money/format";
 import { isMissingSetColumn, shareOf } from "@/lib/vault/setPurchase";
+import { isMissingPurchaseNotes } from "@/lib/vault/purchaseNotes";
 import { escapeCSV } from "@/lib/utils/csv";
 import { NextResponse } from "next/server";
 
@@ -21,7 +22,7 @@ export async function GET() {
     const currencySymbol = ((me as { currency_symbol?: string | null } | null)?.currency_symbol || "$").trim() || "$";
 
     // Fetch all horses with joined reference data, collection, and financial vault
-    const selectHorses = (withSets: boolean) =>
+    const selectHorses = (withSets: boolean, withNotes: boolean) =>
         supabase
             .from("user_horses")
             .select(
@@ -29,15 +30,23 @@ export async function GET() {
       id, custom_name, finish_type, condition_grade, sculptor, trade_status, listing_price, created_at, asset_category,
       catalog_items:catalog_id(title, maker, item_type, attributes),
       user_collections(name),
-      financial_vault(purchase_price, estimated_current_value, insurance_notes${withSets ? ", purchase_group_id, purchase_group_label" : ""})
+      financial_vault(purchase_price, estimated_current_value, insurance_notes${withSets ? ", purchase_group_id, purchase_group_label" : ""}${withNotes ? ", purchase_notes" : ""})
     `,
             )
             .eq("owner_id", user.id)
             .is("deleted_at", null)
             .order("custom_name");
-    // Set columns are migration 224; read without them until the paste.
-    let horsesResult = await selectHorses(true);
-    if (horsesResult.error && isMissingSetColumn(horsesResult.error)) horsesResult = await selectHorses(false);
+    // Set columns are migration 224 and purchase notes 241; read without
+    // whichever is missing until it is pasted.
+    let withSets = true;
+    let withNotes = true;
+    let horsesResult = await selectHorses(withSets, withNotes);
+    for (let tries = 0; tries < 2 && horsesResult.error; tries++) {
+        if (withNotes && isMissingPurchaseNotes(horsesResult.error)) withNotes = false;
+        else if (withSets && isMissingSetColumn(horsesResult.error)) withSets = false;
+        else break;
+        horsesResult = await selectHorses(withSets, withNotes);
+    }
     const { data: rawHorses, error } = horsesResult;
 
     if (error) {
@@ -104,6 +113,7 @@ export async function GET() {
         "Listing Price",
         "Purchase Price",
         "Set Purchase",
+        "Purchase Notes",
         "Estimated Value",
         "Insurance Notes",
         "Date Added",
@@ -117,6 +127,7 @@ export async function GET() {
         insurance_notes: string | null;
         purchase_group_id?: string | null;
         purchase_group_label?: string | null;
+        purchase_notes?: string | null;
     };
     const rows = horses.map((horse) => {
         // The set columns are 224; the generated types lag the paste.
@@ -160,6 +171,7 @@ export async function GET() {
                       `${vault.purchase_group_label || "Set"} (${formatMoney(Number(vault.purchase_price ?? 0), currencySymbol, { decimals: 2 })} for ${setSize})`,
                   )
                 : "",
+            escapeCSV(vault?.purchase_notes),
             vault?.estimated_current_value
                 ? formatMoney(Number(vault.estimated_current_value), currencySymbol, { decimals: 2 })
                 : "",

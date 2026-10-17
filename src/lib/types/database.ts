@@ -97,6 +97,8 @@ export interface FinancialVault {
     insurance_notes: string | null;
     purchase_date_text: string | null;
     is_trade: boolean;
+    /** 241: where and from whom it was bought. Absent until the paste. */
+    purchase_notes?: string | null;
 }
 
 export interface HorseImage {

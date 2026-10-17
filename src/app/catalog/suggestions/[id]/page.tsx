@@ -10,6 +10,7 @@ import ExplorerLayout from "@/components/layouts/ExplorerLayout";
 import { BRONZE_THRESHOLD, CONTRIBUTOR_THRESHOLD, GOLD_THRESHOLD, SILVER_THRESHOLD } from "@/lib/catalog/corrections";
 import CatalogSubMasthead from "@/components/catalog/CatalogSubMasthead";
 import { referenceHref } from "@/lib/catalog/referenceUrl";
+import { SUGGESTION_STATUS_LABELS, claimLine, isOpenSuggestion, liveClaim } from "@/lib/catalog/suggestionStatus";
 import { MessageCircle, Shield } from "lucide-react";
 
 interface Props {
@@ -44,6 +45,9 @@ export default async function SuggestionDetailPage({ params }: Props) {
         upvotes: number;
         downvotes: number;
         created_at: string;
+        /** Update 242: a moderator's 30-minute claim (absent before it). */
+        claimed_by?: string | null;
+        claimed_until?: string | null;
     };
 
     // Fetch author info
@@ -103,13 +107,23 @@ export default async function SuggestionDetailPage({ params }: Props) {
 
     // Status display
     const statusConfig: Record<string, { icon: string; className: string; label: string }> = {
-        pending: { icon: "🟡", className: "ref-status-pending", label: "Pending Review" },
-        under_review: { icon: "🔍", className: "ref-status-pending", label: "Under Review" },
+        pending: { icon: "🟡", className: "ref-status-pending", label: SUGGESTION_STATUS_LABELS.pending },
+        under_review: { icon: "🔍", className: "ref-status-pending", label: SUGGESTION_STATUS_LABELS.under_review },
         approved: { icon: "✅", className: "ref-status-approved", label: "Approved" },
         auto_approved: { icon: "⚡", className: "ref-status-auto", label: "Auto-Approved" },
         rejected: { icon: "❌", className: "ref-status-rejected", label: "Rejected" },
     };
     const st = statusConfig[s.status] ?? statusConfig.pending;
+
+    // A Registry moderator holding it right now (claimed suggestions read
+    // under_review): the owner can still decide it, and is told who has it.
+    const claim = isAdmin && isOpenSuggestion(s.status) ? liveClaim(s) : null;
+    let claimWords: string | null = null;
+    if (claim) {
+        const { data: holder } = await supabase.from("users").select("alias_name").eq("id", claim.by).maybeSingle();
+        const alias = (holder as { alias_name: string | null } | null)?.alias_name ?? "a moderator";
+        claimWords = `${claimLine(alias, claim.until)} Deciding it now goes ahead of them.`;
+    }
 
     // Curator badge — thresholds come from the same module that decides
     // auto-approval, so the rank shown here always matches the power it
@@ -347,11 +361,17 @@ export default async function SuggestionDetailPage({ params }: Props) {
                         </div>
 
                         {/* Admin Actions */}
-                        {isAdmin && s.status === "pending" && (
+                        {/* Waiting, or being looked at by a moderator (a claim reads under_review). */}
+                        {isAdmin && isOpenSuggestion(s.status) && (
                             <div className="rounded-lg border border-warning bg-card p-6 shadow-md transition-all">
                                 <h3 className="flex items-center gap-2">
                                     <Shield className="h-5 w-5" /> Admin Actions
                                 </h3>
+                                {claimWords && (
+                                    <p className="mt-0 mb-3 text-sm text-secondary-foreground" data-testid="claim-note">
+                                        {claimWords}
+                                    </p>
+                                )}
                                 <SuggestionAdminActions suggestionId={s.id} />
                             </div>
                         )}

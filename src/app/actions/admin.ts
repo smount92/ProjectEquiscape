@@ -2,10 +2,11 @@
 
 import { logger } from "@/lib/logger";
 import { revalidatePath, revalidateTag } from "next/cache";
-import { CACHE_TAGS } from "@/lib/cache/tags";
 import { ANNOUNCEMENTS_CACHE_TAG } from "@/lib/announcements";
 import { paddockPinRefusal } from "@/lib/feed/paddockPin";
-import { mergeCatalogItemsCore, resolveCatalogRef, type MergeClient } from "@/lib/catalog/merge";
+import { resolveCatalogRef, type MergeClient } from "@/lib/catalog/merge";
+import { insertItem, isMissingSchema, requestMerge } from "@/lib/catalog/write";
+import type { ModeratorStatus, RegistryActor } from "@/lib/registry/types";
 
 import { createClient } from "@supabase/supabase-js";
 import { createClient as createAuthClient } from "@/lib/supabase/server";
@@ -67,6 +68,16 @@ async function verifyAdmin() {
 
 function getAdminSupabase() {
     return createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
+}
+
+/** The owner as a Registry actor: their real alias, role "owner" (the history names them). */
+async function ownerActor(user: { id: string }): Promise<RegistryActor> {
+    const { data } = await getAdminSupabase().from("users").select("alias_name").eq("id", user.id).maybeSingle();
+    return {
+        userId: user.id,
+        alias: (data as { alias_name: string | null } | null)?.alias_name ?? "Owner",
+        role: "owner",
+    };
 }
 
 /**
@@ -465,10 +476,14 @@ export async function unsuspendUserByAlias(alias: string): Promise<{ success: bo
 /**
  * Merge a duplicate catalog item into its canonical entry — the North
  * Light repair (two suggestion batches created the same sculpts under
- * different makers), as a button instead of owner SQL. Repoints every
- * reference (horses, wishlists, id-suggestions, catalog suggestions,
- * changelog, child molds), logs to the changelog, then deletes the
- * duplicate. Accepts UUIDs or slugs.
+ * different makers), as a button instead of owner SQL. Every link moves
+ * to the kept entry, the duplicate's address forwards, the duplicate is
+ * removed. Accepts UUIDs or slugs.
+ *
+ * The merge itself is requestMerge in lib/catalog/write (the Registry's
+ * one writer): the owner's merge applies at once and, with update 243,
+ * can be undone for 30 days from the Registry history. Before 243 it is
+ * the old one-way merge.
  */
 export async function mergeCatalogItems(
     duplicateRef: string,
@@ -477,20 +492,18 @@ export async function mergeCatalogItems(
     const user = await verifyAdmin();
     if (!user) return { success: false, error: "Unauthorized" };
 
-    // The procedure itself lives in lib/catalog/merge — an approved
-    // duplicate report runs the very same one.
     const admin = getAdminSupabase() as unknown as MergeClient;
     const dup = await resolveCatalogRef(admin, duplicateRef);
     if (!dup) return { success: false, error: `Duplicate "${duplicateRef}" not found (id or slug).` };
     const canonical = await resolveCatalogRef(admin, canonicalRef);
     if (!canonical) return { success: false, error: `Canonical "${canonicalRef}" not found (id or slug).` };
 
-    const result = await mergeCatalogItemsCore(admin, dup, canonical, { userId: user.id, alias: "Admin" }, (logError) =>
-        logger.error("Admin", "Merge changelog write failed (continuing)", logError),
-    );
+    const result = await requestMerge(await ownerActor(user), {
+        keepId: canonical.id,
+        removeId: dup.id,
+        note: "Merged from the admin console.",
+    });
     if (!result.success) return { success: false, error: result.error };
-    // The removed page and its old address must stop serving from the cache.
-    revalidateTag(CACHE_TAGS.referencePages, "max");
     return { success: true, summary: result.summary };
 }
 
@@ -930,31 +943,14 @@ export async function resolveLegacySuggestion(
             .limit(1);
 
         if (!existing || existing.length === 0) {
-            const { data: inserted, error: insertError } = await admin
-                .from("catalog_items")
-                .insert({ item_type: itemType, title, maker: makerGuess })
-                .select("id")
-                .single();
-            if (insertError) {
-                return { success: false, error: `Catalog insert failed: ${insertError.message}` };
-            }
-            // Leave a changelog trail (the old path never did — approvals were
-            // invisible in the Registry's history and weekly counts). Best
-            // effort: a missing id or failed log never blocks the approve.
-            const newId = (inserted as { id: string } | null)?.id ?? null;
-            if (newId) {
-                const { error: logError } = await admin.from("catalog_changelog").insert({
-                    catalog_item_id: newId,
-                    change_type: "addition",
-                    change_summary: `Added "${title}" (${itemType}) from the legacy suggestion queue.`,
-                    contributed_by: user.id,
-                    contributor_alias: "Admin",
-                    approved_by: user.id,
-                });
-                if (logError) {
-                    logger.error("Admin", "Legacy-approve changelog write failed (continuing)", logError);
-                }
-            }
+            // Through the Registry's one writer: the same checks as every
+            // addition, and a changelog line naming the owner.
+            const inserted = await insertItem(await ownerActor(user), {
+                payload: { item_type: itemType, title, maker: makerGuess },
+                lenient: true,
+                summary: `Added "${title}" (${itemType}) from the legacy suggestion queue.`,
+            });
+            if (!inserted.success) return { success: false, error: `Not added: ${inserted.error}` };
         }
     }
 
@@ -1060,6 +1056,171 @@ export async function searchMembers(
             horseCount: horseCounts.get(r.id) ?? 0,
         })),
     };
+}
+
+// ══════════════════════════════════════════════════════════════
+// Registry moderators (migration 242) — the owner grants and removes
+// seats. The seat is read on every request (requireRegistryModerator),
+// so a removal stops the powers on the moderator's next action.
+// ══════════════════════════════════════════════════════════════
+
+/** The words the owner sees before update 242 is pasted. */
+const MODERATORS_NOT_READY = "Registry moderators open once you add update 242 (Admin › Ops lists it).";
+const MODERATOR_BADGE = "registry_moderator";
+
+export interface RegistryModeratorRow {
+    userId: string;
+    alias: string;
+    status: ModeratorStatus;
+    startedAt: string | null;
+    termEndsAt: string | null;
+    lastActionAt: string | null;
+    removedAt: string | null;
+}
+
+/** Every seat, active first. `ready: false` before 242. */
+export async function listRegistryModerators(): Promise<
+    { success: true; ready: boolean; moderators: RegistryModeratorRow[] } | { success: false; error: string }
+> {
+    const user = await verifyAdmin();
+    if (!user) return { success: false, error: "Unauthorized" };
+    const admin = getAdminSupabase();
+    const { data, error } = await admin
+        .from("registry_moderators")
+        .select("user_id, status, started_at, term_ends_at, last_action_at, removed_at")
+        .order("started_at", { ascending: false })
+        .limit(100);
+    if (error) {
+        if (isMissingSchema(error)) return { success: true, ready: false, moderators: [] };
+        logger.error("Admin", "Moderator list failed", error);
+        return { success: false, error: "Could not read the moderator list." };
+    }
+    const rows = (data ?? []) as {
+        user_id: string;
+        status: ModeratorStatus;
+        started_at: string | null;
+        term_ends_at: string | null;
+        last_action_at: string | null;
+        removed_at: string | null;
+    }[];
+    const aliases = new Map<string, string>();
+    if (rows.length > 0) {
+        const { data: users } = await admin
+            .from("users")
+            .select("id, alias_name")
+            .in(
+                "id",
+                rows.map((r) => r.user_id),
+            );
+        for (const u of (users ?? []) as { id: string; alias_name: string | null }[])
+            aliases.set(u.id, u.alias_name ?? "(no alias)");
+    }
+    const order: Record<string, number> = { active: 0, resting: 1, stepped_down: 2, removed: 3 };
+    return {
+        success: true,
+        ready: true,
+        moderators: rows
+            .map((r) => ({
+                userId: r.user_id,
+                alias: aliases.get(r.user_id) ?? "(no alias)",
+                status: r.status,
+                startedAt: r.started_at,
+                termEndsAt: r.term_ends_at,
+                lastActionAt: r.last_action_at,
+                removedAt: r.removed_at,
+            }))
+            .sort((a, b) => (order[a.status] ?? 9) - (order[b.status] ?? 9)),
+    };
+}
+
+/** Give a member a Registry moderator seat (a new 12-month term) and the badge. */
+export async function grantRegistryModerator(userId: string): Promise<{ success: boolean; error?: string }> {
+    const user = await verifyAdmin();
+    if (!user) return { success: false, error: "Unauthorized" };
+    if (!UUID_RE.test(userId ?? "")) return { success: false, error: "Unknown member." };
+    const admin = getAdminSupabase();
+
+    const { data: target } = await admin
+        .from("users")
+        .select("id, alias_name, is_suspended")
+        .eq("id", userId)
+        .maybeSingle();
+    const member = target as { id: string; alias_name: string | null; is_suspended: boolean | null } | null;
+    if (!member) return { success: false, error: "Unknown member." };
+    if (member.is_suspended) return { success: false, error: "That account is suspended. Unsuspend it first." };
+
+    const now = new Date();
+    const termEnds = new Date(now);
+    termEnds.setFullYear(termEnds.getFullYear() + 1);
+    const { error } = await admin.from("registry_moderators").upsert(
+        {
+            user_id: userId,
+            status: "active",
+            granted_by: user.id,
+            started_at: now.toISOString(),
+            term_ends_at: termEnds.toISOString(),
+            removed_at: null,
+            removed_reason: null,
+        },
+        { onConflict: "user_id" },
+    );
+    if (error) {
+        if (isMissingSchema(error)) return { success: false, error: MODERATORS_NOT_READY };
+        logger.error("Admin", "Moderator grant failed", error);
+        return { success: false, error: "Could not give the seat. Please try again." };
+    }
+    const { error: badgeError } = await admin
+        .from("user_badges")
+        .upsert({ user_id: userId, badge_id: MODERATOR_BADGE }, { onConflict: "user_id,badge_id" });
+    if (badgeError) logger.error("Admin", "Moderator badge failed (continuing)", badgeError);
+
+    await notifyMember(
+        userId,
+        "You are now a Registry moderator. The Registry Desk is open to you from the Registry; the moderator guide explains how it works.",
+        "/catalog/desk",
+        "system",
+    );
+    return { success: true };
+}
+
+/** End a seat. The reason is private to the owner; the badge comes off. */
+export async function removeRegistryModerator(
+    userId: string,
+    reason: string,
+): Promise<{ success: boolean; error?: string }> {
+    const user = await verifyAdmin();
+    if (!user) return { success: false, error: "Unauthorized" };
+    if (!UUID_RE.test(userId ?? "")) return { success: false, error: "Unknown member." };
+    const why = (reason ?? "").trim();
+    if (why.length < 3) return { success: false, error: "Write a short private reason (it stays with you)." };
+    const admin = getAdminSupabase();
+
+    const { data, error } = await admin
+        .from("registry_moderators")
+        .update({ status: "removed", removed_at: new Date().toISOString(), removed_reason: why.slice(0, 1000) })
+        .eq("user_id", userId)
+        .select("user_id");
+    if (error) {
+        if (isMissingSchema(error)) return { success: false, error: MODERATORS_NOT_READY };
+        logger.error("Admin", "Moderator removal failed", error);
+        return { success: false, error: "Could not end the seat. Please try again." };
+    }
+    if (!Array.isArray(data) || data.length === 0) return { success: false, error: "That member has no seat." };
+
+    const { error: badgeError } = await admin
+        .from("user_badges")
+        .delete()
+        .eq("user_id", userId)
+        .eq("badge_id", MODERATOR_BADGE);
+    if (badgeError) logger.error("Admin", "Moderator badge removal failed (continuing)", badgeError);
+
+    await notifyMember(
+        userId,
+        "Your Registry moderator seat has ended. Thank you for your work on the Registry; your changes stay.",
+        "/catalog",
+        "system",
+    );
+    return { success: true };
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -1434,6 +1595,41 @@ const PENDING_MIGRATIONS: MigrationSpec[] = [
             kind: "none",
             why: "A data backfill and a row policy — nothing to select. Verify: every horse you moved in bulk shows in its folder on your public profile.",
         },
+    },
+    {
+        id: "244",
+        title: "Registry style rules, to-do claims and the daily digest",
+        summary:
+            "registry_style_rules and registry_rule_votes (moderators propose and agree Registry style rules; the owner can veto), registry_todo_claims (\"I'm on it\" on the Desk's to-do lists) and registry_digests (one Registry digest a day). Paste after 242.",
+        probe: { kind: "column", table: "registry_style_rules", column: "status" },
+    },
+    {
+        id: "243",
+        title: "Registry merges and removals that can be undone",
+        summary:
+            "catalog_removed_items and the registry_merge / registry_unmerge / registry_remove / registry_restore functions: a merge moves every link (sale reports and price flags too, which the old merge deleted) and can be undone for 30 days; a row nothing points at can be removed and put back. Paste after 242.",
+        probe: { kind: "column", table: "catalog_removed_items", column: "item_id" },
+    },
+    {
+        id: "242",
+        title: "Registry moderators and the Registry history",
+        summary:
+            "registry_moderators (owner-granted seats and a badge), registry_actions and registry_action_rows (every Registry Desk change with its before and after), the changelog's actor_role, and suggestion claims. Until it is pasted only the owner can use the Registry Desk.",
+        probe: { kind: "column", table: "registry_actions", column: "actor_role" },
+    },
+    {
+        id: "241",
+        title: "Purchase notes in the vault",
+        summary:
+            "financial_vault.purchase_notes (owner-only, 2,000 characters) for where and from whom a horse was bought; cleared when the horse changes owner.",
+        probe: { kind: "column", table: "financial_vault", column: "purchase_notes" },
+    },
+    {
+        id: "240",
+        title: "Search reads past punctuation",
+        summary:
+            "catalog_items.search_key (generated, trigram-indexed); search_catalog_fuzzy also matches every typed word in it, so quotes, hyphens, curly apostrophes and word order stop hiding titles.",
+        probe: { kind: "column", table: "catalog_items", column: "search_key" },
     },
     {
         id: "239",

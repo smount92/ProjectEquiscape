@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { renderToBuffer } from "@react-pdf/renderer";
 import { InsuranceReportDocument, type InsuranceHorse, type SetInfo } from "@/lib/pdf/InsuranceReport";
 import { isMissingSetColumn } from "@/lib/vault/setPurchase";
+import { isMissingPurchaseNotes } from "@/lib/vault/purchaseNotes";
 import { getUserTier, isPro } from "@/lib/auth";
 import { getAdminClient } from "@/lib/supabase/admin";
 
@@ -16,23 +17,30 @@ export async function GET() {
     try {
         const tier = await getUserTier();
 
-        // Fetch all horses with vault data (set columns are 224; read
-        // without them until the paste).
-        const selectHorses = (withSets: boolean) =>
+        // Fetch all horses with vault data (set columns are 224, purchase
+        // notes 241; read without whichever is missing until the paste).
+        const selectHorses = (withSets: boolean, withNotes: boolean) =>
             supabase
                 .from("user_horses")
                 .select(
                     `
                 id, custom_name, finish_type, condition_grade, trade_status, created_at, catalog_id,
                 catalog_items:catalog_id(title, maker, scale),
-                financial_vault(purchase_price, purchase_date, estimated_current_value, insurance_notes${withSets ? ", purchase_group_id, purchase_group_label" : ""})
+                financial_vault(purchase_price, purchase_date, estimated_current_value, insurance_notes${withSets ? ", purchase_group_id, purchase_group_label" : ""}${withNotes ? ", purchase_notes" : ""})
             `,
                 )
                 .eq("owner_id", user.id)
                 .is("deleted_at", null)
                 .order("custom_name");
-        let horsesResult = await selectHorses(true);
-        if (horsesResult.error && isMissingSetColumn(horsesResult.error)) horsesResult = await selectHorses(false);
+        let withSets = true;
+        let withNotes = true;
+        let horsesResult = await selectHorses(withSets, withNotes);
+        for (let tries = 0; tries < 2 && horsesResult.error; tries++) {
+            if (withNotes && isMissingPurchaseNotes(horsesResult.error)) withNotes = false;
+            else if (withSets && isMissingSetColumn(horsesResult.error)) withSets = false;
+            else break;
+            horsesResult = await selectHorses(withSets, withNotes);
+        }
         const horses = horsesResult.data;
 
         // One entry per set: total, size, label — the detail page names it

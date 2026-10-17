@@ -13,10 +13,14 @@ import {
     orderReleases,
     parseTerm,
     releaseName,
+    releaseYearFields,
+    rosterPrefilterPatterns,
+    rosterPrefilterWords,
     scaleMatches,
     setLabel,
     splitNumberFromTitle,
     stripGeneration,
+    yearFactChanges,
     yearsLabel,
     type LinkerRelease,
 } from "@/lib/linker/model";
@@ -92,9 +96,98 @@ describe("linker model", () => {
         expect(mentionsMold("Dress-Up Set With unicorn halter", "Unicorn")).toBe(false);
     });
 
+    it("matches a whole piece name, never a mold name inside a longer one (MHH-074)", () => {
+        // Live titles from the Stablemate Saddlebred mold, 2026-10-16.
+        const twelve =
+            "12-Piece Stablemates Set With Arabian Mare, Arabian Stallion, Citation, Draft Horse, American Saddlebred, Swaps.";
+        expect(mentionsMold(twelve, "Saddlebred")).toBe(false);
+        expect(mentionsMold(twelve, "American Saddlebred")).toBe(true);
+        expect(mentionsMold(twelve, "Swaps")).toBe(true);
+        expect(mentionsMold(twelve, "Arabian")).toBe(false);
+        expect(
+            mentionsMold(
+                "The Mod Squad On keychain. With Appaloosa, Rearing Arabian, Draft Horse, Saddlebred.",
+                "Saddlebred",
+            ),
+        ).toBe(true);
+        expect(
+            mentionsMold(
+                "Wooden Carry Stable with Horses With American Saddlebred (2), Andalusian (2), Standing Stock Horse (2)",
+                "Andalusian",
+            ),
+        ).toBe(true);
+        expect(
+            mentionsMold(
+                "Wooden Carry Stable with Horses With American Saddlebred (2), Andalusian (2), Standing Stock Horse (2)",
+                "Saddlebred",
+            ),
+        ).toBe(false);
+        expect(
+            mentionsMold("Four Piece Gift Pack With American Saddlebred, Clydesdale, Thoroughbred", "Saddlebred"),
+        ).toBe(false);
+        expect(
+            mentionsMold(
+                '"Horspital" Play Set With American Saddlebred, blankets, corral fencing',
+                "American Saddlebred",
+            ),
+        ).toBe(true);
+        // Pieces split on commas, "&" and "and"; the same words in another order are the same piece.
+        expect(
+            mentionsMold("Polka Dot Parade With American Saddlebred, Morgan - Prancing, Warmblood", "Prancing Morgan"),
+        ).toBe(true);
+        expect(mentionsMold("Stablemate Keychain With Arabian-Rearing, American Saddlebred", "Rearing Arabian")).toBe(
+            true,
+        );
+        expect(mentionsMold("Pony Pals With Shetland Pony & Welsh Pony", "Welsh Pony")).toBe(true);
+        expect(mentionsMold("Pony Pals With Shetland Pony and Welsh Pony", "Shetland Pony")).toBe(true);
+        expect(mentionsMold("Pony Pals With Shetland Pony and Welsh Pony", "Pony")).toBe(false);
+        // The title before "With" is the set's own name, not a piece.
+        expect(mentionsMold("Panuhu and Honego, Foal With Rojo", "Foal")).toBe(false);
+        // A note after the roster is not a piece.
+        expect(
+            mentionsMold(
+                "Horspital Play Set With American Saddlebred, replaced by Scrambling Foal in 2006",
+                "Scrambling Foal",
+            ),
+        ).toBe(false);
+    });
+
+    it("lists the words a roster search must contain, for the database prefilter", () => {
+        expect(rosterPrefilterWords("Man O' War")).toEqual(["Man", "War"]);
+        expect(rosterPrefilterWords("Morgan Stallion (G1)")).toEqual(["Morgan", "Stallion"]);
+        expect(rosterPrefilterWords("Saddlebred")).toEqual(["Saddlebred"]);
+    });
+
+    it("anchors each prefilter word after 'with', where the roster is (review of MHH-074)", () => {
+        expect(rosterPrefilterPatterns("Saddlebred")).toEqual(["%with%Saddlebred%"]);
+        expect(rosterPrefilterPatterns("Morgan Stallion (G1)")).toEqual(["%with%Morgan%", "%with%Stallion%"]);
+        // LIKE wildcards in a name never reach the pattern.
+        expect(rosterPrefilterPatterns("Pinto_100%")).toEqual(["%with%Pinto%", "%with%100%"]);
+        expect(rosterPrefilterPatterns("Man O' War")).toEqual(["%with%Man%", "%with%War%"]);
+    });
+
+    it("reads a mold whose own name holds 'and' or '&' as one piece (review of MHH-074)", () => {
+        const t = "Set With Mare and Foal, Stallion";
+        expect(mentionsMold(t, "Mare and Foal")).toBe(true);
+        expect(mentionsMold(t, "Mare & Foal")).toBe(true);
+        expect(mentionsMold(t, "Stallion")).toBe(true);
+        expect(mentionsMold("Set With Mare & Foal, Stallion", "Mare and Foal")).toBe(true);
+        // Only pieces joined by "and" or "&" are read together, never across a comma.
+        expect(mentionsMold("Set With Mare, Foal, Stallion", "Mare and Foal")).toBe(false);
+        expect(mentionsMold(t, "Foal Stallion")).toBe(false);
+        // The earlier cases still hold.
+        const twelve =
+            "12-Piece Stablemates Set With Arabian Mare, Arabian Stallion, Citation, Draft Horse, American Saddlebred & Swaps.";
+        expect(mentionsMold(twelve, "American Saddlebred")).toBe(true);
+        expect(mentionsMold(twelve, "Saddlebred")).toBe(false);
+        expect(mentionsMold(twelve, "Swaps")).toBe(true);
+        expect(mentionsMold("Pony Pals With Shetland Pony and Welsh Pony", "Shetland Pony")).toBe(true);
+        expect(mentionsMold("Pony Pals With Shetland Pony and Welsh Pony", "Pony")).toBe(false);
+    });
+
     it("labels years and names the missing facts", () => {
         expect(yearsLabel({ from: 1976, to: 1988 })).toBe("1976–1988");
-        expect(yearsLabel({ from: 2001, to: null })).toBe("2001–");
+        expect(yearsLabel({ from: 2001, to: null })).toBe("2001");
         expect(yearsLabel({ from: null, to: 1997 })).toBe("–1997");
         expect(yearsLabel({ from: null, to: null })).toBeNull();
         expect(missingFacts({ look: null, from: null, to: null, model: "5022" })).toEqual(["colour", "year"]);
@@ -149,6 +242,33 @@ describe("linker model", () => {
             release_year_start: { from: "1976", to: "1988" },
         });
         expect(factCorrection("model_number", null, "#5022")).toEqual({ model_number: { from: "", to: "5022" } });
+    });
+
+    it("files a typed year range as both year fields, and says why a bad one is refused (MHH-077)", () => {
+        expect(yearFactChanges("1995-1997", {})).toEqual({
+            ok: true,
+            changes: {
+                release_year_start: { from: "", to: "1995" },
+                release_year_end: { from: "", to: "1997" },
+            },
+        });
+        expect(yearFactChanges("1995–97", { release_year_start: 1994 })).toEqual({
+            ok: true,
+            changes: {
+                release_year_start: { from: "1994", to: "1995" },
+                release_year_end: { from: "", to: "1997" },
+            },
+        });
+        expect(yearFactChanges("1998", {})).toEqual({
+            ok: true,
+            changes: { release_year_start: { from: "", to: "1998" } },
+        });
+        expect(yearFactChanges("1997-1995", {})).toMatchObject({ ok: false, error: expect.stringMatching(/before/) });
+        // "Add my release": the end year is no longer dropped.
+        expect(releaseYearFields("1995 to 1997")).toEqual({ ok: true, fields: { year: 1995, year_end: 1997 } });
+        expect(releaseYearFields("1976")).toEqual({ ok: true, fields: { year: 1976 } });
+        expect(releaseYearFields("  ")).toEqual({ ok: true, fields: {} });
+        expect(releaseYearFields("70s")).toMatchObject({ ok: false });
     });
 
     it("matches scale chips", () => {

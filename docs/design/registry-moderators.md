@@ -270,6 +270,16 @@ Each phase is one release. A mock is approved before any new screen is built (Q3
 
 ## 8. Open questions for the owner
 
+**Answered 2026-10-16** (see `docs/DECISIONS.md`, rulings log): Q2 (a)
+founding seats the owner picks; Q5 (b) and Q6 (b) second look for merges and
+batches over 25 rows; Q11 changed to **yes, any moderator alone**, hidden
+and undoable for 30 days, in the owner's digest; Q15 (a). New: Registry
+style rules are written by moderators (one proposes, others agree, owner
+veto). Every other question took its bold recommendation; the owner may
+still override any of them. The Release 3 build adds the Mold view
+(a whole mold as an editable table), to-do lists from the 2026-10-16
+Stablemate survey, and the rules page to Phase 1; bulk edit stays Phase 2.
+
 Answer by number. **Bold** is the recommendation.
 
 1. **Who may apply?** (a) Gold only, 50+ approved: about 5 people. **(b) 25+ approved, 60-day account, nothing reverted in 90 days: about 7.** (c) Silver, 10+: about 11.

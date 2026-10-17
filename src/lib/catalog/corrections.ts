@@ -13,7 +13,13 @@
  * shared by the server action. Mirrors src/lib/catalog/filterParams.ts.
  */
 
-import { CANONICAL_SCALES, CATALOG_GENDERS, RUN_TYPES, normalizeScale } from "@/lib/catalog/taxonomy";
+import {
+    CANONICAL_SCALES,
+    CATALOG_GENDERS,
+    RUN_TYPES,
+    normalizeRunCount,
+    normalizeScale,
+} from "@/lib/catalog/taxonomy";
 import { MATERIAL_OPTIONS } from "@/lib/catalog/editableFields";
 
 // Real (top-level) columns on catalog_items. Anything else in a correction's
@@ -127,6 +133,69 @@ export function normalizeFactValue(key: string, value: unknown): unknown {
         default:
             return v;
     }
+}
+
+// ── Release years ──
+
+/** The earliest year a Registry release can carry (Hagen-Renaker, Beswick and Hartland predate Breyer). */
+export const MIN_RELEASE_YEAR = 1900;
+/** The latest: next year's announced releases, and one more. */
+export function maxReleaseYear(): number {
+    return new Date().getFullYear() + 2;
+}
+
+export type YearRange = { ok: true; start: number; end: number | null } | { ok: false; error: string };
+
+/**
+ * A release's years as a member types them (MHH-077): "1995", "1995-1997",
+ * "1995–97", "1995 - 1997", "1995 to 1997". A two-digit end takes the
+ * start's century ("1998-02" is 2002). The same year twice is one year.
+ * Storage is attributes.release_year_start and release_year_end; before
+ * this the end year was dropped (parseInt("1995-1997") is 1995).
+ */
+export function parseYearRange(raw: string): YearRange {
+    const v = raw.trim();
+    const max = maxReleaseYear();
+    const shape = "Use a year like 1976, or a range like 1995-1997.";
+    const parts = v
+        .toLowerCase()
+        .replace(/\s+to\s+/g, "-")
+        .split(/[-‐‑‒–—―]/)
+        .map((p) => p.trim());
+    if (parts.length > 2 || !/^\d{4}$/.test(parts[0]) || (parts.length === 2 && !/^(\d{2}|\d{4})$/.test(parts[1])))
+        return { ok: false, error: shape };
+    const start = Number(parts[0]);
+    let end: number | null = null;
+    if (parts.length === 2) {
+        if (parts[1].length === 2) {
+            end = Math.floor(start / 100) * 100 + Number(parts[1]);
+            if (end < start && end + 100 <= max) end += 100;
+        } else end = Number(parts[1]);
+    }
+    if (end !== null && end < start)
+        return { ok: false, error: `The last year (${end}) is before the first (${start}).` };
+    if (start < MIN_RELEASE_YEAR || start > max || (end !== null && end > max))
+        return { ok: false, error: `Years run from ${MIN_RELEASE_YEAR} to ${max}.` };
+    return { ok: true, start, end: end === start ? null : end };
+}
+
+/**
+ * The years an approved new entry stores, from its suggestion's `year` and
+ * `year_end`. The end is kept only when it makes a valid range with the
+ * start; the start is kept as before either way, so an older pending
+ * suggestion approves exactly as it would have.
+ */
+export function additionYears(
+    year: unknown,
+    yearEnd: unknown,
+): { release_year_start?: unknown; release_year_end?: number } {
+    const blank = (v: unknown) => v === undefined || v === null || (typeof v === "string" && !v.trim());
+    if (blank(year)) return {};
+    const start = normalizeFactValue("release_year_start", typeof year === "number" ? year : String(year).trim());
+    if (blank(yearEnd)) return { release_year_start: start };
+    const range = parseYearRange(`${String(year).trim()}-${String(yearEnd).trim()}`);
+    if (!range.ok) return { release_year_start: start };
+    return { release_year_start: range.start, ...(range.end !== null ? { release_year_end: range.end } : {}) };
 }
 
 // ── Registry vocabularies (the database refuses anything else, 233) ──
@@ -268,6 +337,50 @@ const IDENTITY_VALUE_CHECKS: Record<string, (to: string) => boolean> = {
     manufacturer: (v) => v.length <= 120 && !/^[a-z]/.test(v) && !hasTrailingPunctuation(v),
     scale: (v) => (CANONICAL_SCALES as readonly string[]).includes(v),
 };
+
+/** The same Silver and identity rules, as the sentence a person reads when a value is refused. */
+const VALUE_PROBLEM_WORDS: Record<string, string> = {
+    color_description: "A colour description is up to 300 characters.",
+    model_number:
+        "A model number is up to 24 letters, digits, spaces, dots, dashes or slashes, as the maker prints it.",
+    run_type: "Pick a run type from the list.",
+    run_count: "Pieces made is a whole number above 0, with no commas or words (2500, not 2,500).",
+    retail_price: "An original retail price is a plain number in dollars, like 59.99, with no $ sign.",
+    material: "Pick a material from the list.",
+    breed: "A breed is up to 100 characters.",
+    gender: "Pick a gender from the list.",
+    title: "A name starts with a capital letter, has no stray punctuation at the end, and is up to 200 characters.",
+    maker: "A maker starts with a capital letter, has no stray punctuation at the end, and is up to 120 characters.",
+    artist: "An artist's name starts with a capital letter, has no stray punctuation at the end, and is up to 120 characters.",
+    manufacturer:
+        "A manufacturer starts with a capital letter, has no stray punctuation at the end, and is up to 120 characters.",
+    scale: "Pick a scale from the list.",
+};
+
+/**
+ * Why a value would be refused, in words, or null when it is fine. The
+ * Silver value checks and the identity rules, for every writer of the
+ * Registry (src/lib/catalog/write.ts), so a moderator's edit meets the
+ * same bar as a Gold curator's. Years follow parseYearRange (1900 to
+ * next year and one more), which is wider than Silver's fast-path window.
+ * Empty values are not judged here: whether a field may be emptied is
+ * the writer's rule.
+ */
+export function fieldValueProblem(key: string, value: unknown): string | null {
+    if (value === null || value === undefined) return null;
+    const text = typeof value === "number" ? String(value) : typeof value === "string" ? value.trim() : null;
+    if (text === null) return null;
+    if (text === "") return null;
+    if (key === "release_year_start" || key === "release_year_end") {
+        if (!/^\d{4}$/.test(text)) return "A year is four digits, like 1998.";
+        const range = parseYearRange(text);
+        return range.ok ? null : range.error;
+    }
+    if (key === "run_count") return normalizeRunCount(text) ? null : VALUE_PROBLEM_WORDS.run_count;
+    const check = SILVER_VALUE_CHECKS[key] ?? IDENTITY_VALUE_CHECKS[key];
+    if (!check) return null;
+    return check(text) ? null : (VALUE_PROBLEM_WORDS[key] ?? "That value is not in a form the Registry accepts.");
+}
 
 /**
  * May a Gold curator's correction apply at once? Gold may change any

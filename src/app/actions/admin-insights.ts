@@ -501,7 +501,11 @@ export async function getRegistryInsights(): Promise<
                 return rows;
             })(),
             db.from("catalog_items").select("id", { count: "exact", head: true }),
-            db.from("catalog_suggestions").select("id", { count: "exact", head: true }).eq("status", "pending"),
+            // Waiting, including those a moderator is looking at (under_review).
+            db
+                .from("catalog_suggestions")
+                .select("id", { count: "exact", head: true })
+                .in("status", ["pending", "under_review"]),
             db
                 .from("catalog_suggestions")
                 .select("id", { count: "exact", head: true })

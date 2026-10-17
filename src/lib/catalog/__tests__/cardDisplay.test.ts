@@ -10,9 +10,9 @@ describe("yearRangeLabel", () => {
         expect(yearRangeLabel({ release_year_start: "1988", release_year_end: "1988" })).toBe("1988");
     });
 
-    it("tolerates start-only and end-only", () => {
+    it("tolerates start-only and end-only, and never shows an end as a start", () => {
         expect(yearRangeLabel({ release_year_start: 2001 })).toBe("2001");
-        expect(yearRangeLabel({ release_year_end: "1979" })).toBe("1979");
+        expect(yearRangeLabel({ release_year_end: "1979" })).toBe("–1979");
     });
 
     it("accepts the alternate year_start/year_end key spellings", () => {
@@ -29,8 +29,13 @@ describe("yearRangeLabel", () => {
         expect(yearRangeLabel({})).toBeNull();
         expect(yearRangeLabel({ release_year_start: "" })).toBeNull();
         expect(yearRangeLabel({ release_year_start: "unknown" })).toBeNull();
+        expect(yearRangeLabel({ release_year_start: "?" })).toBeNull();
         expect(yearRangeLabel({ release_year_start: { nested: true } })).toBeNull();
-        expect(yearRangeLabel({ release_year_start: "88" })).toBeNull();
+    });
+
+    it("shows a legacy year written as text, as written, rather than hiding it", () => {
+        expect(yearRangeLabel({ release_year_start: "1990s" })).toBe("1990s");
+        expect(yearRangeLabel({ release_year_start: "88" })).toBe("88");
     });
 });
 

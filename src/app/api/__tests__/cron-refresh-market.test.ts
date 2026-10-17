@@ -22,6 +22,9 @@ vi.mock("@/lib/supabase/admin", () => ({
     getAdminClient: vi.fn(() => ({ rpc: mockRpc, from: mockFrom })),
 }));
 
+const mockDigest = vi.fn().mockResolvedValue({ sent: false, reason: "quiet", day: "2026-10-17" });
+vi.mock("@/lib/registry/digest", () => ({ sendRegistryDigest: (...a: unknown[]) => mockDigest(...a) }));
+
 import { GET } from "@/app/api/cron/refresh-market/route";
 
 function mockRequest(headers: Record<string, string> = {}) {
@@ -57,6 +60,17 @@ describe("GET /api/cron/refresh-market", () => {
         const req = mockRequest({ authorization: "Bearer wrong-secret" });
         const res = await GET(req);
         expect(res.status).toBe(401);
+    });
+
+    it("sends the Registry digest as one step, and a failed digest never fails the run", async () => {
+        const ok = await GET(mockRequest({ authorization: "Bearer test-cron-secret" }));
+        expect(mockDigest).toHaveBeenCalledTimes(1);
+        expect((await ok.json()).registryDigest).toMatchObject({ reason: "quiet" });
+
+        mockDigest.mockRejectedValueOnce(new Error("digest broke"));
+        const res = await GET(mockRequest({ authorization: "Bearer test-cron-secret" }));
+        expect(res.status).toBe(200);
+        expect((await res.json()).success).toBe(true);
     });
 
     it("returns 500 when RPC throws", async () => {

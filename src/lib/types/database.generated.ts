@@ -506,6 +506,8 @@ export type Database = {
       }
       catalog_changelog: {
         Row: {
+          action_id: string | null
+          actor_role: string | null
           approved_by: string | null
           catalog_item_id: string | null
           change_summary: string
@@ -517,6 +519,8 @@ export type Database = {
           suggestion_id: string | null
         }
         Insert: {
+          action_id?: string | null
+          actor_role?: string | null
           approved_by?: string | null
           catalog_item_id?: string | null
           change_summary: string
@@ -528,6 +532,8 @@ export type Database = {
           suggestion_id?: string | null
         }
         Update: {
+          action_id?: string | null
+          actor_role?: string | null
           approved_by?: string | null
           catalog_item_id?: string | null
           change_summary?: string
@@ -539,6 +545,13 @@ export type Database = {
           suggestion_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "catalog_changelog_action_id_fkey"
+            columns: ["action_id"]
+            isOneToOne: false
+            referencedRelation: "registry_actions"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "catalog_changelog_catalog_item_id_fkey"
             columns: ["catalog_item_id"]
@@ -567,6 +580,7 @@ export type Database = {
           manufacturer: string | null
           parent_id: string | null
           scale: string | null
+          search_key: string | null
           slug: string | null
           sort_key: string | null
           title: string
@@ -583,6 +597,7 @@ export type Database = {
           manufacturer?: string | null
           parent_id?: string | null
           scale?: string | null
+          search_key?: string | null
           slug?: string | null
           sort_key?: string | null
           title: string
@@ -599,6 +614,7 @@ export type Database = {
           manufacturer?: string | null
           parent_id?: string | null
           scale?: string | null
+          search_key?: string | null
           slug?: string | null
           sort_key?: string | null
           title?: string
@@ -775,6 +791,86 @@ export type Database = {
           },
         ]
       }
+      catalog_removed_items: {
+        Row: {
+          action_id: string | null
+          created_at: string
+          id: string
+          item: Json
+          item_id: string
+          kind: string
+          links: Json
+          merged_into: string | null
+          reason: string
+          removed_by: string | null
+          restore_until: string
+          restored_at: string | null
+          restored_by: string | null
+          restored_slug: string | null
+        }
+        Insert: {
+          action_id?: string | null
+          created_at?: string
+          id?: string
+          item: Json
+          item_id: string
+          kind: string
+          links?: Json
+          merged_into?: string | null
+          reason: string
+          removed_by?: string | null
+          restore_until?: string
+          restored_at?: string | null
+          restored_by?: string | null
+          restored_slug?: string | null
+        }
+        Update: {
+          action_id?: string | null
+          created_at?: string
+          id?: string
+          item?: Json
+          item_id?: string
+          kind?: string
+          links?: Json
+          merged_into?: string | null
+          reason?: string
+          removed_by?: string | null
+          restore_until?: string
+          restored_at?: string | null
+          restored_by?: string | null
+          restored_slug?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "catalog_removed_items_action_id_fkey"
+            columns: ["action_id"]
+            isOneToOne: false
+            referencedRelation: "registry_actions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "catalog_removed_items_removed_by_fkey"
+            columns: ["removed_by"]
+            isOneToOne: false
+            referencedRelation: "discover_users_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "catalog_removed_items_removed_by_fkey"
+            columns: ["removed_by"]
+            isOneToOne: false
+            referencedRelation: "mv_trusted_sellers"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "catalog_removed_items_removed_by_fkey"
+            columns: ["removed_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       catalog_sale_reports: {
         Row: {
           catalog_item_id: string
@@ -929,10 +1025,14 @@ export type Database = {
           admin_notes: string | null
           artist_name: string | null
           catalog_item_id: string | null
+          claimed_by: string | null
+          claimed_until: string | null
           created_at: string
+          decided_role: string | null
           downvotes: number
           field_changes: Json
           id: string
+          original_field_changes: Json | null
           reason: string
           reviewed_at: string | null
           reviewed_by: string | null
@@ -946,10 +1046,14 @@ export type Database = {
           admin_notes?: string | null
           artist_name?: string | null
           catalog_item_id?: string | null
+          claimed_by?: string | null
+          claimed_until?: string | null
           created_at?: string
+          decided_role?: string | null
           downvotes?: number
           field_changes?: Json
           id?: string
+          original_field_changes?: Json | null
           reason: string
           reviewed_at?: string | null
           reviewed_by?: string | null
@@ -963,10 +1067,14 @@ export type Database = {
           admin_notes?: string | null
           artist_name?: string | null
           catalog_item_id?: string | null
+          claimed_by?: string | null
+          claimed_until?: string | null
           created_at?: string
+          decided_role?: string | null
           downvotes?: number
           field_changes?: Json
           id?: string
+          original_field_changes?: Json | null
           reason?: string
           reviewed_at?: string | null
           reviewed_by?: string | null
@@ -2468,6 +2576,7 @@ export type Database = {
           purchase_date_text: string | null
           purchase_group_id: string | null
           purchase_group_label: string | null
+          purchase_notes: string | null
           purchase_price: number | null
         }
         Insert: {
@@ -2482,6 +2591,7 @@ export type Database = {
           purchase_date_text?: string | null
           purchase_group_id?: string | null
           purchase_group_label?: string | null
+          purchase_notes?: string | null
           purchase_price?: number | null
         }
         Update: {
@@ -2496,6 +2606,7 @@ export type Database = {
           purchase_date_text?: string | null
           purchase_group_id?: string | null
           purchase_group_label?: string | null
+          purchase_notes?: string | null
           purchase_price?: number | null
         }
         Relationships: [
@@ -4417,6 +4528,409 @@ export type Database = {
           window_start?: string
         }
         Relationships: []
+      }
+      registry_action_rows: {
+        Row: {
+          action_id: string
+          after: Json | null
+          before: Json | null
+          catalog_item_id: string | null
+          created_at: string
+          id: string
+          outcome: string
+        }
+        Insert: {
+          action_id: string
+          after?: Json | null
+          before?: Json | null
+          catalog_item_id?: string | null
+          created_at?: string
+          id?: string
+          outcome?: string
+        }
+        Update: {
+          action_id?: string
+          after?: Json | null
+          before?: Json | null
+          catalog_item_id?: string | null
+          created_at?: string
+          id?: string
+          outcome?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "registry_action_rows_action_id_fkey"
+            columns: ["action_id"]
+            isOneToOne: false
+            referencedRelation: "registry_actions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      registry_actions: {
+        Row: {
+          actor_id: string | null
+          actor_role: string
+          applied_at: string | null
+          catalog_item_id: string | null
+          created_at: string
+          id: string
+          item_title: string | null
+          kind: string
+          looks_right_at: string | null
+          looks_right_by: string | null
+          note: string | null
+          related_item_id: string | null
+          row_count: number
+          second_look_at: string | null
+          second_look_by: string | null
+          second_look_note: string | null
+          status: string
+          suggestion_id: string | null
+          summary: string
+          undo_of: string | null
+          undo_until: string
+          undone_at: string | null
+          undone_by: string | null
+        }
+        Insert: {
+          actor_id?: string | null
+          actor_role: string
+          applied_at?: string | null
+          catalog_item_id?: string | null
+          created_at?: string
+          id?: string
+          item_title?: string | null
+          kind: string
+          looks_right_at?: string | null
+          looks_right_by?: string | null
+          note?: string | null
+          related_item_id?: string | null
+          row_count?: number
+          second_look_at?: string | null
+          second_look_by?: string | null
+          second_look_note?: string | null
+          status?: string
+          suggestion_id?: string | null
+          summary: string
+          undo_of?: string | null
+          undo_until?: string
+          undone_at?: string | null
+          undone_by?: string | null
+        }
+        Update: {
+          actor_id?: string | null
+          actor_role?: string
+          applied_at?: string | null
+          catalog_item_id?: string | null
+          created_at?: string
+          id?: string
+          item_title?: string | null
+          kind?: string
+          looks_right_at?: string | null
+          looks_right_by?: string | null
+          note?: string | null
+          related_item_id?: string | null
+          row_count?: number
+          second_look_at?: string | null
+          second_look_by?: string | null
+          second_look_note?: string | null
+          status?: string
+          suggestion_id?: string | null
+          summary?: string
+          undo_of?: string | null
+          undo_until?: string
+          undone_at?: string | null
+          undone_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "registry_actions_actor_id_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "discover_users_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "registry_actions_actor_id_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "mv_trusted_sellers"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "registry_actions_actor_id_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "registry_actions_suggestion_id_fkey"
+            columns: ["suggestion_id"]
+            isOneToOne: false
+            referencedRelation: "catalog_suggestions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "registry_actions_undo_of_fkey"
+            columns: ["undo_of"]
+            isOneToOne: false
+            referencedRelation: "registry_actions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      registry_digests: {
+        Row: {
+          day: string
+          sent_at: string
+          summary: Json
+        }
+        Insert: {
+          day: string
+          sent_at?: string
+          summary?: Json
+        }
+        Update: {
+          day?: string
+          sent_at?: string
+          summary?: Json
+        }
+        Relationships: []
+      }
+      registry_moderators: {
+        Row: {
+          created_at: string
+          granted_by: string | null
+          last_action_at: string | null
+          removed_at: string | null
+          removed_reason: string | null
+          started_at: string
+          status: string
+          term_ends_at: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          granted_by?: string | null
+          last_action_at?: string | null
+          removed_at?: string | null
+          removed_reason?: string | null
+          started_at?: string
+          status?: string
+          term_ends_at?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          granted_by?: string | null
+          last_action_at?: string | null
+          removed_at?: string | null
+          removed_reason?: string | null
+          started_at?: string
+          status?: string
+          term_ends_at?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "registry_moderators_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "discover_users_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "registry_moderators_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "mv_trusted_sellers"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "registry_moderators_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      registry_rule_votes: {
+        Row: {
+          created_at: string
+          note: string | null
+          rule_id: string
+          vote: string
+          voter_id: string
+        }
+        Insert: {
+          created_at?: string
+          note?: string | null
+          rule_id: string
+          vote: string
+          voter_id: string
+        }
+        Update: {
+          created_at?: string
+          note?: string | null
+          rule_id?: string
+          vote?: string
+          voter_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "registry_rule_votes_rule_id_fkey"
+            columns: ["rule_id"]
+            isOneToOne: false
+            referencedRelation: "registry_style_rules"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "registry_rule_votes_voter_id_fkey"
+            columns: ["voter_id"]
+            isOneToOne: false
+            referencedRelation: "discover_users_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "registry_rule_votes_voter_id_fkey"
+            columns: ["voter_id"]
+            isOneToOne: false
+            referencedRelation: "mv_trusted_sellers"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "registry_rule_votes_voter_id_fkey"
+            columns: ["voter_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      registry_style_rules: {
+        Row: {
+          body: string
+          check_key: string | null
+          created_at: string
+          id: string
+          in_effect_at: string | null
+          params: Json
+          proposed_by: string | null
+          retired_at: string | null
+          status: string
+          title: string
+          updated_at: string
+          veto_note: string | null
+          vetoed_at: string | null
+        }
+        Insert: {
+          body: string
+          check_key?: string | null
+          created_at?: string
+          id?: string
+          in_effect_at?: string | null
+          params?: Json
+          proposed_by?: string | null
+          retired_at?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+          veto_note?: string | null
+          vetoed_at?: string | null
+        }
+        Update: {
+          body?: string
+          check_key?: string | null
+          created_at?: string
+          id?: string
+          in_effect_at?: string | null
+          params?: Json
+          proposed_by?: string | null
+          retired_at?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+          veto_note?: string | null
+          vetoed_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "registry_style_rules_proposed_by_fkey"
+            columns: ["proposed_by"]
+            isOneToOne: false
+            referencedRelation: "discover_users_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "registry_style_rules_proposed_by_fkey"
+            columns: ["proposed_by"]
+            isOneToOne: false
+            referencedRelation: "mv_trusted_sellers"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "registry_style_rules_proposed_by_fkey"
+            columns: ["proposed_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      registry_todo_claims: {
+        Row: {
+          claimed_by: string
+          claimed_until: string
+          created_at: string
+          done_at: string | null
+          item_key: string
+          list_key: string
+        }
+        Insert: {
+          claimed_by: string
+          claimed_until?: string
+          created_at?: string
+          done_at?: string | null
+          item_key: string
+          list_key: string
+        }
+        Update: {
+          claimed_by?: string
+          claimed_until?: string
+          created_at?: string
+          done_at?: string | null
+          item_key?: string
+          list_key?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "registry_todo_claims_claimed_by_fkey"
+            columns: ["claimed_by"]
+            isOneToOne: false
+            referencedRelation: "discover_users_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "registry_todo_claims_claimed_by_fkey"
+            columns: ["claimed_by"]
+            isOneToOne: false
+            referencedRelation: "mv_trusted_sellers"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "registry_todo_claims_claimed_by_fkey"
+            columns: ["claimed_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       reviews: {
         Row: {
@@ -6780,6 +7294,7 @@ export type Database = {
         Returns: Json
       }
       can_report_sales: { Args: { p_user_id: string }; Returns: boolean }
+      catalog_search_key: { Args: { t: string }; Returns: string }
       catalog_slugify: { Args: { txt: string }; Returns: string }
       check_rate_limit: {
         Args: {
@@ -7199,6 +7714,35 @@ export type Database = {
       }
       refresh_market_prices: { Args: never; Returns: undefined }
       refresh_mv_trusted_sellers: { Args: never; Returns: undefined }
+      registry_link_counts: { Args: { p_item: string }; Returns: Json }
+      registry_merge: {
+        Args: {
+          p_action_id: string
+          p_actor: string
+          p_keep: string
+          p_reason: string
+          p_remove: string
+        }
+        Returns: Json
+      }
+      registry_reinsert_item: { Args: { p_item: Json }; Returns: Json }
+      registry_remove: {
+        Args: {
+          p_action_id: string
+          p_actor: string
+          p_item: string
+          p_reason: string
+        }
+        Returns: Json
+      }
+      registry_restore: {
+        Args: { p_actor: string; p_removed_id: string }
+        Returns: Json
+      }
+      registry_unmerge: {
+        Args: { p_action_id: string; p_actor: string }
+        Returns: Json
+      }
       reorder_show_nodes: {
         Args: { p_ids: string[]; p_kind: string; p_sort_orders: number[] }
         Returns: number

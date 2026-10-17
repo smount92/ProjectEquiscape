@@ -11,7 +11,8 @@
  * order. Pure, so the action and the tests agree.
  */
 
-import { stripGeneration } from "@/lib/linker/model";
+import { rosterPieces, rosterRuns, stripGeneration } from "@/lib/linker/model";
+import { containsEveryWord, sameWords, searchKey } from "@/lib/catalog/searchKey";
 
 /** Most ids one search carries into the facet query (a URL-length budget). */
 export const EXPANDED_CANDIDATE_LIMIT = 260;
@@ -36,13 +37,66 @@ export interface CandidateRow {
     item_type: string;
     title: string;
     scale?: string | null;
+    /** The mold's title, as the fuzzy RPC joins it. */
+    parent_title?: string | null;
 }
 
-/** Molds whose own name (generation stripped) is exactly the searched name. */
+/**
+ * Molds whose own name (generation stripped) is the searched name: the same
+ * words, however punctuated or ordered ("Morgan - Prancing" names Prancing
+ * Morgan, MHH-080), but never a longer name.
+ */
 export function namedMolds<T extends CandidateRow>(rows: T[], name: string): T[] {
-    const n = name.trim().toLowerCase();
-    if (!n) return [];
-    return rows.filter((r) => r.item_type === "plastic_mold" && stripGeneration(r.title).trim().toLowerCase() === n);
+    if (!name.trim()) return [];
+    return rows.filter((r) => r.item_type === "plastic_mold" && sameWords(stripGeneration(r.title), name));
+}
+
+/** A search candidate as the fuzzy RPC returns it: its own title and its mold's. */
+export interface MatchRow {
+    id?: string;
+    title: string;
+    parent_title?: string | null;
+}
+
+/**
+ * How a row matches what was typed (MHH-075):
+ *  - "own": its own name (the title before " With ") or its mold's name holds every typed word;
+ *  - "roster": one piece of a set's roster holds every typed word;
+ *  - "other": neither (a near spelling, a maker match, or the words spread
+ *    over several pieces: "Set With Morgan Mare, Arabian Stallion" does not
+ *    include a Morgan Stallion).
+ * Searching "Arabian Stallion" returned 49 Stablemate rows and only 8 were
+ * on that mold: every set listing an Arabian Stallion among its pieces came
+ * along, mixed in with the mold's own releases.
+ */
+export function matchKind(row: MatchRow, term: string): "own" | "roster" | "other" {
+    const t = searchKey(stripGeneration(term));
+    if (!t) return "other";
+    const head = row.title.replace(/\s+with\b.*$/i, "");
+    if (containsEveryWord(searchKey(stripGeneration(head)), t)) return "own";
+    if (row.parent_title && containsEveryWord(searchKey(stripGeneration(row.parent_title)), t)) return "own";
+    const holds = (piece: string) => containsEveryWord(searchKey(stripGeneration(piece)), t);
+    if (rosterPieces(row.title).some(holds)) return "roster";
+    // A piece named with "and" ("Mare and Foal") is split by the roster reader;
+    // read the joined pieces only when the member typed "and" too, so words
+    // from two separate pieces never add up to one.
+    if (t.split(" ").includes("and") && rosterRuns(row.title).some(holds)) return "roster";
+    return "other";
+}
+
+/**
+ * The result order with roster-only rows moved to the end, each band in its
+ * own order. Ids the rows do not describe (releases placed under a named
+ * mold) keep their place: they are the mold's own.
+ */
+export function rosterLast(ids: string[], rows: (MatchRow & { id: string })[], term: string): string[] {
+    const roster = rosterOnlyIds(rows, term);
+    return [...ids.filter((id) => !roster.has(id)), ...ids.filter((id) => roster.has(id))];
+}
+
+/** The rows that match only inside a set's roster. */
+export function rosterOnlyIds(rows: (MatchRow & { id: string })[], term: string): Set<string> {
+    return new Set(rows.filter((r) => matchKind(r, term) === "roster").map((r) => r.id));
 }
 
 /**

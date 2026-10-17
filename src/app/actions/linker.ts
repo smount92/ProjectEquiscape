@@ -18,6 +18,10 @@ import { createClient } from "@/lib/supabase/server";
 import { parseCatalogQuery, makerMatches } from "@/lib/catalog/queryParse";
 import { referenceHref } from "@/lib/catalog/referenceUrl";
 import { createSuggestion } from "@/app/actions/catalog-suggestions";
+import { containsEveryWord, sameWords, searchKey } from "@/lib/catalog/searchKey";
+import { rosterLast } from "@/lib/catalog/moldSearch";
+import { parseYearRange } from "@/lib/catalog/corrections";
+import { reconcileTitleNumber, titleNumberProblem } from "@/lib/catalog/titleNumber";
 import {
     collapseSetPieces,
     commonOne,
@@ -28,9 +32,12 @@ import {
     normalizeTerm,
     orderReleases,
     parseTerm,
+    releaseYearFields,
+    rosterPrefilterPatterns,
     scaleMatches,
     setLabel,
     stripGeneration,
+    yearFactChanges,
     type LinkerMold,
     type LinkerMoldSummary,
     type LinkerOther,
@@ -134,6 +141,19 @@ async function ownersOf(supabase: Client, moldId: string): Promise<number | null
     }
 }
 
+/**
+ * Candidate set rows for a mold: every word of the mold's name after "with",
+ * in any order. `mentionsMold` then keeps only rows that list the mold as a
+ * whole piece; this read is the coarse sieve, sized so a common name
+ * (Thoroughbred, 120+ sets) is never cut short (MHH-074), and ordered so
+ * that, if it ever is, the cut is the same on every call.
+ */
+function setCandidates(supabase: Client, mold: Row, limit: number) {
+    let q = supabase.from("catalog_items").select(COLS).eq("item_type", "plastic_release").neq("parent_id", mold.id);
+    for (const p of rosterPrefilterPatterns(mold.title)) q = q.ilike("title", p);
+    return q.order("id").limit(limit);
+}
+
 /** A mold's own releases plus the set rows on other molds whose title names it. */
 async function expandMold(supabase: Client, mold: Row, hitIds: Set<string> = new Set()): Promise<LinkerMold> {
     const [{ data: own }, { data: sets }, owners] = await Promise.all([
@@ -143,13 +163,7 @@ async function expandMold(supabase: Client, mold: Row, hitIds: Set<string> = new
             .eq("parent_id", mold.id)
             .eq("item_type", "plastic_release")
             .limit(400),
-        supabase
-            .from("catalog_items")
-            .select(COLS)
-            .eq("item_type", "plastic_release")
-            .neq("parent_id", mold.id)
-            .ilike("title", `%with%${stripGeneration(mold.title).replace(/[%_]/g, "")}%`)
-            .limit(80),
+        setCandidates(supabase, mold, 400),
         ownersOf(supabase, mold.id),
     ]);
     const ownRows = (own ?? []) as Row[];
@@ -302,8 +316,8 @@ export async function searchLinker(rawTerm: string, scale: string | null): Promi
     // Named matches first; when nothing is named, the three closest names so the member is not stranded.
     const moldPool = allMolds.some(named) ? allMolds.filter(named) : allMolds.slice(0, 3);
     const molds = moldPool.sort((a, b) => {
-        const ea = stripGeneration(a.title).toLowerCase() === termLower ? 0 : 1;
-        const eb = stripGeneration(b.title).toLowerCase() === termLower ? 0 : 1;
+        const ea = sameWords(stripGeneration(a.title), termLower) ? 0 : 1;
+        const eb = sameWords(stripGeneration(b.title), termLower) ? 0 : 1;
         return ea - eb;
     });
     const inScale = molds.filter((m) => scaleMatches(m.scale, chosen)).slice(0, MAX_MOLDS);
@@ -328,12 +342,19 @@ export async function searchLinker(rawTerm: string, scale: string | null): Promi
             m.releases = m.releases.map((r) => (r.id === common ? { ...r, run: r.run ?? "the common one" } : r));
     }
 
-    const others = rows
-        .filter(
-            (r) =>
-                r.item_type !== "plastic_mold" && r.item_type !== "plastic_release" && titleMatches(r.title, termLower),
-        )
+    // A piece found only in a set's roster comes after pieces found by their own name (MHH-075).
+    const otherRows = rows.filter(
+        (r) => r.item_type !== "plastic_mold" && r.item_type !== "plastic_release" && titleMatches(r.title, termLower),
+    );
+    const otherOrder = rosterLast(
+        otherRows.map((r) => r.id),
+        otherRows,
+        term,
+    );
+    const otherById = new Map(otherRows.map((r) => [r.id, r]));
+    const others = otherOrder
         .slice(0, 12)
+        .map((id) => otherById.get(id) as Row)
         .map(toOther);
 
     return {
@@ -366,13 +387,21 @@ export async function fileReleaseUnderMold(input: {
         .maybeSingle();
     if (!mold) return { success: false, error: "That mold is not in the Registry any more." };
     const m = mold as Row;
-    const model = (input.modelNumber ?? "").trim().replace(/^#/, "");
     const look = (input.look ?? "").trim();
-    const name = (input.name ?? "").trim();
-    const set = (input.setName ?? "").trim();
+    // A number typed in front of the name (or of the set's name, when that is
+    // the title) moves to the number field, or must agree with it (MHH-079).
+    // A bare number that may be part of the name ("101 Dalmatians") stays:
+    // the form has already asked the member.
+    const named = reconcileTitleNumber((input.name ?? "").trim() || (input.setName ?? "").trim(), input.modelNumber);
+    if (!named.ok) return { success: false, error: titleNumberProblem(named.inTitle, named.inBox) };
+    const model = named.model;
+    const name = (input.name ?? "").trim() ? named.title : "";
+    const set = name ? (input.setName ?? "").trim() : named.title;
     if (!model && !look) return { success: false, error: "Give at least a model number or what it looks like." };
     const title = name || set || stripGeneration(m.title);
-    const year = parseInt((input.yearFrom ?? "").trim(), 10);
+    // "1995-1997" files both years; parseInt kept only the first (MHH-077).
+    const years = releaseYearFields(input.yearFrom);
+    if (!years.ok) return { success: false, error: years.error };
     const result = await createSuggestion({
         catalogItemId: null,
         suggestionType: "addition",
@@ -387,7 +416,7 @@ export async function fileReleaseUnderMold(input: {
             parent_catalog_id: m.id,
             ...(model ? { model_number: model } : {}),
             ...(look ? { color: look } : {}),
-            ...(Number.isFinite(year) ? { year } : {}),
+            ...years.fields,
             ...(set ? { set_name: set } : {}),
         },
         reason: `Added from the reference linker while linking a horse${input.note?.trim() ? ": " + input.note.trim() : "."}`,
@@ -407,7 +436,7 @@ export async function fileReleaseFact(input: {
     value: string;
     /** The row is a set piece filed under another mold (see ReleaseRow). */
     isSetPiece?: boolean;
-}): Promise<{ success: true } | { success: false; error: string }> {
+}): Promise<{ success: true; autoApproved?: boolean } | { success: false; error: string }> {
     const value = input.value.trim();
     if (!value) return { success: false, error: "Type the value first." };
     // A set row's colour describes the piece on the mold it is filed under.
@@ -418,10 +447,11 @@ export async function fileReleaseFact(input: {
             error: 'This row is the set, filed under another mold. Use "Add my release" to record your piece\'s colour.',
         };
     }
-    const field =
-        input.fact === "colour" ? "color_description" : input.fact === "year" ? "release_year_start" : "model_number";
-    if (field === "release_year_start" && !/^\d{4}$/.test(value))
-        return { success: false, error: "Use a four-digit year." };
+    // A year may be a range: "1995-1997" files the first and the last year (MHH-077).
+    if (input.fact === "year") {
+        const check = parseYearRange(value);
+        if (!check.ok) return { success: false, error: check.error };
+    }
     // The correction carries what the Registry holds today as `from`, so the
     // queue shows a real diff and a revert knows what to put back.
     const supabase = await createClient();
@@ -430,22 +460,39 @@ export async function fileReleaseFact(input: {
         .select("attributes")
         .eq("id", input.catalogId)
         .maybeSingle();
-    const current = ((row as { attributes?: Record<string, unknown> | null } | null)?.attributes ?? {})[field];
+    const attrs = (row as { attributes?: Record<string, unknown> | null } | null)?.attributes ?? {};
+    let fieldChanges: Record<string, { from: string; to: string }>;
+    if (input.fact === "year") {
+        const years = yearFactChanges(value, attrs);
+        if (!years.ok) return { success: false, error: years.error };
+        fieldChanges = years.changes;
+    } else {
+        const field = input.fact === "colour" ? "color_description" : "model_number";
+        fieldChanges = factCorrection(field, attrs[field], value);
+    }
     const result = await createSuggestion({
         catalogItemId: input.catalogId,
         suggestionType: "correction",
-        fieldChanges: factCorrection(field, current, value),
+        fieldChanges,
         reason: "Filled in from the reference linker by a member holding the horse.",
     });
     if (!result.success) return { success: false, error: ("error" in result && result.error) || "Could not file it." };
-    return { success: true };
+    // A curator's fact applies at once; the row then says "saved" rather than "sent for review".
+    return { success: true, autoApproved: !!(result as { autoApproved?: boolean }).autoApproved };
 }
 
-/** The row's name is the term, or contains it, or the term contains it ("G1 Silky Sullivan" vs "Silky Sullivan"). */
+/**
+ * The row's name is the term, or contains it, or the term contains it ("G1
+ * Silky Sullivan" vs "Silky Sullivan"), or holds every word of it in another
+ * order ("Morgan - Prancing" for Prancing Morgan). Compared as search keys,
+ * so quotes, hyphens and apostrophes never decide it (MHH-080).
+ */
 function titleMatches(title: string, termLower: string): boolean {
-    const t = stripGeneration(title).toLowerCase();
-    if (!termLower) return true;
-    return t.includes(termLower) || termLower.includes(t);
+    const term = searchKey(termLower);
+    if (!term) return true;
+    const t = searchKey(stripGeneration(title));
+    if (!t) return false;
+    return t.includes(term) || term.includes(t) || containsEveryWord(t, term);
 }
 
 export type MoldChoice = { id: string; title: string; maker: string; scale: string | null };

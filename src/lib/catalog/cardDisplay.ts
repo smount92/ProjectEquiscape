@@ -34,16 +34,57 @@ function asText(v: unknown): string | null {
     return s ? s : null;
 }
 
+/** A year as the label shows it: a 4-digit year, else legacy text with a
+ *  digit in it kept as written ("1990s", "c. 1985" from older imports),
+ *  else null ("unknown", "?" say nothing). */
+function asYearOrText(v: unknown): string | null {
+    const year = asYear(v);
+    if (year) return year;
+    const text = asText(v);
+    return text && /\d/.test(text) ? text : null;
+}
+
 /**
- * "1988–1995", "1988" (open/single year), or null when no usable year.
- * Equal start/end collapses to the single year.
+ * The Registry's one year label: "1988–1995"; "1988" for a first year
+ * alone (owner's choice); "–1997" for a last year alone, so it never reads
+ * as a first year; or null when nothing is recorded. Equal start/end
+ * collapses to the single year. A legacy year stored as words ("1990s",
+ * "c. 1985") is shown as written rather than hidden.
  */
 export function yearRangeLabel(attrs: CardAttributes | null | undefined): string | null {
     if (!attrs || typeof attrs !== "object") return null;
-    const start = asYear(attrs.release_year_start) ?? asYear(attrs.year_start);
-    const end = asYear(attrs.release_year_end) ?? asYear(attrs.year_end);
+    const start = asYearOrText(attrs.release_year_start) ?? asYearOrText(attrs.year_start);
+    const end = asYearOrText(attrs.release_year_end) ?? asYearOrText(attrs.year_end);
     if (start && end) return start === end ? start : `${start}–${end}`;
-    return start ?? end;
+    if (end) return `–${end}`;
+    return start;
+}
+
+/** The release rows of a horse passport (stable, community and public views). */
+export interface PassportReleaseInfo {
+    name: string;
+    modelNumber: string | null;
+    color: string | null;
+    /** The one year label; the "Release Years" row shows only when this is set. */
+    years: string | null;
+}
+
+/**
+ * What the three passport views show about a linked release; null when the
+ * horse is not linked to a release. One helper so the views cannot drift.
+ */
+export function passportReleaseInfo(
+    cat: { item_type: string; title: string; attributes?: unknown } | null | undefined,
+): PassportReleaseInfo | null {
+    if (!cat || cat.item_type !== "plastic_release") return null;
+    const a = (cat.attributes && typeof cat.attributes === "object" ? cat.attributes : {}) as Record<string, unknown>;
+    const model = a.model_number;
+    return {
+        name: cat.title,
+        modelNumber: typeof model === "number" ? String(model) : asText(model),
+        color: asText(a.color_description),
+        years: yearRangeLabel(a as CardAttributes),
+    };
 }
 
 /**
