@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
@@ -103,6 +103,9 @@ export default function MoldView({
     // filter until the moderator moves on, so Next carries on from it.
     const [stay, setStay] = useState<string | null>(initialReleaseId);
     const [drafts, setDrafts] = useState<Drafts>({});
+    // The latest drafts and selection, for a save that comes back after the moderator typed or moved on.
+    const draftsRef = useRef<Drafts>({});
+    const selectedRef = useRef<string | null>(null);
     const [displays, setDisplays] = useState<Drafts>({});
     const [added, setAdded] = useState<Record<string, string[]>>({});
     const [conflicts, setConflicts] = useState<Record<string, DeskSource>>({});
@@ -145,6 +148,10 @@ export default function MoldView({
     const entries = [...(mold ? [mold] : []), ...shown];
     const index = entries.findIndex((e) => e.row.id === selectedId);
     const selected = selectedId ? (byId.get(selectedId) ?? null) : null;
+    useEffect(() => {
+        draftsRef.current = drafts;
+        selectedRef.current = selectedId;
+    });
 
     // Leaving with unsaved changes asks first: links and Back in the app...
     const anyDirty = dirtyIds.size > 0;
@@ -164,6 +171,7 @@ export default function MoldView({
 
     const select = useCallback(
         (id: string | null) => {
+            selectedRef.current = id;
             setSelectedId(id);
             setStay((s) => (s === id ? s : null));
             rememberRelease(id, moldId);
@@ -218,6 +226,49 @@ export default function MoldView({
         setFieldErrors(drop);
     }
 
+    /**
+     * A save came back: clear only the draft values it sent that still
+     * read the same. Anything typed while it was saving (another box, or
+     * the same box again) stays as unsaved work.
+     */
+    function settle(id: string, sent: Record<string, string>) {
+        const kept = (cur: Record<string, string> | undefined) =>
+            Object.fromEntries(Object.entries(cur ?? {}).filter(([k, v]) => !(k in sent) || sent[k] !== v));
+        // What is typed now (the last render's drafts): the keys still unsaved.
+        const left = kept(draftsRef.current[id]);
+        setDrafts((d) => {
+            const now = kept(d[id]);
+            const next = { ...d };
+            if (Object.keys(now).length > 0) next[id] = now;
+            else delete next[id];
+            return next;
+        });
+        setDisplays((d) => {
+            if (!d[id]) return d;
+            const still = Object.fromEntries(Object.entries(d[id]).filter(([k]) => k in left));
+            const next = { ...d };
+            if (Object.keys(still).length > 0) next[id] = still;
+            else delete next[id];
+            return next;
+        });
+        setAdded((a) => {
+            if (!a[id]) return a;
+            const still = a[id].filter((k) => k in left);
+            const next = { ...a };
+            if (still.length > 0) next[id] = still;
+            else delete next[id];
+            return next;
+        });
+        const drop = <T,>(m: Record<string, T>) => {
+            if (!(id in m)) return m;
+            const next = { ...m };
+            delete next[id];
+            return next;
+        };
+        setConflicts(drop);
+        setFieldErrors(drop);
+    }
+
     function dropRows(ids: string[]) {
         const gone = new Set(ids);
         const after = entries.filter((e) => !gone.has(e.row.id));
@@ -259,7 +310,8 @@ export default function MoldView({
         const current = byId.get(id);
         if (!current) return true;
         const row = base ?? current.row;
-        const changes = deskChanges(fieldsFor(row), drafts[id] ?? {});
+        const sent = { ...(drafts[id] ?? {}) };
+        const changes = deskChanges(fieldsFor(row), sent);
         if (Object.keys(changes).length === 0) return true;
         const r = await saveItem({ id, updatedAt: row.updated_at, changes });
         if (!r.success) {
@@ -272,7 +324,7 @@ export default function MoldView({
             if (!field) toast(r.error, "error");
             return false;
         }
-        forget(id);
+        settle(id, sent);
         const undo =
             "actionId" in r && r.actionId
                 ? { label: "Undo", onClick: () => void undoSave(r.actionId as string, id) }
@@ -290,8 +342,10 @@ export default function MoldView({
         }
         if ("entry" in r && r.entry) replaceEntry(r.entry);
         else replaceRow(r.item);
-        setStay(id);
-        toast(`Saved “${r.item.title}”. Recorded in the history with your name.`, "success", UNDO_TOAST_MS, undo);
+        // Keep it in view under its filter only if the moderator is still on it.
+        if (selectedRef.current === id) setStay(id);
+        if (r.warning) toast(`Saved “${r.item.title}”, but: ${r.warning}`, "error", UNDO_TOAST_MS, undo);
+        else toast(`Saved “${r.item.title}”. Recorded in the history with your name.`, "success", UNDO_TOAST_MS, undo);
         return true;
     }
 
@@ -329,7 +383,13 @@ export default function MoldView({
         }
     }
 
-    useDeskKeys({ onNext: () => step(1), onPrev: () => step(-1), onSave: () => void save() });
+    useDeskKeys({
+        onNext: () => step(1),
+        onPrev: () => step(-1),
+        onSave: () => void save(),
+        // The Desk's own dialogs pause the keys; a cookie banner or the bell's panel does not.
+        paused: mergeOpen || moldMergeOpen || removeOpen || !!guard.target,
+    });
 
     async function addRelease() {
         if (!mold) return;

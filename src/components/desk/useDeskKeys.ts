@@ -10,12 +10,6 @@ export function isTypingTarget(target: EventTarget | null): boolean {
     return tag === "input" || tag === "textarea" || tag === "select" || el.isContentEditable;
 }
 
-/** True while a dialog (merge, remove, leave without saving ...) is open over the page. */
-export function dialogOpen(): boolean {
-    if (typeof document === "undefined") return false;
-    return !!document.querySelector('[role="dialog"], [role="alertdialog"]');
-}
-
 /** True on a Mac (or iPad with a keyboard), where the save key is ⌘S. */
 export function isMacLike(nav: { platform?: string; userAgent?: string } | undefined): boolean {
     if (!nav) return false;
@@ -26,9 +20,17 @@ export function isMacLike(nav: { platform?: string; userAgent?: string } | undef
  * The editor's keys: J next, K previous (never while typing in a box, so a
  * "j" in a colour stays a "j"), and Ctrl/Cmd+S saves from anywhere,
  * including inside a box, instead of the browser's Save Page. None of them
- * act while a dialog is open: the dialog's own buttons decide.
+ * act while `paused`: the page passes true while one of its own dialogs
+ * (merge, remove, leave without saving) is open, and the dialog's buttons
+ * decide. Other panels that call themselves dialogs (the cookie banner,
+ * the notifications panel) don't stop the keys.
  */
-export default function useDeskKeys(handlers: { onNext: () => void; onPrev: () => void; onSave: () => void }): void {
+export default function useDeskKeys(handlers: {
+    onNext: () => void;
+    onPrev: () => void;
+    onSave: () => void;
+    paused?: boolean;
+}): void {
     const ref = useRef(handlers);
     useEffect(() => {
         ref.current = handlers;
@@ -37,13 +39,14 @@ export default function useDeskKeys(handlers: { onNext: () => void; onPrev: () =
     useEffect(() => {
         const onKey = (e: KeyboardEvent) => {
             const key = e.key.toLowerCase();
+            const paused = !!ref.current.paused;
             if ((e.ctrlKey || e.metaKey) && key === "s") {
                 // Never the browser's Save Page on the Desk, dialog or not.
                 e.preventDefault();
-                if (!dialogOpen()) ref.current.onSave();
+                if (!paused) ref.current.onSave();
                 return;
             }
-            if (dialogOpen()) return;
+            if (paused) return;
             if (e.ctrlKey || e.metaKey || e.altKey || isTypingTarget(e.target)) return;
             if (key === "j") {
                 e.preventDefault();
