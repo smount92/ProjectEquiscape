@@ -8,7 +8,7 @@ updated_date: '2026-10-16 21:49'
 labels:
   - stable
   - member-reported
-milestone: Release 3 - Registry cleanup
+milestone: m-3
 dependencies: []
 priority: medium
 type: feature

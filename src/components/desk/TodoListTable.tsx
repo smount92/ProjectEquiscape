@@ -14,13 +14,17 @@ import type { TodoListDef } from "@/lib/registry/checks";
 import { FLAG_LABELS } from "@/lib/registry/checks";
 import { Button } from "@/components/ui/button";
 
-/** Where a row opens: the Mold view for anything on a mold, the edit page for the rest. */
+/**
+ * Where a row opens: the Mold view for anything on a mold. A release with
+ * no mold opens in the Desk editor on its own (the Mold view takes a
+ * release's id), where it can be re-filed under its mold.
+ */
 function openHref(row: TodoRow): string {
     if (row.kind === "near_name") return `/catalog?q=${encodeURIComponent(row.title.split(" / ")[0])}`;
     if (row.moldId && row.id && row.moldId !== row.id)
         return `/catalog/desk/mold/${row.moldId}?release=${encodeURIComponent(row.id)}`;
     if (row.moldId) return `/catalog/desk/mold/${row.moldId}`;
-    return row.id ? `/catalog/${row.id}` : "/catalog";
+    return row.id ? `/catalog/desk/mold/${encodeURIComponent(row.id)}` : "/catalog";
 }
 
 function claimWords(c: ClaimView | null): string | null {

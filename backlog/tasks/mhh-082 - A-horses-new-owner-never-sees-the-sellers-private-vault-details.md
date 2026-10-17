@@ -7,7 +7,7 @@ created_date: '2026-10-16 21:49'
 labels:
   - stable
   - accounts
-milestone: Release 3 - Registry cleanup
+milestone: m-3
 dependencies: []
 priority: high
 type: bug

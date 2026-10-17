@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { registryRoleOf } from "@/lib/auth";
 import { getTodoLists } from "@/app/actions/registry-desk-lists";
-import DeskListsShell from "@/components/desk/DeskListsShell";
 import TodoBoard from "@/components/desk/TodoBoard";
 
 export const metadata: Metadata = {
@@ -12,18 +11,14 @@ export const metadata: Metadata = {
 
 /** The Registry Desk's to-do lists. Moderators and the owner only; anyone else gets a 404. */
 export default async function DeskTodoPage() {
-    // Own role check: the Desk's shared layout (Package B) checks too, once merged.
+    // Own role check as well as the Desk layout's: a page never trusts its frame.
     if (!(await registryRoleOf())) notFound();
     const result = await getTodoLists();
-    return (
-        <DeskListsShell active="todo">
-            {result.success ? (
-                <TodoBoard lists={result.lists} computedAt={result.computedAt} claimsReady={result.claimsReady} />
-            ) : (
-                <div role="alert" className="ledger-card text-secondary-foreground">
-                    {result.error}
-                </div>
-            )}
-        </DeskListsShell>
+    return result.success ? (
+        <TodoBoard lists={result.lists} computedAt={result.computedAt} claimsReady={result.claimsReady} />
+    ) : (
+        <div role="alert" className="ledger-card text-secondary-foreground">
+            {result.error}
+        </div>
     );
 }

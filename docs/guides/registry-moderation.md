@@ -80,23 +80,23 @@ them and save.
 Work lists found by scanning the whole Registry every hour, Stablemates
 first. Each card says how many rows it has and who is on it:
 
-| List | What it means |
-|---|---|
-| Model number in the title | "#5038 Morgan Mare": the number belongs in the number box. |
-| No colour | No colour description, or only "?". Fill in what you know. |
-| Shop or sale as the title | "Sears Holiday Catalog" or "BreyerFest 1990 — Live Auction 01" as the name. |
-| Description in the title | Notes pasted into the name, like "(Replaced in 2006 by …)". |
-| Molds with no generation tag | Breyer Stablemate molds without "(G1)", "(G2)" … |
-| Filed under the wrong scale | A release under a mold of another scale. |
-| Possible duplicates or number clashes | Identical releases, or two releases sharing a model number. Usually a wrong number, sometimes a real duplicate. |
-| Gift sets with missing pieces | A set names a horse that has no piece of that set filed under its mold. |
-| Releases with no mold | Find the mold and file the release there. |
-| Molds with no releases | Usually a duplicate mold, or its releases are filed elsewhere. |
-| Typed mold name disagrees | The Mold box says one mold; the release is filed under another. |
-| Names spelled two ways | Two maker or artist names a letter or two apart. A typo, or two people? Check first. |
-| Titles ending in punctuation / starting lowercase | Tidy-ups. |
-| Years stored as text | Saving the year again stores it as a number. |
-| Colour in the title, Whole set in the title | **Notes, not problems.** Some horses are named for their colour, and today's rule keeps a set's full list of horses in the title. These become work only if the moderators agree a rule. |
+| List                                              | What it means                                                                                                                                                                            |
+| ------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Model number in the title                         | "#5038 Morgan Mare": the number belongs in the number box.                                                                                                                               |
+| No colour                                         | No colour description, or only "?". Fill in what you know.                                                                                                                               |
+| Shop or sale as the title                         | "Sears Holiday Catalog" or "BreyerFest 1990 — Live Auction 01" as the name.                                                                                                              |
+| Description in the title                          | Notes pasted into the name, like "(Replaced in 2006 by …)".                                                                                                                              |
+| Molds with no generation tag                      | Breyer Stablemate molds without "(G1)", "(G2)" …                                                                                                                                         |
+| Filed under the wrong scale                       | A release under a mold of another scale.                                                                                                                                                 |
+| Possible duplicates or number clashes             | Identical releases, or two releases sharing a model number. Usually a wrong number, sometimes a real duplicate.                                                                          |
+| Gift sets with missing pieces                     | A set names a horse that has no piece of that set filed under its mold.                                                                                                                  |
+| Releases with no mold                             | Find the mold and file the release there.                                                                                                                                                |
+| Molds with no releases                            | Usually a duplicate mold, or its releases are filed elsewhere.                                                                                                                           |
+| Typed mold name disagrees                         | The Mold box says one mold; the release is filed under another.                                                                                                                          |
+| Names spelled two ways                            | Two maker or artist names a letter or two apart. A typo, or two people? Check first.                                                                                                     |
+| Titles ending in punctuation / starting lowercase | Tidy-ups.                                                                                                                                                                                |
+| Years stored as text                              | Saving the year again stores it as a number.                                                                                                                                             |
+| Colour in the title, Whole set in the title       | **Notes, not problems.** Some horses are named for their colour, and today's rule keeps a set's full list of horses in the title. These become work only if the moderators agree a rule. |
 
 - **I'm on it** holds a whole list, or one row, for a day, so two people
   don't fix the same rows. **Let it go** when you stop.
