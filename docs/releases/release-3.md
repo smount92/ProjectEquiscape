@@ -144,9 +144,9 @@ engine, B the Desk, C the lists) and merged on `desk-integrated`.
   moderator undoing another. Links open `/catalog/desk/history` or
   `/catalog/desk?tab=second_looks`.
 - **One digest a day** in the bell (from the 06:00 `refresh-market` run):
-  how many changes, and every removal and merge by name. Once any
-  moderator is active, the per-suggestion pings stop and move into the
-  digest.
+  how many changes, every removal and merge by name, and how many member
+  suggestions wait in the Queue. Once any moderator is active, the
+  per-suggestion pings stop; that last line is where they went.
 - Merges now **keep members' sale reports and price flags** (MHH-093): the
   old merge deleted them. Machine price rows on a merged-away or removed
   row are dropped and re-collected; undo doesn't bring those back.
@@ -179,7 +179,9 @@ first.
   there, it comes back.
 - Each cached to-do list keeps **300 rows** (the count is the full count).
 - A **quiet day sends no digest** (it is recorded, but the bell stays
-  silent).
+  silent). A day with member suggestions still waiting in the Queue is
+  not quiet (added at integration, so the owner hears when the Queue
+  piles up).
 - A rule that is **in effect stays in effect** if someone later takes back
   an agreement; only a veto or retiring it ends it.
 - **Check again** (re-scan now) is limited to **6 an hour** per moderator.

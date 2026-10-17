@@ -120,6 +120,16 @@ describe("sendRegistryDigest", () => {
         expect(sent).toHaveLength(0);
     });
 
+    it("is not quiet while members' suggestions wait in the Queue", async () => {
+        const db = setup({ actions: [] });
+        db.on("registry_actions", (q: FakeQuery) =>
+            q.filters.some((f) => f[0] === "eq") ? ({ data: null, error: null, count: 0 } as never) : OK,
+        );
+        db.on("catalog_suggestions", () => ({ data: null, error: null, count: 3 }) as never);
+        expect(await sendRegistryDigest(db as never, NOW)).toMatchObject({ sent: true });
+        expect(sent[0][0].content).toContain("3 member suggestions waiting in the Queue.");
+    });
+
     it("waits for update 244, then for 242", async () => {
         expect(await sendRegistryDigest(setup({ missing: "registry_digests" }) as never, NOW)).toMatchObject({
             sent: false,
@@ -142,9 +152,16 @@ describe("digestText", () => {
         merges: [],
         undos: 0,
         secondLooksWaiting: 0,
+        suggestionsWaiting: 0,
         rulesProposed: 0,
         rulesInEffect: 0,
     };
+
+    it("counts members' suggestions waiting in the Queue (where the per-suggestion pings went)", () => {
+        expect(digestText({ ...base, suggestionsWaiting: 1 })).toMatch(/1 member suggestion waiting in the Queue\./);
+        expect(digestText({ ...base, suggestionsWaiting: 4 })).toMatch(/4 member suggestions waiting/);
+        expect(digestText(base)).not.toMatch(/suggestion/);
+    });
 
     it("says one and many in words", () => {
         expect(digestText({ ...base, total: 2, byKind: { edit: 1, add: 1 } })).toBe(

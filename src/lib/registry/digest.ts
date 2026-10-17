@@ -44,6 +44,12 @@ export interface RegistryDigest {
     merges: DigestLine[];
     undos: number;
     secondLooksWaiting: number;
+    /**
+     * Members' suggestions waiting in the Queue. Once a moderator is
+     * active the owner no longer gets a ping per suggestion (owner answer
+     * 4); this line is where those pings went.
+     */
+    suggestionsWaiting: number;
     rulesProposed: number;
     rulesInEffect: number;
 }
@@ -78,6 +84,10 @@ export async function buildRegistryDigest(admin: Admin, since: string): Promise<
         .from("registry_actions")
         .select("id", { count: "exact", head: true })
         .eq("status", "awaiting_second_look");
+    const { count: suggestionsWaiting } = await db
+        .from("catalog_suggestions")
+        .select("id", { count: "exact", head: true })
+        .in("status", ["pending", "under_review"]);
 
     let rulesProposed = 0;
     let rulesInEffect = 0;
@@ -116,6 +126,7 @@ export async function buildRegistryDigest(admin: Admin, since: string): Promise<
         merges: actions.filter((a) => a.kind === "merge").map(line),
         undos: byKind.undo ?? 0,
         secondLooksWaiting: waiting ?? 0,
+        suggestionsWaiting: suggestionsWaiting ?? 0,
         rulesProposed,
         rulesInEffect,
     };
@@ -153,6 +164,10 @@ export function digestText(d: RegistryDigest): string {
     if (d.removals.length) parts.push(`Removed: ${d.removals.map(say).join("; ")}.`);
     if (d.merges.length) parts.push(`Merged: ${d.merges.map(say).join("; ")}.`);
     if (d.secondLooksWaiting) parts.push(`${d.secondLooksWaiting} waiting for a second look.`);
+    if (d.suggestionsWaiting)
+        parts.push(
+            `${d.suggestionsWaiting} member suggestion${d.suggestionsWaiting === 1 ? "" : "s"} waiting in the Queue.`,
+        );
     if (d.rulesProposed || d.rulesInEffect)
         parts.push(
             `Style rules: ${d.rulesProposed} proposed, ${d.rulesInEffect} took effect. You can veto any of them on the Rules tab.`,
@@ -206,7 +221,12 @@ export async function sendRegistryDigest(admin: Admin, now: Date = new Date()): 
     if (insertError) throw insertError;
     if (!inserted || (inserted as unknown[]).length === 0) return { sent: false, reason: "already_sent", day };
 
-    const quiet = digest.total === 0 && !digest.rulesProposed && !digest.rulesInEffect && !digest.secondLooksWaiting;
+    const quiet =
+        digest.total === 0 &&
+        !digest.rulesProposed &&
+        !digest.rulesInEffect &&
+        !digest.secondLooksWaiting &&
+        !digest.suggestionsWaiting;
     if (quiet) return { sent: false, reason: "quiet", day };
 
     const owners = await adminNotificationTargets(admin);
