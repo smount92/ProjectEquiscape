@@ -125,11 +125,34 @@ engine, B the Desk, C the lists) and merged on `desk-integrated`.
       agreements put it in effect, the owner can veto.
     - **History**: every change with who made it and in which role;
       **Undo** within 30 days and **Looks right** on someone else's.
-- Daily limits: 300 edits and approvals, 20 merge requests, 50 removals,
-  10 rule proposals. A refused action says so in words.
-- The draft guide, `docs/guides/registry-moderation.md`, explains all of
-  this in plain words. **It is a draft for the owner to approve** before
-  the first moderator is asked to read it.
+- **Find any entry, by name or model number** on the Mold view's first
+  page reaches releases with no mold, resins, tack and props; each opens
+  in the Desk editor.
+- **Edit in the Desk** on every reference page, for moderators and the
+  owner only (decided in the browser, so the page stays the same cached
+  page for everyone else).
+- **Add a field**: under "Everything else", any field the Registry keeps
+  can be added to a row, in plain labels. Lists (materials, components
+  ...) are typed as comma-separated words.
+- **Merge this mold into ...** on the mold header: for the same mold
+  listed twice. Its releases move under the kept mold and take its scale;
+  an undo puts the old scales back.
+- **The leave guard**: with anything unsaved (a dot on the rail), a link,
+  Back, Forward or closing the tab asks "Leave without saving N
+  releases?" with Stay, Leave without saving, or **Save all and leave**.
+- While a moderator has a suggestion open it reads **"Being looked at"**
+  to members (it was "pending"); it still counts as waiting everywhere.
+- **Edit, then approve** can fix a field the member didn't touch, and a
+  new entry's values the Registry won't keep are listed before anyone
+  approves it. If the member changes the suggestion while it is open,
+  nothing is decided and the card offers a reload.
+- Daily limits: 300 edits and approvals, 200 rejections, 20 merge
+  requests, 50 removals, 10 rule proposals. A refused action says so in
+  words.
+- The guide, `docs/guides/registry-moderation.md`, is readable on the
+  Desk at `/catalog/desk/guide` and explains all of this in plain words.
+  **It is a draft for the owner to approve** before the first moderator
+  is asked to read it.
 
 ### What the owner will notice
 
@@ -139,14 +162,23 @@ engine, B the Desk, C the lists) and merged on `desk-integrated`.
   the next Desk click is refused.
 - The owner uses the Desk too, with no limits. The owner's merges apply at
   once (still undoable); a moderator's wait for a second look.
+- **The owner can decide their own suggestions** (the card says "Your own
+  suggestion: as site owner you can decide it"); moderators can't decide
+  theirs, and an artist can't decide one about their own piece.
+- On a suggestion's page (`/catalog/suggestions/<id>`) the approve and
+  reject buttons also show while a moderator has it open, with "@alias is
+  looking at this for another N minutes. Deciding it now goes ahead of
+  them."
 - **Bell alerts at once** for merges requested and applied, removals, a
   moderator hitting a limit, more than 100 changes in an hour, and one
   moderator undoing another. Links open `/catalog/desk/history` or
   `/catalog/desk?tab=second_looks`.
 - **One digest a day** in the bell (from the 06:00 `refresh-market` run):
-  how many changes, every removal and merge by name, and how many member
-  suggestions wait in the Queue. Once any moderator is active, the
-  per-suggestion pings stop; that last line is where they went.
+  how many changes, every removal and merge by name, how many member
+  suggestions wait in the Queue, and "@alias's moderator term ended on
+  <date>" for any term that ran out since the last digest. Once any
+  moderator is active, the per-suggestion pings stop; the Queue line is
+  where they went.
 - Merges now **keep members' sale reports and price flags** (MHH-093): the
   old merge deleted them. Machine price rows on a merged-away or removed
   row are dropped and re-collected; undo doesn't bring those back.
@@ -167,21 +199,37 @@ the digest say "Coming once update 244 is added."
 
 ### Granting the first moderator
 
-After 242 is pasted: **Admin › Members**, search for the member by alias,
-choose **Make moderator**. They get the Registry moderator badge and the
-Desk link at once, for a 12-month term. Send them the approved guide
-first.
+1. Paste 242 (and 243 and 244, so they can merge, remove and use Rules).
+2. Approve the guide (`docs/guides/registry-moderation.md`, also at
+   `/catalog/desk/guide`) and send it to them first.
+3. **Admin › Members**, search for the member by alias, choose **Make
+   moderator**. It asks first: "This gives @alias the Registry Desk and a
+   public Registry moderator badge." They get the badge and the Desk link
+   at once, for a 12-month term; the strip at the top of Members shows
+   the seat, its term end and their last action.
+4. **Remove** on the same row ends a seat at once, with a private reason.
 
-### Small defaults to confirm (Package C)
+### Small defaults to confirm
 
+- Opening a suggestion on the Desk holds it for **30 minutes** (others
+  see who has it and for how long); the owner can still decide it.
 - An "I'm on it" claim on a to-do list or row lasts **a day**.
+- A moderator's term is **12 months** from Make moderator; when it ends
+  the seat stops working and the digest says so.
+- Undo works for **30 days** after a change.
+- A day's limits: 300 edits and approvals, 200 rejections, 20 merge
+  requests, 50 removals, 10 rule proposals; more than **100 changes in an
+  hour** alerts the owner (once an hour). The owner has no limits.
 - **Done** hides a row until the next check; if the problem is still
   there, it comes back.
 - Each cached to-do list keeps **300 rows** (the count is the full count).
 - A **quiet day sends no digest** (it is recorded, but the bell stays
-  silent). A day with member suggestions still waiting in the Queue is
-  not quiet (added at integration, so the owner hears when the Queue
-  piles up).
+  silent). A day with member suggestions still waiting in the Queue, or a
+  moderator's term ending, is not quiet (so the owner hears when the Queue
+  piles up or a seat lapses).
+- A year stored as text is fixed along with any other save on that row
+  only when it is a plain year the Registry accepts, in order with the
+  other year; anything else waits for a person.
 - A rule that is **in effect stays in effect** if someone later takes back
   an agreement; only a veto or retiring it ends it.
 - **Check again** (re-scan now) is limited to **6 an hour** per moderator.
@@ -204,17 +252,20 @@ first.
 3. Paste **`supabase/migrations/241_vault_purchase_notes.sql`** (safe to paste twice): purchase
    notes in the Financial Vault. Admin › Ops shows 241 green once it is in.
 4. Paste **`supabase/migrations/242_registry_moderators.sql`**: moderator
-   seats, the History tables, the changelog's role column and suggestion
-   claims. Admin › Ops shows 242 green.
+   seats, the History tables (with one open merge per duplicate, held by
+   a unique index), the changelog's role column and suggestion claims.
+   Admin › Ops shows 242 green.
 5. Paste **`supabase/migrations/243_registry_merge_undo.sql`** (after 242):
    the removal archive and the merge, unmerge, remove and restore
    functions. Admin › Ops shows 243 green.
 6. Paste **`supabase/migrations/244_registry_rules_todo.sql`** (after 242
    and 243): style rules, votes, to-do claims and the digest record.
    Admin › Ops shows 244 green. All three are safe to paste twice.
-7. Merge to main and push. The live smoke test runs by itself.
-8. `npm run gen-types` and commit the types (they gain `search_key`,
-   purchase notes and the Registry Desk tables).
+   **The paste order is 240, 241, 242, 243, 244**, one after another.
+7. Then `npm run gen-types` and commit the types to the release branch
+   (they gain `search_key`, purchase notes and the Registry Desk tables),
+   so they ride in the same push.
+8. Merge to main and push. The live smoke test runs by itself.
 9. Look: `/catalog?q=Arabian%20Stallion&scale=Stablemate%20(1%3A32)` shows
    the mold and its releases, then "Sets that include “Arabian Stallion”".
 10. Look: `/catalog/desk` opens the Desk for the owner; History shows
@@ -236,6 +287,24 @@ Recorded in `docs/DECISIONS.md` as Q33 to Q36.
   year, not a model number, unless it has a "#". Molds and artist pieces
   keep a leading number in their title, because they have no number field
   to move it to.
+
+## Known limits
+
+- **Bulk edit comes in Phase 2.** Phase 1 edits one row at a time (Save
+  all saves the rows with unsaved changes, one after another); there is
+  no "set this field on 40 rows" yet.
+- **The back-button guard needs a manual check in Safari.** It is tested
+  in Chrome-like browsers and jsdom; Safari handles Back and Forward
+  history a little differently. Before the first moderator starts: edit a
+  field on the Desk in Safari (Mac and iPhone), press Back, and check the
+  "Leave without saving" question shows and Stay keeps the edit; then the
+  same with Forward.
+- Back or Forward onto a page outside the Desk is undone by putting the
+  Desk page back on the stack, which drops any Forward history beyond it
+  (Back and Forward between Desk pages keep the whole history).
+- A mold's scale change moves its releases in a second step; if that
+  step stops part way, the save says so ("could not all be moved") and
+  Undo in History puts back what moved.
 
 ## Not in this release
 
