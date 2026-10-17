@@ -26,25 +26,24 @@ import { getAdminClient } from "@/lib/supabase/admin";
 import { sanitizeText } from "@/lib/utils/validation";
 import { buildDeskFields, deskFieldLabel, type DeskSource } from "@/lib/catalog/editableFields";
 import {
+    claimSuggestion as engineClaimSuggestion,
     confirmMerge as writeConfirmMerge,
     declineMerge as writeDeclineMerge,
     insertItem,
     knownAttributeKeys,
     linkCounts,
-    removeItem as writeRemoveItem,
-    updateItem,
-} from "@/lib/catalog/write";
-// TEMP: these four come from write.ts / suggestionApply.ts once r3-engine-fixes merges.
-import {
-    additionDrops,
-    claimSuggestion as engineClaimSuggestion,
-    decideSuggestion,
     releaseSuggestionClaim,
+    removeItem as writeRemoveItem,
     requestMerge as writeRequestMerge,
     undoReady,
-    type Dropped,
-    type SuggestionExpectation,
-} from "@/lib/catalog/desk-engine-interfaces";
+    updateItem,
+    type DroppedValue,
+} from "@/lib/catalog/write";
+import {
+    additionDrops,
+    decideSuggestion,
+    type ExpectedSuggestion as SuggestionExpectation,
+} from "@/lib/catalog/suggestionApply";
 import {
     FLAG_LABELS,
     moldFlags,
@@ -166,7 +165,8 @@ export interface DeskCounts {
 
 export type DeskLinks = Awaited<ReturnType<typeof linkCounts>>;
 
-export type { Dropped };
+/** A value a new entry would lose, and why (the engine's DroppedValue). */
+export type Dropped = DroppedValue;
 
 export type SaveResult =
     | {

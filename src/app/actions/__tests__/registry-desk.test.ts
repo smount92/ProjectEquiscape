@@ -119,10 +119,8 @@ const write = vi.hoisted(() => ({
     linkCounts: vi.fn(),
     knownAttributeKeys: vi.fn(() => new Set(["model_number", "cast_medium", "materials"])),
 }));
-vi.mock("@/lib/catalog/write", () => write);
-
-// The engine interfaces the Desk codes against (r3-engine-fixes). At merge
-// this mock moves to @/lib/catalog/write and @/lib/catalog/suggestionApply.
+// The engine's claim, merge and decision calls the Desk makes, from the
+// two real modules (write.ts and suggestionApply.ts).
 const engine = vi.hoisted(() => ({
     undoReady: vi.fn(),
     claimSuggestion: vi.fn(),
@@ -131,9 +129,19 @@ const engine = vi.hoisted(() => ({
     decideSuggestion: vi.fn(),
     additionDrops: vi.fn(),
 }));
-vi.mock("@/lib/catalog/desk-engine-interfaces", () => engine);
+vi.mock("@/lib/catalog/write", () => ({
+    ...write,
+    undoReady: engine.undoReady,
+    claimSuggestion: engine.claimSuggestion,
+    releaseSuggestionClaim: engine.releaseSuggestionClaim,
+    requestMerge: engine.requestMerge,
+}));
 const apply = vi.hoisted(() => ({ applySuggestion: vi.fn() }));
-vi.mock("@/lib/catalog/suggestionApply", () => apply);
+vi.mock("@/lib/catalog/suggestionApply", () => ({
+    ...apply,
+    decideSuggestion: engine.decideSuggestion,
+    additionDrops: engine.additionDrops,
+}));
 
 import { AuthError } from "@/lib/auth";
 import * as desk from "@/app/actions/registry-desk";
