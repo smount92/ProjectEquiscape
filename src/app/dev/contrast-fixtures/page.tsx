@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import AccomplishmentsSection from "@/components/passport/AccomplishmentsSection";
 import PapersSection from "@/components/passport/PapersSection";
 import PedigreeCard from "@/components/PedigreeCard";
+import DeskContrastFixtures from "@/components/desk/DeskContrastFixtures";
 import ShowRecordTimeline from "@/components/ShowRecordTimeline";
 import type { PaperView } from "@/app/actions/papers";
 import type { AccomplishmentView } from "@/app/actions/accomplishments";
@@ -242,6 +243,9 @@ export default async function ContrastFixtures({ searchParams }: { searchParams:
                 <span className="text-xs font-bold text-success">🛡️ MHH Verified</span>
                 <span className="text-xs font-bold text-destructive">Overdue</span>
             </div>
+
+            {/* The Registry Desk (moderators' editor and Queue), in every theme. */}
+            <DeskContrastFixtures />
         </div>
     );
 }
