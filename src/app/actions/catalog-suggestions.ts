@@ -1,43 +1,16 @@
 "use server";
 
-import { requireAuth } from "@/lib/auth";
-import { stripGeneration } from "@/lib/linker/model";
-import { fieldLabel } from "@/lib/catalog/editableFields";
+import { AuthError, requireAuth, requireRegistryModerator } from "@/lib/auth";
 import { readRegistryTerm, searchRegistry } from "@/lib/catalog/registrySearch";
 import { applyTitleNumberRule } from "@/lib/catalog/titleNumber";
 import { getAdminClient } from "@/lib/supabase/admin";
-import { logger } from "@/lib/logger";
 import { createClient } from "@/lib/supabase/server";
-import { revalidatePath, revalidateTag } from "next/cache";
+import { revalidatePath } from "next/cache";
 import { after } from "next/server";
 import { sanitizeText } from "@/lib/utils/validation";
 import { sanitizeForOr } from "@/lib/utils/search";
-import {
-    BRONZE_THRESHOLD,
-    additionYears,
-    CATALOG_REAL_COLUMNS,
-    CONTRIBUTOR_THRESHOLD,
-    GOLD_THRESHOLD,
-    SILVER_THRESHOLD,
-    buildCorrectionUpdate,
-    correctionTouchesAttributes,
-    canonicalVocabulary,
-    curatorAutoApprovable,
-    normalizeFactValue,
-    vocabularyProblem,
-} from "@/lib/catalog/corrections";
-import { referenceHref } from "@/lib/catalog/referenceUrl";
-import {
-    deriveAttribution,
-    isCatalogGender,
-    normalizeCatalogBreed,
-    normalizeRunCount,
-    normalizeScale,
-    resolveNewEntryMaker,
-    suggestionItemTypeToDb,
-    ARTIST_ATTRIBUTED_CATEGORIES,
-} from "@/lib/catalog/taxonomy";
-import { REFERENCE_PAGES_CACHE_TAG } from "@/app/actions/reference-pages";
+import { curatorAutoApprovable, vocabularyProblem } from "@/lib/catalog/corrections";
+import { suggestionItemTypeToDb, ARTIST_ATTRIBUTED_CATEGORIES } from "@/lib/catalog/taxonomy";
 import {
     DUPLICATE_MIGRATION_NOTICE,
     DUPLICATE_SUGGESTION_TYPE,
@@ -45,12 +18,17 @@ import {
     duplicateTarget,
     isMissingDuplicateType,
 } from "@/lib/catalog/duplicates";
-import { mergeCatalogItemsCore, resolveCatalogRef, type MergeClient } from "@/lib/catalog/merge";
+import {
+    applySuggestion,
+    decideSuggestion,
+    findExistingMold,
+    existingMoldMessage,
+    withdrawApproval,
+} from "@/lib/catalog/suggestionApply";
+import { revertFields } from "@/lib/catalog/write";
+import { alertOwner, anyActiveModerator } from "@/lib/registry/alerts";
+import { actorOf } from "@/lib/registry/types";
 import type { Json } from "@/lib/types/database.generated";
-import type { Database } from "@/lib/types/database.generated";
-
-type CatalogItemInsert = Database["public"]["Tables"]["catalog_items"]["Insert"];
-type CatalogItemUpdate = Database["public"]["Tables"]["catalog_items"]["Update"];
 
 // ── Type definitions ──
 
@@ -446,7 +424,7 @@ export async function createSuggestion(input: SuggestionInput) {
     // title. The caller renders the candidates and may resubmit with
     // confirmDuplicates — this is a speed bump, never a wall.
     if (input.suggestionType === "addition") {
-        const existing = await findExistingMold(admin, input.fieldChanges ?? {});
+        const existing = await findExistingMold(input.fieldChanges ?? {});
         if (existing) return { success: false, error: existingMoldMessage(existing) };
     }
     if (
@@ -539,9 +517,10 @@ export async function createSuggestion(input: SuggestionInput) {
         return { success: false, error: error.message };
     }
 
-    // If auto-approved, apply immediately
+    // If auto-approved, apply immediately: the contributor's rank is the
+    // approver (no reviewer), through the Registry's one writer.
     if (autoApprove && data) {
-        const applied = await applyApprovedSuggestion(data.id as string, user.id, alias);
+        const applied = await applySuggestion(data.id as string, { reviewer: null });
         // Could not be written: it is back in the queue for a person.
         if (!applied.ok) autoApprove = false;
     }
@@ -553,7 +532,11 @@ export async function createSuggestion(input: SuggestionInput) {
     // and then vandalises instantly. Auto-applied changes are already live
     // when this notification lands, so it links straight to the suggestion
     // page, where the admin has a one-click revert.
-    {
+    //
+    // Once any Registry moderator is active, these per-suggestion pings
+    // stop: the moderators work the queue and the owner reads the daily
+    // digest instead (owner answer 4, 2026-10-16).
+    if (!(await anyActiveModerator())) {
         const userId = user.id;
         const wasAutoApproved = autoApprove;
         const suggestionId = data?.id as string | undefined;
@@ -601,18 +584,24 @@ export async function createSuggestion(input: SuggestionInput) {
  * reverted while the entry STILL HOLDS the suggestion's `to` value. If
  * someone corrected it again since, that later value wins and the field
  * is reported as drifted rather than clobbered.
+ *
+ * The owner or any active Registry moderator may revert; the history and
+ * the author's notice carry their real alias and role. The field work is
+ * revertFields in lib/catalog/write (the Registry's one writer).
  */
 export async function revertSuggestion(input: {
     suggestionId: string;
     reason: string;
 }): Promise<{ success: boolean; error?: string; reverted?: string[]; drifted?: string[] }> {
-    const { user } = await requireAuth();
+    let seat: Awaited<ReturnType<typeof requireRegistryModerator>>;
+    try {
+        seat = await requireRegistryModerator();
+    } catch (err) {
+        return { success: false, error: err instanceof AuthError ? err.message : "Please log in to do that." };
+    }
+    const actor = actorOf(seat);
     const admin = getAdminClient();
 
-    const adminEmail = process.env.ADMIN_EMAIL?.toLowerCase();
-    if (!adminEmail || user.email?.toLowerCase() !== adminEmail) {
-        return { success: false, error: "Admin access required." };
-    }
     const reason = sanitizeText(input.reason ?? "").slice(0, 500);
     if (reason.length < 5) {
         return { success: false, error: "Give a short reason — the author sees it." };
@@ -624,7 +613,7 @@ export async function revertSuggestion(input: {
         .eq("id", input.suggestionId)
         .single();
     if (!suggestion) return { success: false, error: "Suggestion not found." };
-    const s = suggestion as CatalogSuggestion;
+    const s = suggestion as CatalogSuggestion & { decided_role?: string | null };
 
     if (s.suggestion_type !== "correction" || !s.catalog_item_id) {
         return {
@@ -636,140 +625,33 @@ export async function revertSuggestion(input: {
         return { success: false, error: "This suggestion was never applied." };
     }
 
-    const { data: item } = await admin
-        .from("catalog_items")
-        .select("id, title, maker, scale, item_type, attributes")
-        .eq("id", s.catalog_item_id)
-        .single();
-    if (!item) return { success: false, error: "The catalog entry no longer exists." };
+    const result = await revertFields(actor, {
+        itemId: s.catalog_item_id,
+        fieldChanges: (s.field_changes ?? {}) as Record<string, unknown>,
+        suggestionId: s.id,
+        reason,
+    });
+    if (!result.success) return { success: false, error: result.error, drifted: result.drifted };
 
-    const row = item as {
-        id: string;
-        title: string;
-        maker: string | null;
-        scale: string | null;
-        item_type: string;
-        attributes: Record<string, unknown> | null;
-    };
-    const attrs = { ...(row.attributes ?? {}) };
-    const columnUpdates: Record<string, unknown> = {};
-    let attributesTouched = false;
-    const reverted: string[] = [];
-    const drifted: string[] = [];
+    // Status, the approval credit back, and the author's notice.
+    await withdrawApproval(s.id, actor, reason, result.drifted);
 
-    for (const [key, value] of Object.entries(s.field_changes ?? {})) {
-        if (typeof value !== "object" || value === null || !("to" in value)) continue;
-        const { from, to } = value as { from?: unknown; to: unknown };
-        const isColumn = CATALOG_REAL_COLUMNS.has(key);
-        const current = isColumn ? (row as unknown as Record<string, unknown>)[key] : attrs[key];
-
-        // The guard: only revert what the correction actually left behind.
-        if (String(current ?? "") !== String(normalizeFactValue(key, to) ?? "")) {
-            drifted.push(key);
-            continue;
-        }
-
-        const restored = from == null ? "" : String(from);
-        // A value the Registry's lists no longer accept can't be put back.
-        if (
-            restored &&
-            (key === "scale" || key === "run_type" || key === "material") &&
-            canonicalVocabulary(key, restored) === null
-        ) {
-            drifted.push(key);
-            continue;
-        }
-        if (isColumn) {
-            // Title and maker cannot be emptied; scale can go back to null.
-            if (restored === "" && (key === "title" || key === "maker")) {
-                drifted.push(key);
-                continue;
-            }
-            columnUpdates[key] = restored === "" ? null : restored;
-        } else if (restored === "") {
-            // The correction ADDED this field; reverting removes it rather
-            // than leaving an empty string that reads as a filled value.
-            delete attrs[key];
-            attributesTouched = true;
-        } else {
-            attrs[key] = restored;
-            attributesTouched = true;
-        }
-        reverted.push(key);
+    // One moderator undoing another's approval goes to the owner at once.
+    if (
+        actor.role === "moderator" &&
+        s.decided_role === "moderator" &&
+        s.reviewed_by &&
+        s.reviewed_by !== actor.userId
+    ) {
+        await alertOwner(
+            "undo_other",
+            `@${actor.alias} reverted a correction another moderator approved. Why: ${reason.slice(0, 200)}`,
+            `/catalog/suggestions/${s.id}`,
+        );
     }
 
-    if (reverted.length === 0) {
-        return {
-            success: false,
-            error: "Nothing left to revert — every field has been changed again since this correction.",
-            drifted,
-        };
-    }
-
-    const updates: Record<string, unknown> = { ...columnUpdates };
-    if (attributesTouched) updates.attributes = JSON.parse(JSON.stringify(attrs));
-    const { error: updateError } = await admin.from("catalog_items").update(updates).eq("id", row.id);
-    if (updateError) return { success: false, error: updateError.message };
-
-    // The revert is itself a change, so it goes in the public changelog —
-    // an admin quietly rewriting history would be worse than the vandalism.
-    await admin.from("catalog_changelog").insert({
-        suggestion_id: s.id,
-        catalog_item_id: row.id,
-        change_type: "correction",
-        change_summary: `↩️ Reverted a correction (${reverted.join(", ")}): ${reason}`,
-        contributed_by: user.id,
-        contributor_alias: "Admin",
-        approved_by: user.id,
-    });
-
-    await admin
-        .from("catalog_suggestions")
-        .update({
-            status: "rejected",
-            admin_notes: `Reverted: ${reason}${drifted.length ? ` (kept, changed since: ${drifted.join(", ")})` : ""}`,
-            reviewed_by: user.id,
-            reviewed_at: new Date().toISOString(),
-        })
-        .eq("id", s.id);
-
-    // The approval credit goes back. A reverted change must not count
-    // toward the curator ladder, or farming rank survives the revert.
-    // Read-then-write rather than an RPC: reverts are rare, admin-only,
-    // and a lost race here costs one badge check, not money.
-    const { data: authorRow } = await admin
-        .from("users")
-        .select("approved_suggestions_count")
-        .eq("id", s.user_id)
-        .single();
-    const currentCount = (authorRow as { approved_suggestions_count: number } | null)?.approved_suggestions_count ?? 0;
-    await admin
-        .from("users")
-        .update({ approved_suggestions_count: Math.max(0, currentCount - 1) })
-        .eq("id", s.user_id);
-
-    const authorId = s.user_id;
-    const suggestionId = s.id;
-    after(async () => {
-        try {
-            const { createNotification } = await import("@/lib/notifications/createNotification");
-            await createNotification({
-                userId: authorId,
-                type: "system",
-                content: `↩️ An admin reverted your catalog correction. Note: "${reason}"`,
-                linkUrl: `/catalog/suggestions/${suggestionId}`,
-            });
-        } catch {
-            /* non-blocking */
-        }
-    });
-
-    revalidateTag(REFERENCE_PAGES_CACHE_TAG, "max");
-    revalidatePath(`/catalog/suggestions/${s.id}`);
-    revalidatePath("/catalog/suggestions");
-    revalidatePath(`/catalog/${row.id}`);
-
-    return { success: true, reverted, drifted };
+    revalidatePath(`/catalog/${s.catalog_item_id}`);
+    return { success: true, reverted: result.reverted, drifted: result.drifted };
 }
 
 export async function getSuggestions(statusFilter?: string, page: number = 1) {
@@ -975,9 +857,14 @@ export async function deleteSuggestionComment(commentId: string) {
 
 // ── ADMIN REVIEW ──
 
+/**
+ * The owner's admin queue. The decision itself (refusals, the apply
+ * through the Registry's one writer, status, credit, the member's notice
+ * naming who approved it) is decideSuggestion in lib/catalog/suggestionApply,
+ * the same one the Registry Desk uses.
+ */
 export async function reviewSuggestion(decision: ReviewDecision) {
     const { user } = await requireAuth();
-    const admin = getAdminClient();
 
     // Verify admin — use ADMIN_EMAIL check (same as admin page)
     const adminEmail = process.env.ADMIN_EMAIL?.toLowerCase();
@@ -985,399 +872,24 @@ export async function reviewSuggestion(decision: ReviewDecision) {
         return { success: false, error: "Admin access required." };
     }
 
-    // Get suggestion with contributor info
-    const { data: suggestion } = await admin
-        .from("catalog_suggestions")
-        .select("*")
-        .eq("id", decision.suggestionId)
-        .single();
+    const { data: me } = await getAdminClient().from("users").select("alias_name").eq("id", user.id).maybeSingle();
+    const reviewer = {
+        userId: user.id,
+        alias: (me as { alias_name: string | null } | null)?.alias_name ?? "Owner",
+        role: "owner" as const,
+    };
 
-    if (!suggestion) return { success: false, error: "Suggestion not found." };
-
-    const s = suggestion as CatalogSuggestion;
-
-    // Get contributor alias
-    const { data: contributorProfile } = await admin.from("users").select("alias_name").eq("id", s.user_id).single();
-    const contributorAlias = (contributorProfile as { alias_name: string } | null)?.alias_name ?? "Unknown";
-
-    if (decision.decision === "approved" && s.suggestion_type === "addition") {
-        const existing = await findExistingMold(admin, (s.field_changes ?? {}) as Record<string, unknown>);
-        if (existing) return { success: false, error: existingMoldMessage(existing) + " Reject this suggestion." };
-    }
-
-    // Update status
-    await admin
-        .from("catalog_suggestions")
-        .update({
-            status: decision.decision,
-            admin_notes: decision.adminNotes || null,
-            reviewed_by: user.id,
-            reviewed_at: new Date().toISOString(),
-        })
-        .eq("id", decision.suggestionId);
-
-    if (decision.decision === "approved") {
-        // Artist-targeted suggestions (200) write the artists table;
-        // everything else takes the classic catalog apply path.
-        const artistName = (suggestion as { artist_name?: string | null }).artist_name ?? null;
-        if (artistName) {
-            const change = (s.field_changes as Record<string, { to?: unknown }>)?.registry_notes;
-            const to = typeof change?.to === "string" ? change.to.trim() : "";
-            if (to) {
-                await (
-                    admin as unknown as {
-                        from: (t: string) => {
-                            upsert: (
-                                row: Record<string, unknown>,
-                                opts: { onConflict: string },
-                            ) => Promise<{ error: unknown }>;
-                        };
-                    }
-                )
-                    .from("artists")
-                    .upsert(
-                        { name: artistName, registry_notes: to, updated_at: new Date().toISOString() },
-                        { onConflict: "name" },
-                    );
-                revalidateTag(REFERENCE_PAGES_CACHE_TAG, "max");
-            }
-        } else {
-            const applied = await applyApprovedSuggestion(decision.suggestionId, s.user_id, contributorAlias, user.id);
-            if (!applied.ok) {
-                revalidatePath("/admin");
-                return {
-                    success: false,
-                    error: `It could not be applied, so it is back in the queue: ${applied.error}.`,
-                };
-            }
-        }
-    }
-
-    // Notify the suggestion author
-    const suggestionUserId = s.user_id;
-    const adminUserId = user.id;
-    after(async () => {
-        try {
-            const { createNotification } = await import("@/lib/notifications/createNotification");
-            const emoji = decision.decision === "approved" ? "✅" : "❌";
-            const verb = decision.decision === "approved" ? "approved" : "not approved";
-            await createNotification({
-                userId: suggestionUserId,
-                type: "system",
-                actorId: adminUserId,
-                content: `${emoji} Your catalog suggestion was ${verb}.${decision.adminNotes ? ` Note: "${decision.adminNotes}"` : ""}`,
-                linkUrl: `/catalog/suggestions/${decision.suggestionId}`,
-            });
-        } catch {
-            /* non-blocking */
-        }
+    const result = await decideSuggestion(decision.suggestionId, {
+        reviewer,
+        verdict: decision.decision,
+        note: decision.adminNotes,
     });
-
-    revalidatePath("/catalog/suggestions");
     revalidatePath("/admin");
+    if (!result.success) {
+        if (!result.requeued) return { success: false, error: result.error };
+        return { success: false, error: `It could not be applied, so it is back in the queue: ${result.error}` };
+    }
     return { success: true };
-}
-
-// ── APPLY APPROVED SUGGESTION ──
-
-/**
- * An approval the Registry refused goes back to the queue with the reason,
- * so it is never marked approved while nothing changed.
- */
-async function unapply(
-    admin: ReturnType<typeof getAdminClient>,
-    suggestionId: string,
-    error: { code?: string; message?: string },
-    reason?: string,
-): Promise<{ ok: false; error: string }> {
-    logger.error("CatalogSuggestions", "An approved suggestion could not be applied", error);
-    const words =
-        reason ??
-        (error.code === "23514"
-            ? "a value is not in the Registry's lists (scale, run type or material)"
-            : error.code === "23505"
-              ? "an entry at that address already exists"
-              : "the Registry refused the change");
-    await admin
-        .from("catalog_suggestions")
-        .update({ status: "pending", admin_notes: `Not applied: ${words}` })
-        .eq("id", suggestionId);
-    return { ok: false, error: words };
-}
-
-async function applyApprovedSuggestion(
-    suggestionId: string,
-    userId: string,
-    alias: string,
-    /** Who approved it: the reviewer, or the contributor when their rank auto-applied it (MHH-070). */
-    approverId: string = userId,
-): Promise<{ ok: true } | { ok: false; error: string }> {
-    const admin = getAdminClient();
-
-    const { data: suggestion } = await admin.from("catalog_suggestions").select("*").eq("id", suggestionId).single();
-
-    if (!suggestion) return { ok: false, error: "that suggestion no longer exists" };
-
-    const s = suggestion as CatalogSuggestion;
-
-    let changeSummary = "";
-    let catalogItemId = s.catalog_item_id;
-
-    if (s.suggestion_type === "correction" && s.catalog_item_id) {
-        const fieldChanges = s.field_changes as Record<string, unknown>;
-
-        // catalog_items is polymorphic: attribute fields (color_description,
-        // model_number, cast_medium, release_year_start, material, …) live in
-        // the `attributes` JSONB, not as top-level columns. Read the current
-        // attributes first (only when needed) so we merge rather than clobber.
-        let existingAttributes: Record<string, unknown> | null = null;
-        if (correctionTouchesAttributes(fieldChanges)) {
-            const { data: current } = await admin
-                .from("catalog_items")
-                .select("attributes")
-                .eq("id", s.catalog_item_id)
-                .single();
-            existingAttributes =
-                (
-                    current as {
-                        attributes: Record<string, unknown> | null;
-                    } | null
-                )?.attributes ?? null;
-        }
-
-        const { columnUpdates, attributes } = buildCorrectionUpdate(fieldChanges, existingAttributes);
-
-        const updates: CatalogItemUpdate = { ...columnUpdates };
-        // Taxonomy v2: corrections are free-text — normalize scale so
-        // an approved "traditional" lands as "Traditional (1:9)".
-        if (typeof updates.scale === "string") {
-            updates.scale = canonicalVocabulary("scale", updates.scale) ?? updates.scale;
-        }
-        if (attributes) {
-            (updates as Record<string, unknown>).attributes = JSON.parse(JSON.stringify(attributes));
-        }
-        if (Object.keys(updates).length > 0) {
-            const { error: applyError } = await admin.from("catalog_items").update(updates).eq("id", s.catalog_item_id);
-            if (applyError) return unapply(admin, suggestionId, applyError);
-        }
-        const changes = Object.entries(s.field_changes)
-            .map(([k, v]) => {
-                const val = v as { from: unknown; to: unknown };
-                return `${fieldLabel(k)}: ${val.from} → ${val.to}`;
-            })
-            .join(", ");
-        changeSummary = `🔧 Correction: ${changes}`;
-    } else if (s.suggestion_type === "addition") {
-        // Map field_changes to catalog_items columns. Taxonomy v2: the
-        // translation lives in taxonomy.ts and accepts both the current
-        // canonical values and the legacy release/mold/resin form values
-        // still sitting in older pending suggestions. Unrecognized types
-        // fall back to plastic_mold (the CHECK constraint would reject
-        // the insert otherwise) — but loudly, not silently.
-        const fc = s.field_changes as Record<string, unknown>;
-        const mappedType = suggestionItemTypeToDb(fc.item_type as string | undefined);
-        if (!mappedType) {
-            console.error(
-                `Catalog addition ${s.id}: unknown item_type "${String(fc.item_type)}" — filing as plastic_mold`,
-            );
-        }
-        const itemType = mappedType ?? "plastic_mold";
-        const sculptorIn = typeof fc.sculptor === "string" ? fc.sculptor.trim() : "";
-        const maker = resolveNewEntryMaker(itemType, fc.maker, fc.sculptor);
-        // Attribution split (156): artist/manufacturer stamped at insert.
-        // No annotation on the literal — the columns enter generated
-        // types after the owner applies 156 (cast at the insert call).
-        const attribution = deriveAttribution({
-            item_type: itemType,
-            maker,
-            sculptor: sculptorIn || null,
-            manufacturer: (fc.manufacturer as string | undefined) ?? null,
-        });
-        // Tier 1 attributes (2026-08-23) — validated BEFORE the literal so
-        // each normalizer runs once. Every one of these returns undefined
-        // for a value it doesn't recognize, and the spreads below drop
-        // undefined: a bad value costs the field, never the whole approval.
-        const runCount = normalizeRunCount(fc.run_count);
-        const breed = normalizeCatalogBreed(fc.breed);
-        // The reference linker (2026-10) files a release with the id of
-        // the mold the member was looking at. Honour it: the release is
-        // filed under that mold and inherits its scale, which is the one
-        // thing this path never did (517 orphan releases say so).
-        const parentId = await resolveParentMold(admin, fc.parent_catalog_id, itemType, {
-            moldName: fc.mold_name,
-            maker,
-            scale: typeof fc.scale === "string" ? fc.scale : null,
-        });
-        const insertPayload = {
-            item_type: itemType,
-            title: normalizeFactValue("title", fc.title ?? fc.mold_name ?? "Untitled") as string,
-            maker,
-            artist: attribution.artist,
-            manufacturer: attribution.manufacturer,
-            // Scales enter in canonical vocabulary; normalize defensively
-            // (older pending suggestions carry bare "Traditional" etc.).
-            // A release filed under a mold is that mold's scale.
-            scale: parentId?.scale ?? canonicalVocabulary("scale", fc.scale),
-            ...(parentId ? { parent_id: parentId.id } : {}),
-            attributes: JSON.parse(
-                JSON.stringify({
-                    // First and last year; "Last year (if it ended)" was never stored (MHH-077).
-                    ...(fc.year ? additionYears(fc.year, fc.year_end) : {}),
-                    ...(fc.color ? { color_description: normalizeFactValue("color_description", fc.color) } : {}),
-                    ...(fc.model_number ? { model_number: fc.model_number } : {}),
-                    ...(canonicalVocabulary("material", fc.material)
-                        ? { material: canonicalVocabulary("material", fc.material) }
-                        : {}),
-                    // Original retail price (Amanda, 2026-08-23): what the maker
-                    // charged at release. Pairs with the Blue Book on reference
-                    // pages — original price beside today's market range.
-                    ...(fc.retail_price ? { retail_price: fc.retail_price } : {}),
-                    // Run type must be one of RUN_TYPES — free text here would
-                    // defeat the whole point (the browse filter groups on the
-                    // exact string). Anything else is dropped, not stored.
-                    ...(canonicalVocabulary("run_type", fc.run_type)
-                        ? { run_type: canonicalVocabulary("run_type", fc.run_type) }
-                        : {}),
-                    // Pieces made: a positive integer as a plain string, matching
-                    // the 74 imported rows. "~2500" / "2,500" / "0" are dropped.
-                    ...(runCount ? { run_count: runCount } : {}),
-                    // What the model depicts. Gender is closed (the horse forms'
-                    // GENDER_GROUPS); breed is open — see normalizeCatalogBreed.
-                    ...(breed ? { breed } : {}),
-                    ...(isCatalogGender(fc.gender) ? { gender: fc.gender } : {}),
-                    // Sculptor is credit, not maker — factory pieces have a
-                    // company maker AND a named sculpting artist (the North
-                    // Light lesson: conflating them misfiled 20 sculpts as
-                    // artist resins under "Guy Pocock/Anne Godfrey").
-                    ...(fc.sculptor ? { sculptor: fc.sculptor } : {}),
-                    // The form collects the parent mold's name for releases —
-                    // this used to be dropped on apply. Kept as an attribute so
-                    // admins can wire parent_id from it later.
-                    ...(fc.mold_name && fc.title ? { mold_name: fc.mold_name } : {}),
-                    ...(typeof fc.set_name === "string" && fc.set_name.trim() ? { set_name: fc.set_name.trim() } : {}),
-                }),
-            ),
-        };
-        const { data: newItem, error: insertError } = await admin
-            .from("catalog_items")
-            .insert(insertPayload as CatalogItemInsert)
-            .select("id")
-            .single();
-        if (insertError) return unapply(admin, suggestionId, insertError);
-        catalogItemId = newItem ? (newItem as { id: string }).id : null;
-        changeSummary = `📗 New entry added: ${insertPayload.title}`;
-    } else if (s.suggestion_type === "photo") {
-        changeSummary = "📸 Reference photo added";
-    } else if (s.suggestion_type === "removal") {
-        changeSummary = "🗑 Entry marked for removal";
-    } else if (s.suggestion_type === DUPLICATE_SUGGESTION_TYPE && s.catalog_item_id) {
-        // The same merge the admin button runs (lib/catalog/merge):
-        // references move to the kept entry, the duplicate is deleted.
-        // The merge repoints this suggestion's own catalog_item_id too,
-        // so the changelog row below lands on the kept entry.
-        const target = duplicateTarget(s.field_changes);
-        const mergeClient = admin as unknown as MergeClient;
-        const dup = target ? await resolveCatalogRef(mergeClient, s.catalog_item_id) : null;
-        const keep = target ? await resolveCatalogRef(mergeClient, target.duplicate_of) : null;
-        if (!target || !dup || !keep) {
-            changeSummary = "🔁 Duplicate report approved, but one entry was already gone — nothing merged";
-        } else {
-            const merged = await mergeCatalogItemsCore(mergeClient, dup, keep, {
-                userId,
-                alias,
-                approvedBy: approverId,
-            });
-            if (!merged.success) {
-                return unapply(admin, suggestionId, { message: merged.error }, `the merge failed (${merged.error})`);
-            } else {
-                catalogItemId = keep.id;
-                changeSummary = `🔁 ${merged.summary}`;
-            }
-        }
-    }
-
-    // Log to changelog
-    await admin.from("catalog_changelog").insert({
-        suggestion_id: suggestionId,
-        catalog_item_id: catalogItemId,
-        change_type: s.suggestion_type,
-        change_summary: changeSummary,
-        contributed_by: userId,
-        contributor_alias: alias,
-        approved_by: approverId,
-    });
-
-    // Increment user's approved count atomically
-    await admin.rpc("increment_approved_suggestions", {
-        target_user_id: userId,
-    });
-
-    // Check curator thresholds
-    const { data: profile } = await admin.from("users").select("approved_suggestions_count").eq("id", userId).single();
-
-    const count =
-        (
-            profile as {
-                approved_suggestions_count: number;
-            } | null
-        )?.approved_suggestions_count ?? 0;
-
-    // Award curator badges — same constants as the auto-approve decision,
-    // so the badge a member sees and the power it confers cannot disagree.
-    const badgesToCheck = [
-        { threshold: CONTRIBUTOR_THRESHOLD, badgeId: "catalog_contributor" },
-        { threshold: BRONZE_THRESHOLD, badgeId: "bronze_curator" },
-        { threshold: SILVER_THRESHOLD, badgeId: "silver_curator" },
-        { threshold: GOLD_THRESHOLD, badgeId: "gold_curator" },
-    ];
-
-    for (const { threshold, badgeId } of badgesToCheck) {
-        if (count >= threshold) {
-            await admin
-                .from("user_badges")
-                .upsert({ user_id: userId, badge_id: badgeId }, { onConflict: "user_id,badge_id" });
-        }
-    }
-
-    // Update trusted curator flag. Tied to Silver — the same rank that
-    // unlocks auto-approval, so "trusted" means one thing site-wide.
-    if (count >= SILVER_THRESHOLD) {
-        await admin.from("users").update({ is_trusted_curator: true }).eq("id", userId);
-    }
-
-    // ── Revalidate what the change just made stale ──
-    // Reference pages read through hour-long unstable_cache entries
-    // (reference-pages.ts) — bust the tag so an approved correction shows
-    // up now, not in ≤60 minutes. Also refresh the affected pages.
-    revalidateTag(REFERENCE_PAGES_CACHE_TAG, "max");
-    revalidatePath("/catalog");
-    if (catalogItemId) {
-        revalidatePath(`/catalog/${catalogItemId}`);
-        const { data: refItem } = await admin
-            .from("catalog_items")
-            .select("maker, title, maker_slug, slug")
-            .eq("id", catalogItemId)
-            .single();
-        if (refItem) {
-            const r = refItem as {
-                maker: string | null;
-                title: string | null;
-                maker_slug: string | null;
-                slug: string | null;
-            };
-            revalidatePath(
-                referenceHref({
-                    id: catalogItemId,
-                    maker: r.maker,
-                    title: r.title,
-                    maker_slug: r.maker_slug,
-                    slug: r.slug,
-                }),
-            );
-        }
-    }
-
-    return { ok: true };
 }
 
 // ── CHANGELOG ──
@@ -1515,117 +1027,27 @@ export async function suggestArtistNotes(input: {
 
     const suggestionId = data.id;
     const authorId = user.id;
-    after(async () => {
-        try {
-            const { createNotification } = await import("@/lib/notifications/createNotification");
-            const { adminNotificationTargets } = await import("@/lib/notifications/adminTargets");
-            const ids = await adminNotificationTargets(getAdminClient());
-            for (const id of ids) {
-                await createNotification({
-                    userId: id,
-                    type: "system",
-                    actorId: authorId,
-                    content: `📝 Artist notes suggested for ${artistName}.`,
-                    linkUrl: `/catalog/suggestions/${suggestionId}`,
-                });
+    // Moderators active: the owner reads these in the digest (answer 4).
+    if (!(await anyActiveModerator()))
+        after(async () => {
+            try {
+                const { createNotification } = await import("@/lib/notifications/createNotification");
+                const { adminNotificationTargets } = await import("@/lib/notifications/adminTargets");
+                const ids = await adminNotificationTargets(getAdminClient());
+                for (const id of ids) {
+                    await createNotification({
+                        userId: id,
+                        type: "system",
+                        actorId: authorId,
+                        content: `📝 Artist notes suggested for ${artistName}.`,
+                        linkUrl: `/catalog/suggestions/${suggestionId}`,
+                    });
+                }
+            } catch {
+                /* non-blocking */
             }
-        } catch {
-            /* non-blocking */
-        }
-    });
+        });
 
     revalidatePath("/catalog/suggestions");
     return { success: true };
-}
-
-/**
- * A release filed with `parent_catalog_id` (the reference linker) is
- * filed under that mold when the id names a plastic mold that exists.
- * Anything else, including a stale id, falls back to no parent and the
- * mold_name attribute, as before.
- */
-async function resolveParentMold(
-    admin: ReturnType<typeof getAdminClient>,
-    raw: unknown,
-    itemType: string,
-    typed?: { moldName?: unknown; maker?: string | null; scale?: string | null },
-): Promise<{ id: string; scale: string | null } | null> {
-    if (itemType !== "plastic_release") return null;
-    if (typeof raw === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(raw)) {
-        const { data } = await admin
-            .from("catalog_items")
-            .select("id, scale")
-            .eq("id", raw)
-            .eq("item_type", "plastic_mold")
-            .maybeSingle();
-        if (data) return { id: (data as { id: string }).id, scale: (data as { scale: string | null }).scale ?? null };
-    }
-    // The old suggestion form sends the mold as typed text ("G1 Arabian
-    // Stallion"). Resolve it the way the linker does: same maker, same
-    // scale, same name with the generation token stripped. Two molds with
-    // that name (the Registry holds 48 such pairs) resolve to the one that
-    // already carries the most releases, then the older one, so the
-    // duplicate does not keep collecting children. 22 Arabian Stallion
-    // releases sat with no parent before this (2026-10-14).
-    const name = typeof typed?.moldName === "string" ? stripGeneration(typed.moldName).trim() : "";
-    if (!name) return null;
-    let query = admin
-        .from("catalog_items")
-        .select("id, scale, created_at")
-        .eq("item_type", "plastic_mold")
-        .ilike("title", name);
-    if (typed?.maker) query = query.ilike("maker", typed.maker);
-    const scale = normalizeScale(typed?.scale ?? null);
-    if (scale) query = query.eq("scale", scale);
-    const { data: molds } = await query.limit(5);
-    const candidates = (molds ?? []) as { id: string; scale: string | null; created_at: string }[];
-    if (candidates.length === 0) return null;
-    if (candidates.length === 1) return { id: candidates[0].id, scale: candidates[0].scale ?? null };
-    const { data: kids } = await admin
-        .from("catalog_items")
-        .select("parent_id")
-        .in(
-            "parent_id",
-            candidates.map((c) => c.id),
-        )
-        .eq("item_type", "plastic_release")
-        .limit(5000);
-    const counts = new Map<string, number>();
-    for (const k of (kids ?? []) as { parent_id: string }[])
-        counts.set(k.parent_id, (counts.get(k.parent_id) ?? 0) + 1);
-    candidates.sort(
-        (a, b) => (counts.get(b.id) ?? 0) - (counts.get(a.id) ?? 0) || a.created_at.localeCompare(b.created_at),
-    );
-    return { id: candidates[0].id, scale: candidates[0].scale ?? null };
-}
-
-/**
- * A mold the Registry already holds under this maker, scale and name
- * (generation token ignored). 44 of the 48 duplicate molds found on
- * 2026-10-14 were approved additions of molds that already existed; the
- * duplicate check was a dismissible speed bump. A second copy of a mold
- * is now refused outright, at filing and again at approval.
- */
-async function findExistingMold(
-    admin: ReturnType<typeof getAdminClient>,
-    fc: Record<string, unknown>,
-): Promise<{ id: string; title: string; scale: string | null } | null> {
-    if (suggestionItemTypeToDb(fc.item_type as string | undefined) !== "plastic_mold") return null;
-    const title = typeof fc.title === "string" ? fc.title : typeof fc.mold_name === "string" ? fc.mold_name : "";
-    const name = stripGeneration(title).trim();
-    if (!name) return null;
-    const maker = typeof fc.maker === "string" ? fc.maker.trim() : "";
-    const scale = normalizeScale(typeof fc.scale === "string" ? fc.scale : null);
-    let q = admin.from("catalog_items").select("id, title, scale").eq("item_type", "plastic_mold");
-    if (maker) q = q.ilike("maker", maker);
-    q = scale ? q.eq("scale", scale) : q.is("scale", null);
-    const { data } = await q.limit(50);
-    const hit = ((data ?? []) as { id: string; title: string; scale: string | null }[]).find(
-        (m) => stripGeneration(m.title).trim().toLowerCase() === name.toLowerCase(),
-    );
-    return hit ?? null;
-}
-
-function existingMoldMessage(m: { title: string; scale: string | null }): string {
-    return `The Registry already has the ${m.scale ? m.scale + " " : ""}"${m.title}" mold. Add releases under it instead of a second copy.`;
 }

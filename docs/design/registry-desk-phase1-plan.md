@@ -382,3 +382,73 @@ C's pages run their own role check.
   uses the moderator's copy and keeps the original.
 - Set-piece detection reads titles and can miss some; the FK guards still
   protect horses and want lists.
+
+## Deviations from the plan (Package A, branch desk-a-engine)
+
+Every name and signature above is kept; these are additions and the
+choices the plan left open. B and C: read "Return shapes" first.
+
+- **Return shapes.** Every write.ts function returns `WriteResult<T>`:
+  `{ success: true, ...T } | { success: false, error, code, field?, current?, counts?, drifted? }`,
+  so a server action can return it as its `ActionResult`. `code` is one of
+  `invalid, conflict, not_found, forbidden, limit, linked, not_ready, failed`.
+  The plan's `{code: "conflict", current}` is the failure branch of
+  `updateItem`. Successes: `updateItem -> {item, actionId, touched}`,
+  `insertItem -> {id, item, actionId, dropped}`, `revertFields -> {reverted,
+drifted, actionId}`, `requestMerge -> {actionId, status, summary, legacy}`,
+  `confirmMerge -> {actionId, status: "applied", summary}`,
+  `declineMerge -> {actionId, status: "declined"}`, `removeItem -> {actionId,
+removedId}`, `undoAction -> {restored: number, drifted: string[], actionId}`.
+  `linkCounts(id)` returns `LinkCounts` (the seven database counts plus
+  `set_mentions`, `set_siblings`, `total`); `linkWords(counts)` says them.
+- **validateChanges(row, changes, ctx?, opts?)** stays pure: `ctx.parent`
+  (the mold the row will sit under) and `ctx.childCount` are looked up by
+  `updateItem`/`insertItem`; `opts.lenient` drops a bad attribute value
+  instead of refusing (suggested additions, as before). `row = null` checks
+  a new row. `changes` maps a column or attribute key to its new value; an
+  empty value clears it. Attribute keys must be on the row, in the member
+  form, in `HIDDEN_ATTRIBUTES`, in a short list of keys the live data
+  carries, or in B's `DESK_FIELDS` (read from editableFields when it exists).
+- **Optional extras** on the plan's inputs: `updateItem` and `insertItem`
+  take `contributor` and `summary` (a member's approved suggestion credits
+  them in the changelog); `insertItem` takes `lenient`; `updateItem.kind`
+  defaults to `refile` when `parent_id` changes, else `edit`;
+  `requestMerge` takes `contributor`.
+- **recordChange is exported** from write.ts (still the only changelog
+  writer): the suggestion pipeline's photo and removal notes change no row.
+- **decideSuggestion(id, {reviewer, verdict: "approved" | "rejected", note?,
+edited?}) -> {success, status: "approved" | "rejected" | "awaiting_second_look"}**
+  (or `{success: false, error, code, requeued?}`; `requeued` = the apply
+  failed and the suggestion is back in the queue with the reason). It does
+  the whole decision: refusals, applySuggestion, status, `decided_role`,
+  claim cleared, the member's notice. B's approve/reject actions call it.
+  Also in suggestionApply.ts: `finishMergedSuggestion` (a confirmed merge's
+  report is approved and credited), `withdrawApproval` (a revert or undone
+  approval: rejected, credit back, notice), `reviewRefusal`, `editDiff`, and
+  `resolveParentMold` / `findExistingMold` / `existingMoldMessage` (moved
+  from catalog-suggestions.ts).
+- **The owner is exempt** from "nobody decides their own" and the artist
+  rule: the owner is the last word, and the old approval path keeps working.
+- **Duplicates by a moderator**: the suggestion goes `under_review` while the
+  merge waits; confirm approves and credits it; decline puts it back to
+  `pending` with the note. Undoing an `approve` also withdraws the approval.
+- **Before 243 nobody removes** (there was no removal before); merges
+  before 243 are the owner's one-way merge, which now also moves sale reports
+  and price flags. `requestMerge` refuses a mold merged into a non-mold and a
+  keeper filed under the duplicate.
+- **Before 242**, changelog types the old CHECK lacks are written as their
+  nearest old type (merge as removal, restore as addition, revert as
+  correction).
+- **Migration 243** adds one more server-only function,
+  `registry_reinsert_item(jsonb)`, shared by unmerge and restore; the merge
+  folds a member's second price flag on the same model like a want list.
+- **Extra exports for B and C**: `actorOf(seat)` (types.ts) builds the
+  `RegistryActor` from `requireRegistryModerator()`; `REGISTRY_DESK_REFUSAL`
+  (auth.ts); `checkRegistryLimit(actor, "edit" | "merge" | "remove" | "rule")`,
+  `noteRegistryAction`, `REGISTRY_LIMITS`, `SPEED_ALARM_PER_HOUR` (limits.ts;
+  C's `proposeRule` calls `checkRegistryLimit(actor, "rule")`);
+  `anyActiveModerator()` (alerts.ts); `MERGE_REMOVE_NOT_READY`,
+  `MERGE_REPOINTS`, `CatalogRow`, `CATALOG_ROW_COLUMNS`, `isMissingSchema`,
+  `describeChanges`, `knownAttributeKeys` (write.ts).
+- **Alert links** point at `/catalog/desk/history` and
+  `/catalog/desk?tab=second_looks`; B, keep or tell A.

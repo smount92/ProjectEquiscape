@@ -1,11 +1,11 @@
 # Release 3: Registry cleanup
 
-Branch `r3-registry-fixes`, cut from `release-3`. Board milestone "Release 3
+Branch `release-3` (the Registry Desk was integrated on `desk-integrated`).
+Board milestone `m-3`, "Release 3 - Registry cleanup". One push to `main`,
+one rebuild. How releases work: `docs/guides/releasing.md`.
 
-- Registry cleanup". One push to `main`, one rebuild. How releases work:
-  `docs/guides/releasing.md`.
-
-All seven tickets come from one volunteer cataloguing Breyer Stablemates
+The seven Registry fixes (MHH-074 to MHH-080) come from one volunteer
+cataloguing Breyer Stablemates
 (2026-10-15/16), checked against the live Registry before and after.
 
 ## What members will notice
@@ -89,6 +89,103 @@ and for the links in the vault to be clickable.
   a member who typed a purchase note is told "Purchase notes switch on
   soon" and asked to add it again later.
 
+## Registry Desk, Phase 1 (MHH-084 to MHH-093)
+
+The owner's ruling of 2026-10-16 hands the Registry's clean-up to vetted
+Registry moderators. Phase 1 gives them a workspace, the **Registry Desk**
+at `/catalog/desk`, and puts every Registry write through one writer that
+records who did what and can undo it. Plan:
+`docs/design/registry-desk-phase1-plan.md`. Built in three packages (A the
+engine, B the Desk, C the lists) and merged on `desk-integrated`.
+
+### What moderators will notice
+
+- A **Registry Desk** link in the Registry masthead, shown only to
+  moderators and the owner. Anyone else who types the address gets a plain
+  not-found. Five tabs:
+    - **Queue**: members' corrections, new entries and duplicates, oldest
+      first, plus "Auto-applied" (curators' changes from the last week,
+      with **Put it back**) and "Second looks" (merges waiting for
+      someone else to confirm). Opening one holds it for 30 minutes.
+      **Approve**, **Edit, then approve** (the member is told what was
+      changed) or **Say no** with a reason the member reads. Nobody
+      decides their own suggestion, and an artist doesn't decide
+      suggestions about their own pieces.
+    - **Mold view**: pick a mold, click through its releases (J/K or
+      Prev/Next), and edit **every field**; Ctrl/Cmd+S saves. Re-file a
+      release under another mold (its scale follows), merge two rows, or
+      remove a row nothing points at. If someone saved the row in the
+      meantime, the editor shows their version instead of overwriting it.
+      Flags on each row say what looks wrong; an in-effect style rule
+      offers a suggested fix with **Use this**.
+    - **To-do**: work lists found by scanning the whole Registry (no
+      colour, number in the title, wrong scale, set pieces missing ...),
+      Stablemates first, with "I'm on it" and "Done".
+    - **Rules**: the house style. One moderator proposes, three
+      agreements put it in effect, the owner can veto.
+    - **History**: every change with who made it and in which role;
+      **Undo** within 30 days and **Looks right** on someone else's.
+- Daily limits: 300 edits and approvals, 20 merge requests, 50 removals,
+  10 rule proposals. A refused action says so in words.
+- The draft guide, `docs/guides/registry-moderation.md`, explains all of
+  this in plain words. **It is a draft for the owner to approve** before
+  the first moderator is asked to read it.
+
+### What the owner will notice
+
+- **Admin › Members** has a Registry moderators strip (who holds a seat,
+  since when, term end, last action) and **Make moderator** / **Remove** on
+  member rows. Removing asks for a private reason; the badge comes off and
+  the next Desk click is refused.
+- The owner uses the Desk too, with no limits. The owner's merges apply at
+  once (still undoable); a moderator's wait for a second look.
+- **Bell alerts at once** for merges requested and applied, removals, a
+  moderator hitting a limit, more than 100 changes in an hour, and one
+  moderator undoing another. Links open `/catalog/desk/history` or
+  `/catalog/desk?tab=second_looks`.
+- **One digest a day** in the bell (from the 06:00 `refresh-market` run):
+  how many changes, every removal and merge by name, and how many member
+  suggestions wait in the Queue. Once any moderator is active, the
+  per-suggestion pings stop; that last line is where they went.
+- Merges now **keep members' sale reports and price flags** (MHH-093): the
+  old merge deleted them. Machine price rows on a merged-away or removed
+  row are dropped and re-collected; undo doesn't bring those back.
+- `/catalog/changelog` names a moderator's change as such, and a removed
+  entry's line has no dead link.
+- Admin › Ops lists **242**, **243** and **244**; each turns green once
+  pasted. Admin › Catalog's review still works and goes through the same
+  writer.
+
+### Before each update is pasted
+
+Nothing breaks if the code ships first. Before 242 only the owner passes
+the Desk's role check, History and claims are skipped, and the changelog
+is written without the new columns. Before 243 the owner gets the old
+one-way merge (not undoable) and moderators read "Merging and removing
+open once the owner adds update 243." Before 244, Rules, to-do claims and
+the digest say "Coming once update 244 is added."
+
+### Granting the first moderator
+
+After 242 is pasted: **Admin › Members**, search for the member by alias,
+choose **Make moderator**. They get the Registry moderator badge and the
+Desk link at once, for a 12-month term. Send them the approved guide
+first.
+
+### Small defaults to confirm (Package C)
+
+- An "I'm on it" claim on a to-do list or row lasts **a day**.
+- **Done** hides a row until the next check; if the problem is still
+  there, it comes back.
+- Each cached to-do list keeps **300 rows** (the count is the full count).
+- A **quiet day sends no digest** (it is recorded, but the bell stays
+  silent). A day with member suggestions still waiting in the Queue is
+  not quiet (added at integration, so the owner hears when the Queue
+  piles up).
+- A rule that is **in effect stays in effect** if someone later takes back
+  an agreement; only a veto or retiring it ends it.
+- **Check again** (re-scan now) is limited to **6 an hour** per moderator.
+
 ## Go-live checklist (owner)
 
 1. Push the branch, wait for CI to go green.
@@ -106,10 +203,24 @@ and for the links in the vault to be clickable.
     ```
 3. Paste **`supabase/migrations/241_vault_purchase_notes.sql`** (safe to paste twice): purchase
    notes in the Financial Vault. Admin › Ops shows 241 green once it is in.
-4. Merge to main and push. The live smoke test runs by itself.
-5. `npm run gen-types` and commit the types.
-6. Look: `/catalog?q=Arabian%20Stallion&scale=Stablemate%20(1%3A32)` shows
+4. Paste **`supabase/migrations/242_registry_moderators.sql`**: moderator
+   seats, the History tables, the changelog's role column and suggestion
+   claims. Admin › Ops shows 242 green.
+5. Paste **`supabase/migrations/243_registry_merge_undo.sql`** (after 242):
+   the removal archive and the merge, unmerge, remove and restore
+   functions. Admin › Ops shows 243 green.
+6. Paste **`supabase/migrations/244_registry_rules_todo.sql`** (after 242
+   and 243): style rules, votes, to-do claims and the digest record.
+   Admin › Ops shows 244 green. All three are safe to paste twice.
+7. Merge to main and push. The live smoke test runs by itself.
+8. `npm run gen-types` and commit the types (they gain `search_key`,
+   purchase notes and the Registry Desk tables).
+9. Look: `/catalog?q=Arabian%20Stallion&scale=Stablemate%20(1%3A32)` shows
    the mold and its releases, then "Sets that include “Arabian Stallion”".
+10. Look: `/catalog/desk` opens the Desk for the owner; History shows
+    nothing yet. Approve `docs/guides/registry-moderation.md`, then grant
+    the first moderator in **Admin › Members** (see "Granting the first
+    moderator" above).
 
 ## Decisions made in this release (to confirm)
 
