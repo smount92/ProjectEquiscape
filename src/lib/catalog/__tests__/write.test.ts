@@ -195,10 +195,14 @@ describe("validateChanges: re-filing", () => {
         expect(gone.ok ? "" : gone.error).toMatch(/no longer in the Registry/);
     });
 
-    it("a release's scale follows its mold", () => {
+    it("a release's scale follows its mold, and the refusal says to re-file it under the right mold", () => {
         const filed = { ...release, parent_id: mold.id };
-        const v = validateChanges(filed, { scale: "Stablemate (1:32)" }, { parent: mold });
-        expect(v.ok ? "" : v.error).toMatch(/follows its mold \(Classic \(1:12\)\)/);
+        const named = { ...mold, title: "Classic Arabian Mare" };
+        const v = validateChanges(filed, { scale: "Stablemate (1:32)" }, { parent: named });
+        const words = v.ok ? "" : v.error;
+        expect(words).toContain('filed under "Classic Arabian Mare", which is Classic (1:12)');
+        expect(words).toContain("If it really is Stablemate (1:32), it belongs under the Stablemate (1:32) mold");
+        expect(words).toMatch(/re-file it there instead/);
     });
 
     it("a mold isn't filed under another mold", () => {
