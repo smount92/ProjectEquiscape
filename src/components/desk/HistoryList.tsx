@@ -15,6 +15,7 @@ const KINDS: [string, string][] = [
     ["add", "New entries"],
     ["refile", "Re-filed under another mold"],
     ["approve", "Suggestions approved"],
+    ["reject", "Suggestions turned down"],
     ["revert", "Reverts"],
     ["merge", "Merges"],
     ["remove", "Removals"],

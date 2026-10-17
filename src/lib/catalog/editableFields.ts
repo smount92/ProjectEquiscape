@@ -534,6 +534,13 @@ export function splitList(text: string): string[] {
 
 const YEAR_KEYS = new Set(["release_year_start", "release_year_end"]);
 
+/**
+ * The attribute keys that may hold a list (the engine's listAttributeKeys:
+ * these four, plus any Desk field of kind "list"). Every other value is
+ * text, so a list stored anywhere else is edited and saved as one line.
+ */
+const LIST_KEYS: ReadonlySet<string> = new Set(["components", "fits_molds", "materials", "working_parts"]);
+
 /** The editor's field for a key no box shows yet (from "Add a field"). */
 export function deskFieldFor(key: string): DeskFieldEdit {
     const def = DESK_FIELDS.find((f) => f.key === key && !f.readOnly);
@@ -571,8 +578,9 @@ export function buildDeskFields(
         const edit: DeskFieldEdit = { ...f, original: asText(value) };
         if (f.key === "parent_id" && value) edit.display = ctx.parentTitle ?? undefined;
         if (f.key === "item_type" && typeof value === "string") edit.display = CATEGORY_LABELS[value] ?? value;
-        // A list someone stored where the Desk expects one value still edits as a list.
-        if (Array.isArray(value) && !f.readOnly && f.kind !== "mold") edit.kind = "list";
+        // A list stored under a list key edits as one; anywhere else the
+        // Registry keeps text, so it edits (and saves) as one line.
+        if (Array.isArray(value) && !f.readOnly && f.kind !== "mold" && LIST_KEYS.has(f.key)) edit.kind = "list";
         if (YEAR_KEYS.has(f.key) && typeof value === "string" && value.trim() !== "") edit.storedAsText = true;
         out.push(edit);
     };
@@ -586,18 +594,21 @@ export function buildDeskFields(
         if (seen.has(key) || v == null || v === "") continue;
         const isList = Array.isArray(v);
         const nested = typeof v === "object" && !isList;
+        const listKey = isList && LIST_KEYS.has(key);
         take({
             key,
             label: labelForKey(key),
-            kind: isList ? "list" : "text",
+            kind: listKey ? "list" : "text",
             group: "extras",
             appliesTo: "all",
             readOnly: nested,
-            help: isList
+            help: listKey
                 ? "Separate the values with commas."
-                : nested
-                  ? "A value with parts of its own, shown as stored."
-                  : undefined,
+                : isList
+                  ? "Stored as a list; a change is saved as one line of text."
+                  : nested
+                    ? "A value with parts of its own, shown as stored."
+                    : undefined,
         });
     }
 

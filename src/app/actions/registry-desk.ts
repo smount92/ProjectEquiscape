@@ -36,6 +36,7 @@ import {
 } from "@/lib/catalog/write";
 // TEMP: these four come from write.ts / suggestionApply.ts once r3-engine-fixes merges.
 import {
+    additionDrops,
     claimSuggestion as engineClaimSuggestion,
     decideSuggestion,
     releaseSuggestionClaim,
@@ -91,6 +92,8 @@ export interface QueueItem {
      * starting from what the Registry says.
      */
     current: Record<string, string> | null;
+    /** A new entry's values the Registry won't keep, and why: shown before anyone approves it. */
+    willDrop: Dropped[];
     claim: { by: string; mine: boolean; until: string } | null;
     keep: { id: string; title: string } | null;
     note: string | null;
@@ -448,6 +451,7 @@ export async function getQueue(tab: QueueTab): Promise<ActionResult<{ queue: Que
                 note: null,
                 canEdit: false,
                 current: null,
+                willDrop: [],
             }));
             return { success: true, queue: { tab, items, counts, notice: null } };
         }
@@ -570,8 +574,21 @@ export async function getQueue(tab: QueueTab): Promise<ActionResult<{ queue: Que
                 current: currentValues(
                     r.suggestion_type === "correction" && r.catalog_item_id ? fullRows.get(r.catalog_item_id) : null,
                 ),
+                willDrop: [],
             };
         });
+        // What each new entry would lose, before anyone approves it. A failed
+        // check is no reason to hide the Queue: that card shows no list.
+        await Promise.all(
+            out.map(async (item, i) => {
+                if (item.kind !== "addition" || tab === "auto_applied") return;
+                try {
+                    item.willDrop = await additionDrops(rows[i].field_changes ?? {});
+                } catch {
+                    item.willDrop = [];
+                }
+            }),
+        );
         return { success: true, queue: { tab, items: out, counts, notice } };
     } catch (e) {
         return safeError("RegistryDesk.getQueue", e, "The Queue could not be read. Please try again.");
@@ -661,11 +678,10 @@ export async function claimSuggestion(id: string): Promise<ActionResult<{ claime
 
     try {
         const r = await engineClaimSuggestion(actor, id);
-        if (!r.success) {
-            // Before 242 there are no claims: open it without one.
-            if (r.code === "not_ready") return { success: true, claimed: false, until: null };
-            return fail(r.code === "conflict" ? "Another moderator picked this one up a moment ago." : r.error);
-        }
+        // The engine's own words (who holds it, for how long).
+        if (!r.success) return fail(r.error);
+        // Before 242 there are no holds: it opens without one.
+        if (!r.claimedUntil) return { success: true, claimed: false, until: null };
         return { success: true, claimed: true, until: r.claimedUntil };
     } catch (e) {
         return safeError("RegistryDesk.claimSuggestion", e);

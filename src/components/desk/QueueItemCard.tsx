@@ -54,7 +54,7 @@ type Outcome = { success: boolean; error?: string; changed?: boolean; dropped?: 
 /** "Run type “Store Special”: not a run type the Registry knows." */
 function droppedLine(d: Dropped): string {
     const value = d.value == null || d.value === "" ? "" : ` “${String(d.value)}”`;
-    return `${deskFieldLabel(d.key)}${value}: ${d.error}`;
+    return `${d.label || deskFieldLabel(d.key)}${value}: ${d.error}`;
 }
 
 /**
@@ -202,6 +202,20 @@ export default function QueueItemCard({
             {item.note && <p className="m-0 rounded-lg bg-warning/10 px-3 py-2 text-sm text-warning">{item.note}</p>}
             {item.reason && item.tab !== "second_looks" && (
                 <p className="m-0 text-sm text-secondary-foreground italic">“{item.reason}”</p>
+            )}
+            {item.willDrop.length > 0 && !doneWords && (
+                <div className="flex flex-col gap-1 rounded-lg bg-warning/10 px-3 py-2" data-testid="will-drop">
+                    <p className="m-0 text-sm font-semibold text-warning">
+                        Approved as sent, the Registry won&apos;t keep{" "}
+                        {item.willDrop.length === 1 ? "this value" : "these values"}. Fix{" "}
+                        {item.willDrop.length === 1 ? "it" : "them"} with Edit, then approve:
+                    </p>
+                    <ul className="m-0 list-disc pl-5 text-sm text-foreground">
+                        {item.willDrop.map((d) => (
+                            <li key={d.key}>{droppedLine(d)}</li>
+                        ))}
+                    </ul>
+                </div>
             )}
             {claim && (
                 <p className="m-0 text-xs text-muted-foreground" data-testid="claim-line">

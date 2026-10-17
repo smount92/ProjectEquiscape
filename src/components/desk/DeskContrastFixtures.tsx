@@ -101,6 +101,9 @@ const CARD: QueueItem = {
     note: "The model number was in the title.",
     canEdit: true,
     current: null,
+    willDrop: [
+        { key: "run_type", label: "Run type", value: "Store Special", error: "not a run type the Registry knows." },
+    ],
 };
 
 const noop = () => {};

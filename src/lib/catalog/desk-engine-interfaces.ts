@@ -13,8 +13,11 @@ import "server-only";
  * (ii)  decideSuggestion / applySuggestion take `expected` (what the
  *       moderator saw) and refuse with code "changed" if the member edited
  *       the suggestion since; a decision may report `dropped` values.
- * (iii) claimSuggestion / releaseSuggestionClaim hold a suggestion for 30 minutes.
+ * (iii) claimSuggestion / releaseSuggestionClaim hold a suggestion for 30 minutes
+ *       (before 242: success with claimedUntil "").
  * (iv)  requestMerge merges mold into mold; the releases follow the kept mold's scale.
+ * Also additionDrops(fieldChanges) (suggestionApply.ts): the values a new
+ * entry would lose, shown before anyone approves it.
  */
 import type { SupabaseClient } from "@supabase/supabase-js";
 
@@ -32,10 +35,13 @@ export type DecideResultWithDropped =
     | { success: true; status: "approved" | "rejected" | "awaiting_second_look"; dropped?: Dropped[] }
     | { success: false; error: string; code?: string; requeued?: boolean; dropped?: Dropped[] };
 
+/** The engine's DroppedValue: a value the Registry would not keep, and why. */
 export interface Dropped {
     key: string;
-    error: string;
+    /** The field's name, as people read it. */
+    label?: string;
     value?: unknown;
+    error: string;
 }
 
 interface Engine {
@@ -45,6 +51,13 @@ interface Engine {
 }
 
 const engine = write as unknown as Partial<Engine>;
+const engineApply = apply as unknown as {
+    additionDrops?: (fieldChanges: Record<string, unknown>) => Promise<Dropped[]>;
+};
+
+/** The values a suggested new entry would lose, before it is approved (none known before the engine has it). */
+export const additionDrops: (fieldChanges: Record<string, unknown>) => Promise<Dropped[]> =
+    engineApply.additionDrops ?? (async () => []);
 const db = () => getAdminClient() as unknown as SupabaseClient;
 const CLAIM_MS = 30 * 60 * 1000;
 
@@ -69,8 +82,8 @@ export const claimSuggestion: Engine["claimSuggestion"] =
             .or(`claimed_by.is.null,claimed_until.lt.${now.toISOString()},claimed_by.eq.${actor.userId}`)
             .select("id");
         if (error) {
-            if (write.isMissingSchema(error))
-                return { success: false, code: "not_ready", error: "Claims start with update 242." };
+            // As the engine does: before 242 there is no hold to take.
+            if (write.isMissingSchema(error)) return { success: true, claimedUntil: "" };
             return { success: false, code: "failed", error: "It could not be held. Please try again." };
         }
         if (!data || (data as unknown[]).length === 0)

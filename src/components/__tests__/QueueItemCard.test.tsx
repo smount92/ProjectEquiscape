@@ -51,6 +51,7 @@ function item(over: Partial<QueueItem> = {}): QueueItem {
         note: null,
         canEdit: true,
         current: { title: "Saddlebred", model_number: "", release_year_end: "1975" },
+        willDrop: [],
         ...over,
     };
 }
@@ -281,6 +282,19 @@ describe("QueueItemCard", () => {
                 SEEN,
             ),
         );
+    });
+
+    it("shows a new entry's values the Registry won't keep before anyone approves it", () => {
+        const added = item({
+            tab: "additions",
+            kind: "addition",
+            kindLabel: "New entry",
+            itemId: null,
+            willDrop: [{ key: "run_type", label: "Run type", value: "Store Special", error: "not a run type." }],
+        });
+        render(<QueueItemCard item={added} role="moderator" onDone={onDone} />);
+        expect(screen.getByTestId("will-drop").textContent).toContain("Run type “Store Special”: not a run type.");
+        expect(desk.approveSuggestion).not.toHaveBeenCalled();
     });
 
     it("shows the values the Registry left out before moving on", async () => {

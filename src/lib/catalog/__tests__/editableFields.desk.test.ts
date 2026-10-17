@@ -221,6 +221,13 @@ describe("deskChanges", () => {
         expect(deskChanges(fields, { id: "x", updated_at: "y", nested: "z" })).toEqual({});
     });
 
+    it("edits a list stored under a key that holds text as one line, and saves it as text", () => {
+        const fields = buildDeskFields(row({ attributes: { odd_tags: ["Bay", "Pinto"] } }));
+        const f = fields.find((x) => x.key === "odd_tags")!;
+        expect(f).toMatchObject({ kind: "text", original: "Bay, Pinto", readOnly: false });
+        expect(deskChanges(fields, { odd_tags: "Bay, Pinto, Roan" })).toEqual({ odd_tags: "Bay, Pinto, Roan" });
+    });
+
     it("sends a list as its values, and nothing when only the spacing changed", () => {
         const fields = buildDeskFields(row({ attributes: { materials: ["Leather", "Brass"] } }));
         expect(deskChanges(fields, { materials: "Leather,Brass " })).toEqual({});

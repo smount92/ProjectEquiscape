@@ -129,6 +129,7 @@ const engine = vi.hoisted(() => ({
     releaseSuggestionClaim: vi.fn(),
     requestMerge: vi.fn(),
     decideSuggestion: vi.fn(),
+    additionDrops: vi.fn(),
 }));
 vi.mock("@/lib/catalog/desk-engine-interfaces", () => engine);
 const apply = vi.hoisted(() => ({ applySuggestion: vi.fn() }));
@@ -207,6 +208,7 @@ beforeEach(() => {
         claimedUntil: new Date(Date.now() + 30 * 60 * 1000).toISOString(),
     }));
     engine.releaseSuggestionClaim.mockResolvedValue({ success: true });
+    engine.additionDrops.mockResolvedValue([]);
 });
 
 const asOwner = () =>
@@ -286,16 +288,20 @@ describe("claims", () => {
         expect(engine.claimSuggestion).toHaveBeenCalledTimes(1);
     });
 
-    it("says so when another moderator won the race for it", async () => {
-        engine.claimSuggestion.mockResolvedValue({ success: false, code: "conflict", error: "taken" });
+    it("says so, in the engine's words, when another moderator won the race for it", async () => {
+        engine.claimSuggestion.mockResolvedValue({
+            success: false,
+            code: "conflict",
+            error: "@BayLeaf is looking at this one for another 29 minutes.",
+        });
         expect(await desk.claimSuggestion("s1")).toEqual({
             success: false,
-            error: "Another moderator picked this one up a moment ago.",
+            error: "@BayLeaf is looking at this one for another 29 minutes.",
         });
     });
 
-    it("opens it without a hold before update 242", async () => {
-        engine.claimSuggestion.mockResolvedValue({ success: false, code: "not_ready", error: "later" });
+    it("opens it without a hold before update 242 (the engine answers with no time)", async () => {
+        engine.claimSuggestion.mockResolvedValue({ success: true, claimedUntil: "" });
         expect(await desk.claimSuggestion("s1")).toEqual({ success: true, claimed: false, until: null });
     });
 
@@ -452,6 +458,23 @@ describe("the Queue", () => {
             model_number: "",
             color_description: "Bay",
         });
+    });
+
+    it("lists what a new entry would lose before anyone approves it", async () => {
+        const fc = { title: "Morgan Mare", maker: "Breyer", run_type: "Store Special" };
+        db.tables.catalog_suggestions = [
+            suggestion({ id: "s9", suggestion_type: "addition", catalog_item_id: null, field_changes: fc }),
+        ];
+        const lost = [{ key: "run_type", label: "Run type", value: "Store Special", error: "not a run type" }];
+        engine.additionDrops.mockResolvedValue(lost);
+        const r = await desk.getQueue("additions");
+        if (!r.success) throw new Error(r.error);
+        expect(engine.additionDrops).toHaveBeenCalledWith(fc);
+        expect(r.queue.items[0].willDrop).toEqual(lost);
+        // A failed check costs only the list, never the Queue.
+        engine.additionDrops.mockRejectedValue(new Error("boom"));
+        const again = await desk.getQueue("additions");
+        expect(again).toMatchObject({ success: true, queue: { items: [{ willDrop: [] }] } });
     });
 
     it("counts the Desk's tabs: open suggestions, second looks, proposed rules", async () => {
