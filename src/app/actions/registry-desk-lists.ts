@@ -29,6 +29,7 @@ import { getAdminClient } from "@/lib/supabase/admin";
 import { checkRateLimit } from "@/lib/utils/rateLimit";
 import { undoAction as undoRegistryAction } from "@/lib/catalog/write";
 import { checkRegistryLimit } from "@/lib/registry/limits";
+import { countableRuleVoters } from "@/lib/registry/alerts";
 import { actorOf, type ActionKind, type ActionStatus, type ActorRole } from "@/lib/registry/types";
 import { TODO_LISTS, type TodoItem, type TodoListDef, type TodoListKey } from "@/lib/registry/checks";
 import { FIX_RULES, isKnownFix } from "@/lib/registry/fixes";
@@ -361,6 +362,8 @@ export async function listRules(): Promise<ActionResult<{ rules: RuleView[]; isO
     ]);
     const name = (id: string | null) => (id ? (aliases.get(id) ?? "a moderator") : "a former moderator");
     const isOwner = me.role === "owner";
+    // Votes from moderators whose seat or term has ended stay on the record but no longer count.
+    const voters = await countableRuleVoters();
     const views = rules.map((r): RuleView => {
         const mine = votes.filter((v) => v.rule_id === r.id);
         const fix = r.check_key ? FIX_RULES[r.check_key] : undefined;
@@ -375,7 +378,7 @@ export async function listRules(): Promise<ActionResult<{ rules: RuleView[]; isO
             status: r.status,
             proposedBy: name(r.proposed_by),
             mine: r.proposed_by === me.user.id,
-            agreements: agreementCount(r, mine),
+            agreements: agreementCount(r, mine, voters),
             agreedBy: mine
                 .filter((v) => v.vote === "agree" && v.voter_id !== r.proposed_by)
                 .map((v) => name(v.voter_id)),
@@ -490,7 +493,9 @@ export async function voteRule(
         .eq("rule_id", rule.id);
     if (readError) return safeError("RegistryRules", readError);
     const votes = (voteData ?? []) as VoteRow[];
-    const status = ruleStatusAfterVote(rule, votes);
+    // Only votes from moderators still in their seat (and the owner's) count.
+    const voters = await countableRuleVoters();
+    const status = ruleStatusAfterVote(rule, votes, voters);
     if (status !== rule.status) {
         // Guarded: only a rule still proposed moves (a veto in between wins).
         const { error: moveError } = await db
@@ -503,7 +508,7 @@ export async function voteRule(
         revalidatePath("/catalog/desk", "layout");
     }
     revalidatePath("/catalog/desk/rules");
-    return { success: true, status, agreements: agreementCount(rule, votes) };
+    return { success: true, status, agreements: agreementCount(rule, votes, voters) };
 }
 
 /** The proposer takes their rule back, while it is still proposed. */
@@ -614,7 +619,9 @@ interface ActionRecord {
 const HISTORY_PAGE = 30;
 const HistoryFilter = z.object({
     who: z.enum(["all", "mine", "others"]).catch("all"),
-    kind: z.enum(["all", "edit", "add", "refile", "approve", "revert", "merge", "remove", "undo"]).catch("all"),
+    kind: z
+        .enum(["all", "edit", "add", "refile", "approve", "revert", "merge", "remove", "undo", "reject"])
+        .catch("all"),
     page: z.coerce.number().int().min(1).max(1000).catch(1),
 });
 export type HistoryFilterInput = { who?: string; kind?: string; page?: number | string };

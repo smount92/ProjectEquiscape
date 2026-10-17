@@ -4,6 +4,7 @@ import { cache } from "react";
 
 import { createClient } from "@/lib/supabase/server";
 import { entitledTier } from "@/lib/entitlement/clock";
+import { seatIsActive } from "@/lib/registry/types";
 import type { SupabaseClient } from "@supabase/supabase-js";
 // (getAdminClient is imported lazily inside resolveRegistryRole: it is
 // "server-only", and client components import types from this file.)
@@ -104,26 +105,40 @@ export type RegistryRole = "owner" | "moderator";
 /** The words a member who is not a Registry moderator sees from any Desk action. */
 export const REGISTRY_DESK_REFUSAL = "The Registry Desk is for Registry moderators.";
 
+/** What a moderator whose 12-month term has run out sees from any Desk action. */
+export const REGISTRY_TERM_ENDED =
+    "Your term as a Registry moderator has ended, so the Registry Desk is closed to you. The site owner can renew it.";
+
+export { seatIsActive };
+
 function isOwnerEmail(email: string | undefined): boolean {
     const adminEmail = process.env.ADMIN_EMAIL?.toLowerCase();
     return !!adminEmail && email?.toLowerCase() === adminEmail;
 }
 
+type RegistrySeat = { userId: string; alias: string; role: RegistryRole };
+
 /**
  * The viewer's Registry role, read once per request. The seat is read
  * with the service role (registry_moderators has no policies), so a
- * removed moderator is refused on their very next request. Before 242
- * the table is missing and only the owner has a role.
+ * removed moderator is refused on their very next request, and so is one
+ * whose 12-month term has run out (term_ends_at in the past), even while
+ * the seat still says "active". Before 242 the table is missing and only
+ * the owner has a role.
  */
-const resolveRegistryRole = cache(async function resolveRegistryRole(): Promise<{
-    userId: string;
-    alias: string;
-    role: RegistryRole;
-} | null> {
+const resolveRegistryRole = cache(async function resolveRegistryRole(): Promise<RegistrySeat | null> {
+    return (await resolveRegistrySeat()).seat;
+});
+
+const resolveRegistrySeat = cache(async function resolveRegistrySeat(): Promise<{
+    seat: RegistrySeat | null;
+    termEnded: boolean;
+}> {
+    const none = { seat: null, termEnded: false };
     const { user } = await resolveViewer();
-    if (!user) return null;
+    if (!user) return none;
     // A suspended account has no Desk, whatever its seat says.
-    if (user.app_metadata?.is_suspended) return null;
+    if (user.app_metadata?.is_suspended) return none;
     const { getAdminClient } = await import("@/lib/supabase/admin");
     const admin = getAdminClient();
     const owner = isOwnerEmail(user.email);
@@ -135,20 +150,21 @@ const resolveRegistryRole = cache(async function resolveRegistryRole(): Promise<
     } catch {
         /* the alias is cosmetic; the role check below decides */
     }
-    if (owner) return { userId: user.id, alias, role: "owner" };
+    if (owner) return { seat: { userId: user.id, alias, role: "owner" }, termEnded: false };
     try {
         const { data, error } = await (admin as unknown as SupabaseClient)
             .from("registry_moderators")
-            .select("status")
+            .select("status, term_ends_at")
             .eq("user_id", user.id)
             .maybeSingle();
         // 42P01 / PGRST205: no 242 yet, so nobody but the owner has a seat.
-        if (error || !data) return null;
-        if ((data as { status: string }).status !== "active") return null;
+        if (error || !data) return none;
+        const row = data as { status: string; term_ends_at?: string | null };
+        if (!seatIsActive(row)) return { seat: null, termEnded: row.status === "active" };
     } catch {
-        return null;
+        return none;
     }
-    return { userId: user.id, alias: alias || "member", role: "moderator" };
+    return { seat: { userId: user.id, alias: alias || "member", role: "moderator" }, termEnded: false };
 });
 
 /**
@@ -176,8 +192,8 @@ export async function requireRegistryModerator(): Promise<{
     alias: string;
 }> {
     const { supabase, user } = await requireAuth();
-    const seat = await resolveRegistryRole();
-    if (!seat || seat.userId !== user.id) throw new AuthError(REGISTRY_DESK_REFUSAL);
+    const { seat, termEnded } = await resolveRegistrySeat();
+    if (!seat || seat.userId !== user.id) throw new AuthError(termEnded ? REGISTRY_TERM_ENDED : REGISTRY_DESK_REFUSAL);
     return { supabase, user, role: seat.role, alias: seat.alias };
 }
 

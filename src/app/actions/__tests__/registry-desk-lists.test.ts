@@ -122,6 +122,17 @@ describe("owner only", () => {
 });
 
 describe("rules", () => {
+    const FUTURE = "2099-01-01T00:00:00Z";
+    let seats: { user_id: string; status: string; term_ends_at: string }[] = [];
+    beforeEach(() => {
+        seats = ["u-maple", "u-ridge", "u-fern", "u-bay"].map((user_id) => ({
+            user_id,
+            status: "active",
+            term_ends_at: FUTURE,
+        }));
+        db.on("registry_moderators", () => ({ data: seats, error: null }));
+    });
+
     function ruleWithVotes(status: string, votes: { voter_id: string; vote: string }[]) {
         db.on("registry_style_rules", (q) =>
             q.op === "select" ? { data: { id: RULE, status, proposed_by: "u-maple" }, error: null } : OK,
@@ -141,6 +152,44 @@ describe("rules", () => {
         const move = db.writes("registry_style_rules")[0];
         expect(move.payload).toMatchObject({ status: "in_effect" });
         expect(db.filter(move, "eq", "status")).toBe("proposed");
+    });
+
+    it("votes from moderators whose seat or term has ended don't count; the owner's always does", async () => {
+        seats = [
+            { user_id: "u-ridge", status: "removed", term_ends_at: FUTURE },
+            { user_id: "u-fern", status: "active", term_ends_at: "2020-01-01T00:00:00Z" },
+            { user_id: "u-bay", status: "active", term_ends_at: FUTURE },
+        ];
+        ruleWithVotes("proposed", [
+            { voter_id: "u-ridge", vote: "agree" },
+            { voter_id: "u-fern", vote: "agree" },
+            { voter_id: "u-bay", vote: "agree" },
+        ]);
+        expect(await actions.voteRule(RULE, "agree")).toEqual({ success: true, status: "proposed", agreements: 1 });
+        expect(db.writes("registry_style_rules")).toHaveLength(0);
+
+        // The owner has no seat, and their agreement still counts.
+        db.on("users", (q) =>
+            q.filters.some((f) => f[0] === "ilike" && f[1] === "email")
+                ? { data: [{ id: "u-owner" }], error: null }
+                : { data: [{ id: "u-maple", alias_name: "Maple" }], error: null },
+        );
+        const before = process.env.ADMIN_EMAIL;
+        process.env.ADMIN_EMAIL = "owner@test.com";
+        try {
+            ruleWithVotes("proposed", [
+                { voter_id: "u-owner", vote: "agree" },
+                { voter_id: "u-bay", vote: "agree" },
+                { voter_id: "u-fern", vote: "agree" },
+            ]);
+            expect(await actions.voteRule(RULE, "agree")).toEqual({
+                success: true,
+                status: "proposed",
+                agreements: 2,
+            });
+        } finally {
+            process.env.ADMIN_EMAIL = before;
+        }
     });
 
     it("two agreements stay proposed", async () => {

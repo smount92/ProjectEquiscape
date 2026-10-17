@@ -27,10 +27,29 @@ export interface VoteRow {
     vote: RuleVote;
 }
 
-/** Agreements that count: one per moderator, never the proposer's. */
-export function agreementCount(rule: RuleForVote, votes: VoteRow[]): number {
+/**
+ * Whose votes count today: moderators whose seat is active and whose term
+ * has not run out, and the owner, whose vote always counts. A moderator
+ * removed, resting, stepped down or out of term keeps their vote on the
+ * record, but it no longer counts toward the agreements. Omitted: every
+ * vote counts (as before seats could end).
+ */
+export interface CountableVoters {
+    active: ReadonlySet<string>;
+    owners: ReadonlySet<string>;
+}
+
+function counts(voterId: string, voters: CountableVoters | undefined): boolean {
+    if (!voters) return true;
+    return voters.owners.has(voterId) || voters.active.has(voterId);
+}
+
+/** Agreements that count: one per moderator still in their seat (or the owner), never the proposer's. */
+export function agreementCount(rule: RuleForVote, votes: VoteRow[], voters?: CountableVoters): number {
     const agreed = new Set(
-        votes.filter((v) => v.vote === "agree" && v.voter_id !== rule.proposed_by).map((v) => v.voter_id),
+        votes
+            .filter((v) => v.vote === "agree" && v.voter_id !== rule.proposed_by && counts(v.voter_id, voters))
+            .map((v) => v.voter_id),
     );
     return agreed.size;
 }
@@ -41,9 +60,9 @@ export function agreementCount(rule: RuleForVote, votes: VoteRow[]): number {
  * effect if someone takes their agreement back, and a vetoed, withdrawn or
  * retired rule never comes back by vote.
  */
-export function ruleStatusAfterVote(rule: RuleForVote, votes: VoteRow[]): RuleStatus {
+export function ruleStatusAfterVote(rule: RuleForVote, votes: VoteRow[], voters?: CountableVoters): RuleStatus {
     if (rule.status !== "proposed") return rule.status;
-    return agreementCount(rule, votes) >= AGREEMENTS_NEEDED ? "in_effect" : "proposed";
+    return agreementCount(rule, votes, voters) >= AGREEMENTS_NEEDED ? "in_effect" : "proposed";
 }
 
 /** Can this person vote on the rule? Not on their own, and only while it is proposed. */
