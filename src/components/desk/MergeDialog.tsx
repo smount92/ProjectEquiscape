@@ -6,6 +6,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogTitle } f
 import { Input } from "@/components/ui/input";
 import { previewMerge, requestMerge, type DeskRelease } from "@/app/actions/registry-desk";
 import { linkWords } from "@/components/desk/linkWords";
+import MergeCheckFailed from "@/components/desk/MergeCheckFailed";
 import { canMerge, mergeButton, mergeNote, type Readiness } from "@/components/desk/mergeWords";
 
 function sub(r: DeskRelease): string {
@@ -46,6 +47,10 @@ export default function MergeDialog({
     const [error, setError] = useState("");
     const [moving, setMoving] = useState<string[] | null>(null);
     const [ready, setReady] = useState<Readiness>(null);
+    // The check itself failed (a network or server error): not the same as
+    // "update 243 is missing". Merging stays off until a check succeeds.
+    const [checkFailed, setCheckFailed] = useState(false);
+    const [attempt, setAttempt] = useState(0);
 
     const keep = rows.find((r) => r.row.id === keepId) ? keepId : (rows[0]?.row.id ?? "");
     const others = rows.filter((r) => r.row.id !== keep);
@@ -59,7 +64,12 @@ export default function MergeDialog({
             let undoReady: boolean | null = null;
             for (const o of rest) {
                 const r = await previewMerge(keep, o.row.id);
-                if (!r.success) continue;
+                if (!r.success) {
+                    if (!live) return;
+                    setReady(null);
+                    setCheckFailed(true);
+                    return;
+                }
                 undoReady = undoReady === null ? r.undoReady : undoReady && r.undoReady;
                 for (const [k, n] of Object.entries((r.remove.links ?? {}) as Record<string, number>)) {
                     // Set pieces are read from titles; a merge moves links, not titles.
@@ -68,13 +78,14 @@ export default function MergeDialog({
                 }
             }
             if (!live) return;
+            setCheckFailed(false);
             setMoving(linkWords(totals));
             setReady(undoReady ?? false);
         })();
         return () => {
             live = false;
         };
-    }, [open, keep, rows]);
+    }, [open, keep, rows, attempt]);
 
     async function send() {
         setBusy(true);
@@ -145,7 +156,9 @@ export default function MergeDialog({
                         placeholder="Same release listed twice"
                     />
                 </label>
-                {ready === null ? (
+                {checkFailed ? (
+                    <MergeCheckFailed onRetry={() => setAttempt((n) => n + 1)} />
+                ) : ready === null ? (
                     <p className="m-0 text-sm text-muted-foreground">Checking ...</p>
                 ) : (
                     <p
@@ -170,7 +183,7 @@ export default function MergeDialog({
                         type="button"
                         variant={ready === false ? "destructive" : "default"}
                         onClick={send}
-                        disabled={busy || others.length === 0 || !canMerge(role, ready)}
+                        disabled={busy || others.length === 0 || checkFailed || !canMerge(role, ready)}
                     >
                         {mergeButton(role, ready, busy)}
                     </Button>

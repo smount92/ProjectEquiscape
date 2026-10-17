@@ -537,3 +537,220 @@ describe("phones and entries on their own", () => {
         expect(screen.getByText(/This release is not filed under a mold/)).toBeTruthy();
     });
 });
+
+// ══════════════════════════════════════════════════════════════
+// Late review of the Desk UI fixes (r3-final)
+// ══════════════════════════════════════════════════════════════
+
+function deferred<T>() {
+    let resolve!: (v: T) => void;
+    const promise = new Promise<T>((r) => (resolve = r));
+    return { promise, resolve };
+}
+
+describe("keys are not stopped by panels that aren't the Desk's dialogs", () => {
+    it("J, K and Ctrl+S work while the cookie banner (role=dialog) is showing", async () => {
+        const banner = document.createElement("div");
+        banner.setAttribute("role", "dialog");
+        banner.textContent = "We use cookies";
+        document.body.appendChild(banner);
+        try {
+            actions.saveItem.mockResolvedValue(savedOk(SET.row));
+            renderView();
+            fireEvent.keyDown(window, { key: "j" });
+            expect(editorTitle().textContent).toBe("Sears Holiday Catalog");
+            fireEvent.keyDown(window, { key: "k" });
+            expect(editorTitle().textContent).toBe("Saddlebred");
+            fireEvent.change(colourBox(), { target: { value: "Bay, solid face" } });
+            await act(async () => {
+                fireEvent.keyDown(window, { key: "s", ctrlKey: true });
+            });
+            expect(actions.saveItem).toHaveBeenCalledTimes(1);
+        } finally {
+            banner.remove();
+        }
+    });
+});
+
+describe("a save still in flight", () => {
+    it("keeps what was typed while it saved", async () => {
+        const pending = deferred<unknown>();
+        actions.saveItem.mockReturnValue(pending.promise);
+        renderView();
+        fireEvent.change(colourBox(), { target: { value: "Bay, solid face" } });
+        fireEvent.click(screen.getByRole("button", { name: "Save" }));
+        // Typed while the save is out: a new field, and the same box again.
+        fireEvent.change(screen.getByLabelText(/^Name/), { target: { value: "Saddlebred Weanling" } });
+        await act(async () => {
+            pending.resolve(savedOk(row({ id: "r-bay", attributes: { color_description: "Bay, solid face" } })));
+        });
+        expect((screen.getByLabelText(/^Name/) as HTMLInputElement).value).toBe("Saddlebred Weanling");
+        expect(colourBox().value).toBe("Bay, solid face");
+        expect(screen.getByText("1 unsaved change")).toBeTruthy();
+    });
+
+    it("keeps a box changed again while it saved", async () => {
+        const pending = deferred<unknown>();
+        actions.saveItem.mockReturnValue(pending.promise);
+        renderView();
+        fireEvent.change(colourBox(), { target: { value: "Bay" } });
+        fireEvent.click(screen.getByRole("button", { name: "Save" }));
+        fireEvent.change(colourBox(), { target: { value: "Bay, star" } });
+        await act(async () => {
+            pending.resolve(savedOk(row({ id: "r-bay", attributes: { color_description: "Bay" } })));
+        });
+        expect(colourBox().value).toBe("Bay, star");
+    });
+
+    it("doesn't pin the saved release in view when you have already moved on", async () => {
+        const pending = deferred<unknown>();
+        actions.saveItem.mockReturnValue(pending.promise);
+        renderView({ initial: "r-set" });
+        fireEvent.click(screen.getByRole("button", { name: /^Needs work/ }));
+        fireEvent.change(screen.getByLabelText(/^Name/), { target: { value: "Saddlebred" } });
+        fireEvent.click(screen.getByRole("button", { name: "Save" }));
+        fireEvent.click(screen.getByRole("button", { name: "Next release" }));
+        expect(editorTitle().textContent).toBe("Pinto Saddlebred");
+        await act(async () => {
+            pending.resolve(savedOk(row({ id: "r-set", title: "Saddlebred" })));
+        });
+        // The fixed one no longer needs work and you are elsewhere: it leaves the list.
+        expect(within(screen.getByTestId("release-rail")).getAllByTestId("rail-row")).toHaveLength(2);
+        expect(editorTitle().textContent).toBe("Pinto Saddlebred");
+    });
+
+    it("says so when the mold saved but its releases did not all follow", async () => {
+        actions.saveItem.mockResolvedValue({
+            ...savedOk(row({ id: "r-bay", attributes: { color_description: "Bay" } })),
+            warning: "The mold is saved, but the releases filed under it could not all be moved.",
+        });
+        renderView();
+        fireEvent.change(colourBox(), { target: { value: "Bay" } });
+        await act(async () => {
+            fireEvent.click(screen.getByRole("button", { name: "Save" }));
+        });
+        expect(toast).toHaveBeenCalledWith(
+            expect.stringMatching(/could not all be moved/),
+            "error",
+            expect.any(Number),
+            undefined,
+        );
+    });
+});
+
+describe("the leave guard on Back and Forward", () => {
+    const stampHere = () => Number((window.history.state as Record<string, unknown> | null)?.mhhDeskStamp);
+
+    it("undoes a Forward move without cutting off forward history, and Leave goes forward again", () => {
+        renderView();
+        fireEvent.change(colourBox(), { target: { value: "Bay, solid face" } });
+        const here = stampHere();
+        expect(Number.isFinite(here)).toBe(true);
+        const push = vi.spyOn(window.history, "pushState");
+        const go = vi.spyOn(window.history, "go").mockImplementation(() => {});
+        act(() => {
+            window.dispatchEvent(new PopStateEvent("popstate", { state: { mhhDeskStamp: here + 5 } }));
+        });
+        expect(push).not.toHaveBeenCalled();
+        expect(go).toHaveBeenCalledWith(-1);
+        expect(screen.getByRole("dialog").textContent).toMatch(/Leave without saving 1 release\?/);
+        fireEvent.click(within(screen.getByRole("dialog")).getByRole("button", { name: "Leave without saving" }));
+        expect(go).toHaveBeenLastCalledWith(1);
+        push.mockRestore();
+        go.mockRestore();
+    });
+
+    it("undoes a Back move to a page it knows the same way, and Leave goes back", () => {
+        renderView();
+        fireEvent.change(colourBox(), { target: { value: "Bay, solid face" } });
+        const here = stampHere();
+        const push = vi.spyOn(window.history, "pushState");
+        const go = vi.spyOn(window.history, "go").mockImplementation(() => {});
+        act(() => {
+            window.dispatchEvent(new PopStateEvent("popstate", { state: { mhhDeskStamp: here - 5 } }));
+        });
+        expect(push).not.toHaveBeenCalled();
+        expect(go).toHaveBeenCalledWith(1);
+        fireEvent.click(within(screen.getByRole("dialog")).getByRole("button", { name: "Leave without saving" }));
+        expect(go).toHaveBeenLastCalledWith(-1);
+        push.mockRestore();
+        go.mockRestore();
+    });
+
+    it("lets the move back onto this page through quietly, without asking twice", () => {
+        renderView();
+        fireEvent.change(colourBox(), { target: { value: "Bay, solid face" } });
+        const here = stampHere();
+        const go = vi.spyOn(window.history, "go").mockImplementation(() => {});
+        act(() => {
+            window.dispatchEvent(new PopStateEvent("popstate", { state: { mhhDeskStamp: here + 5 } }));
+        });
+        fireEvent.click(within(screen.getByRole("dialog")).getByRole("button", { name: "Stay" }));
+        // The browser arrives back here from history.go(-1).
+        act(() => {
+            window.dispatchEvent(new PopStateEvent("popstate", { state: { mhhDeskStamp: here } }));
+        });
+        expect(screen.queryByRole("dialog")).toBeNull();
+        expect(go).toHaveBeenCalledTimes(1);
+        go.mockRestore();
+    });
+});
+
+describe("a merge check that fails is not 'update 243 is missing'", () => {
+    const none = { horses: 0, wishlists: 0, children: 0, total: 0 };
+    const ok = {
+        success: true,
+        keep: { row: BAY.row, links: none },
+        remove: { row: PINTO.row, links: none },
+        undoReady: true,
+    };
+
+    it("releases: says the check failed, keeps the button off, and tries again on request", async () => {
+        actions.previewMerge.mockResolvedValueOnce({ success: false, error: "Something went wrong." });
+        renderView();
+        fireEvent.click(screen.getByRole("checkbox", { name: "Tick Saddlebred" }));
+        fireEvent.click(screen.getByRole("checkbox", { name: "Tick Pinto Saddlebred" }));
+        fireEvent.click(screen.getByRole("button", { name: "Merge ..." }));
+        expect(await screen.findByTestId("merge-check-failed")).toBeTruthy();
+        expect(screen.queryByTestId("merge-note")).toBeNull();
+        expect(screen.queryByText(/update 243/)).toBeNull();
+        expect((screen.getByRole("button", { name: "Ask for a second look" }) as HTMLButtonElement).disabled).toBe(
+            true,
+        );
+        actions.previewMerge.mockResolvedValue(ok);
+        await act(async () => {
+            fireEvent.click(screen.getByRole("button", { name: "Try again" }));
+        });
+        expect((await screen.findByTestId("merge-note")).textContent).toMatch(/second look/);
+        expect(screen.queryByTestId("merge-check-failed")).toBeNull();
+        expect((screen.getByRole("button", { name: "Ask for a second look" }) as HTMLButtonElement).disabled).toBe(
+            false,
+        );
+    });
+
+    it("molds: the same", async () => {
+        actions.searchMolds.mockResolvedValue({
+            success: true,
+            molds: [{ id: "g1", title: "Saddlebred (G1)", maker: "Breyer", scale: "Stablemate (1:32)", releases: 4 }],
+        });
+        actions.previewMerge.mockResolvedValueOnce({ success: false, error: "Something went wrong." });
+        renderView({ role: "owner" });
+        fireEvent.click(screen.getByRole("button", { name: "Merge this mold into ..." }));
+        const dialog = screen.getByRole("dialog");
+        fireEvent.change(within(dialog).getByLabelText(/Find the mold/), { target: { value: "Saddlebred G1" } });
+        fireEvent.click(await within(dialog).findByRole("button", { name: /Saddlebred \(G1\)/ }, { timeout: 2000 }));
+        expect(await within(dialog).findByTestId("merge-check-failed")).toBeTruthy();
+        expect(within(dialog).queryByText(/update 243/)).toBeNull();
+        expect((within(dialog).getByRole("button", { name: "Merge" }) as HTMLButtonElement).disabled).toBe(true);
+        actions.previewMerge.mockResolvedValue({
+            ...ok,
+            keep: { row: row({ id: "g1", item_type: "plastic_mold", title: "Saddlebred (G1)" }), links: none },
+            remove: { row: MOLD.row, links: none },
+        });
+        await act(async () => {
+            fireEvent.click(within(dialog).getByRole("button", { name: "Try again" }));
+        });
+        expect(await within(dialog).findByTestId("merge-note")).toBeTruthy();
+        expect((within(dialog).getByRole("button", { name: "Merge" }) as HTMLButtonElement).disabled).toBe(false);
+    });
+});

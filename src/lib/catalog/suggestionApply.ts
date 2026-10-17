@@ -716,6 +716,10 @@ async function applyTaken(
                 note: opts.note ?? s.reason,
                 suggestionId: s.id,
                 contributor,
+                // takeDecision has just moved this report to "approved",
+                // uncredited: a moderator's merge sends it back under
+                // review to wait with the merge; the confirm credits it once.
+                fromApproval: true,
             });
             if (!merged.success) {
                 if (merged.code === "not_found") {

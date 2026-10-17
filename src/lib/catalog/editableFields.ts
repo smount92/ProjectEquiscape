@@ -30,6 +30,9 @@ import {
     RUN_TYPES,
 } from "@/lib/catalog/taxonomy";
 import { referenceHref } from "@/lib/catalog/referenceUrl";
+// corrections.ts imports MATERIAL_OPTIONS from this file; both are read only
+// inside functions, so the cycle is safe at load time.
+import { fieldValueProblem } from "@/lib/catalog/corrections";
 
 export type FieldKind = "text" | "textarea" | "select" | "number";
 
@@ -675,10 +678,28 @@ export function deskChanges(fields: DeskFieldEdit[], draft: Record<string, strin
         if (!same || (f.storedAsText && next !== "")) changes[f.key] = value(f, next);
     }
     if (Object.keys(changes).length > 0) {
-        // Only a plain year rides along: "1975-1988" as text waits for a person.
+        // Only a plain year the Registry would accept rides along: "1975-1988"
+        // as text, a year out of range, or a last year before the first waits
+        // for a person, so it can't make an unrelated save fail.
+        const carried: string[] = [];
         for (const f of fields) {
             const year = f.original.trim();
-            if (f.storedAsText && !(f.key in draft) && /^\d{4}$/.test(year)) changes[f.key] = year;
+            if (f.storedAsText && !(f.key in draft) && /^\d{4}$/.test(year) && !fieldValueProblem(f.key, year)) {
+                changes[f.key] = year;
+                carried.push(f.key);
+            }
+        }
+        if (carried.length > 0) {
+            const yearAfter = (key: string): number | null => {
+                const v = key in changes ? changes[key] : fields.find((f) => f.key === key)?.original;
+                const t = typeof v === "string" ? v.trim() : "";
+                return /^\d{4}$/.test(t) ? Number(t) : null;
+            };
+            const start = yearAfter("release_year_start");
+            const end = yearAfter("release_year_end");
+            if (start !== null && end !== null && end < start) {
+                for (const key of carried) delete changes[key];
+            }
         }
     }
     return changes;

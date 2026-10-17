@@ -33,6 +33,8 @@ const ROLE_WORDS: Record<string, string> = {
 function stateOf(e: HistoryEntry): { label: string; tone: string } {
     if (e.status === "undone") return { label: e.undoneBy ? `Undone by @${e.undoneBy}` : "Undone", tone: "bad" };
     if (e.status === "awaiting_second_look") return { label: "Waiting for a second look", tone: "wait" };
+    // Written just before a merge or removal runs; the database turns it applied when it has.
+    if (e.status === "pending") return { label: "Waiting to run", tone: "wait" };
     if (e.status === "declined") return { label: "Declined", tone: "bad" };
     if (e.status === "failed") return { label: "Didn't go through", tone: "bad" };
     if (e.looksRightBy) return { label: `Looks right · @${e.looksRightBy}`, tone: "good" };

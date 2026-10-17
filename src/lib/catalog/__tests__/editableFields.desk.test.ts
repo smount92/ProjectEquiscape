@@ -256,6 +256,30 @@ describe("deskChanges", () => {
         const fields = buildDeskFields(row({ attributes: { release_year_start: "1975-1988" } }));
         expect(deskChanges(fields, { color_description: "Bay" })).toEqual({ color_description: "Bay" });
     });
+
+    it("never carries along a year the Registry would refuse, so an unrelated save still goes through", () => {
+        // Out of range (years run from 1900).
+        const old = buildDeskFields(row({ attributes: { release_year_end: "1890" } }));
+        expect(deskChanges(old, { color_description: "Bay" })).toEqual({ color_description: "Bay" });
+        // A text last year before the first year.
+        const backwards = buildDeskFields(row({ attributes: { release_year_start: 1990, release_year_end: "1985" } }));
+        expect(deskChanges(backwards, { color_description: "Bay" })).toEqual({ color_description: "Bay" });
+        // Both as text, in the wrong order: neither rides along.
+        const both = buildDeskFields(row({ attributes: { release_year_start: "1990", release_year_end: "1985" } }));
+        expect(deskChanges(both, { color_description: "Bay" })).toEqual({ color_description: "Bay" });
+        // The order is read with what is being saved: a first year moved back makes the text last year fine.
+        expect(deskChanges(backwards, { release_year_start: "1980" })).toEqual({
+            release_year_start: "1980",
+            release_year_end: "1985",
+        });
+        // A good pair still rides along.
+        const good = buildDeskFields(row({ attributes: { release_year_start: "1985", release_year_end: "1990" } }));
+        expect(deskChanges(good, { color_description: "Bay" })).toEqual({
+            color_description: "Bay",
+            release_year_start: "1985",
+            release_year_end: "1990",
+        });
+    });
 });
 
 describe("resin, tack and prop fields", () => {

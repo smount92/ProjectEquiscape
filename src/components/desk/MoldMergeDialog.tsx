@@ -6,6 +6,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogTitle } f
 import { Input } from "@/components/ui/input";
 import { previewMerge, requestMerge, type DeskRelease, type MoldHit } from "@/app/actions/registry-desk";
 import { linkWords } from "@/components/desk/linkWords";
+import MergeCheckFailed from "@/components/desk/MergeCheckFailed";
 import MoldPicker from "@/components/desk/MoldPicker";
 import { canMerge, mergeButton, mergeNote, type Readiness } from "@/components/desk/mergeWords";
 
@@ -36,6 +37,9 @@ export default function MoldMergeDialog({
     const [note, setNote] = useState("");
     const [busy, setBusy] = useState(false);
     const [error, setError] = useState("");
+    // The check itself failed: not "update 243 is missing". Merging stays off until a check succeeds.
+    const [checkFailed, setCheckFailed] = useState(false);
+    const [attempt, setAttempt] = useState(0);
 
     useEffect(() => {
         if (!open || !keep) return;
@@ -44,10 +48,11 @@ export default function MoldMergeDialog({
             const r = await previewMerge(keep.id, mold.row.id);
             if (!live) return;
             if (!r.success) {
-                setError(r.error);
-                setReady(false);
+                setReady(null);
+                setCheckFailed(true);
                 return;
             }
+            setCheckFailed(false);
             setError("");
             setKeepScale(r.keep.row.scale);
             const counts = { ...((r.remove.links ?? {}) as unknown as Record<string, number>) };
@@ -60,7 +65,7 @@ export default function MoldMergeDialog({
         return () => {
             live = false;
         };
-    }, [open, keep, mold.row.id]);
+    }, [open, keep, mold.row.id, attempt]);
 
     async function send() {
         if (!keep) return;
@@ -106,6 +111,7 @@ export default function MoldMergeDialog({
                                 onClick={() => {
                                     setKeep(null);
                                     setReady(null);
+                                    setCheckFailed(false);
                                     setMoving(null);
                                 }}
                             >
@@ -133,7 +139,9 @@ export default function MoldMergeDialog({
                                 placeholder="The same mold listed twice"
                             />
                         </label>
-                        {ready === null ? (
+                        {checkFailed ? (
+                            <MergeCheckFailed onRetry={() => setAttempt((n) => n + 1)} />
+                        ) : ready === null ? (
                             <p className="m-0 text-sm text-muted-foreground">Checking ...</p>
                         ) : (
                             <p
@@ -163,7 +171,7 @@ export default function MoldMergeDialog({
                             type="button"
                             variant={ready === false ? "destructive" : "default"}
                             onClick={send}
-                            disabled={busy || !canMerge(role, ready)}
+                            disabled={busy || checkFailed || !canMerge(role, ready)}
                         >
                             {mergeButton(role, ready, busy)}
                         </Button>

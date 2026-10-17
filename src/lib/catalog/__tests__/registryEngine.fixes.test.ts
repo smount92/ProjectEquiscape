@@ -41,7 +41,12 @@ import {
     validateChanges,
     type CatalogRow,
 } from "@/lib/catalog/write";
-import { additionDrops, applySuggestion, decideSuggestion } from "@/lib/catalog/suggestionApply";
+import {
+    additionDrops,
+    applySuggestion,
+    decideSuggestion,
+    finishMergedSuggestion,
+} from "@/lib/catalog/suggestionApply";
 import { noteRegistryAction, SPEED_ALARM_PER_HOUR } from "@/lib/registry/limits";
 import type { RegistryActor } from "@/lib/registry/types";
 
@@ -861,5 +866,210 @@ describe("undoReady", () => {
         expect(await undoReady()).toBe(true);
         db.missing.add("catalog_removed_items");
         expect(await undoReady()).toBe(false);
+    });
+});
+
+// ══════════════════════════════════════════════════════════════
+// r3-final: the rest of the engine review
+// ══════════════════════════════════════════════════════════════
+
+describe("a confirm that loses the race never sends the report back (B1, B2)", () => {
+    it("the merge ran meanwhile and registry_merge says 'missing': told it is done, report left alone", async () => {
+        const s = seedSuggestion({ suggestion_type: "duplicate", status: "under_review" });
+        const { actionId } = await moderatorMerge({ suggestionId: s.id });
+        db.rpcs.registry_merge = (args) => {
+            realisticMerge(args);
+            return P0001("missing", "The duplicate no longer exists.");
+        };
+        const r = await confirmMerge(MOD2, actionId);
+        expect(r).toMatchObject({ success: false });
+        if (!r.success) expect(r.error).toMatch(/already been applied/);
+        expect(action(actionId).status).toBe("applied");
+        expect(suggestion(s.id)).toMatchObject({ status: "under_review", admin_notes: null });
+    });
+
+    it("the merge ran between reading the request and reading the two entries: same answer", async () => {
+        const s = seedSuggestion({ suggestion_type: "duplicate", status: "under_review" });
+        const { keep, dup, actionId } = await moderatorMerge({ suggestionId: s.id });
+        const realFrom = db.client.from;
+        let armed = true;
+        db.client.from = (table: string) => {
+            if (armed && table === "catalog_items") {
+                armed = false;
+                realisticMerge({ p_action_id: actionId, p_keep: keep.id, p_remove: dup.id, p_actor: OWNER.userId });
+            }
+            return realFrom(table);
+        };
+        const r = await confirmMerge(MOD2, actionId);
+        expect(r).toMatchObject({ success: false });
+        if (!r.success) expect(r.error).toMatch(/already been applied/);
+        expect(action(actionId).status).toBe("applied");
+        expect(suggestion(s.id)).toMatchObject({ status: "under_review", admin_notes: null });
+    });
+
+    it("'missing' (an entry really gone) marks the request failed and sends the report back, whatever its words", async () => {
+        const s = seedSuggestion({ suggestion_type: "duplicate", status: "under_review" });
+        const { actionId } = await moderatorMerge({ suggestionId: s.id });
+        db.rpcs.registry_merge = () => ({ data: null, error: { code: "P0001", message: "missing" } });
+        const r = await confirmMerge(MOD2, actionId);
+        expect(r).toMatchObject({ success: false, code: "not_found" });
+        expect(action(actionId).status).toBe("failed");
+        expect(suggestion(s.id).status).toBe("pending");
+        expect(String(suggestion(s.id).admin_notes)).toMatch(/no longer in the Registry/);
+    });
+});
+
+describe("a report already approved is never sent back under review (B3)", () => {
+    it("requestMerge leaves an approved, credited report alone", async () => {
+        const s = seedSuggestion({ suggestion_type: "duplicate", status: "approved", reviewed_by: MOD.userId });
+        await moderatorMerge({ suggestionId: s.id });
+        expect(suggestion(s.id).status).toBe("approved");
+    });
+
+    it("the report's own approval still waits with its merge, and is credited once when confirmed", async () => {
+        const keep = seed({ title: "Adios" });
+        const dup = seed({ title: "Adios (dup)", slug: "adios-dup" });
+        const s = seedSuggestion({
+            suggestion_type: "duplicate",
+            catalog_item_id: dup.id,
+            field_changes: { duplicate_of: keep.id, duplicate_of_title: "Adios" },
+        });
+        expect(await decideSuggestion(s.id, { reviewer: MOD, verdict: "approved" })).toMatchObject({
+            status: "awaiting_second_look",
+        });
+        expect(suggestion(s.id).status).toBe("under_review");
+        const merge = db.tables.registry_actions.find((a) => a.kind === "merge")!;
+        expect((await confirmMerge(MOD2, String(merge.id))).success).toBe(true);
+        await finishMergedSuggestion(s.id, { requester: { userId: MOD.userId, alias: "Maple" }, confirmer: MOD2 });
+        expect(suggestion(s.id).status).toBe("approved");
+        expect(db.tables.users[0].approved_suggestions_count).toBe(4);
+    });
+});
+
+describe("undoing a mold's scale edit (B4, B5)", () => {
+    function mold() {
+        const m = seed({ item_type: "plastic_mold", title: "Classic Arabian Mare", scale: "Classic (1:12)" });
+        const kids = [
+            seed({ parent_id: m.id, scale: "Classic (1:12)", slug: "a" }),
+            seed({ parent_id: m.id, scale: "Classic (1:12)", slug: "b" }),
+        ];
+        return { m, kids };
+    }
+    const scaleOf = (id: string) => db.tables.catalog_items.find((x) => x.id === id)!.scale;
+
+    it("puts the releases back only when the mold's own scale is put back", async () => {
+        const { m, kids } = mold();
+        const r = await updateItem(MOD, {
+            id: m.id,
+            expectedUpdatedAt: null,
+            changes: { scale: "Traditional (1:9)", mold_name: "Proud Arabian Mare" },
+        });
+        expect(r.success).toBe(true);
+        // Someone changed the mold's scale again since; its name still holds.
+        db.tables.catalog_items.find((x) => x.id === m.id)!.scale = "Stablemate (1:32)";
+        const undo = await undoAction(OWNER, r.success ? r.actionId! : "", "wrong name");
+        expect(undo).toMatchObject({ success: true, restored: 1 });
+        expect(scaleOf(m.id)).toBe("Stablemate (1:32)");
+        for (const k of kids) expect(scaleOf(k.id)).toBe("Traditional (1:9)");
+        if (undo.success) {
+            expect(undo.drifted).toContain("Scale");
+            expect(undo.drifted.join(" ")).toMatch(/2 releases filed under it keep their scale/);
+        }
+    });
+
+    it("a release move that stops part way comes back to the caller, not only in the log", async () => {
+        const { m } = mold();
+        const realFrom = db.client.from;
+        db.client.from = (table: string) => {
+            const q = realFrom(table);
+            if (table !== "catalog_items") return q;
+            // The releases' move (an update filtered on parent_id) times out.
+            const patched = q as unknown as Record<string, (...a: unknown[]) => unknown>;
+            const realEq = patched.eq.bind(q);
+            const realSelect = patched.select.bind(q);
+            let releaseMove = false;
+            let updating = false;
+            const realUpdate = patched.update.bind(q);
+            patched.update = (...a: unknown[]) => {
+                updating = true;
+                return realUpdate(...a);
+            };
+            patched.eq = (...a: unknown[]) => {
+                if (updating && a[0] === "parent_id") releaseMove = true;
+                return realEq(...a);
+            };
+            patched.select = (...a: unknown[]) => {
+                if (releaseMove) return Promise.resolve({ data: null, error: { code: "57014", message: "timeout" } });
+                return realSelect(...a);
+            };
+            return q;
+        };
+        const r = await updateItem(MOD, { id: m.id, expectedUpdatedAt: null, changes: { scale: "Traditional (1:9)" } });
+        expect(r).toMatchObject({ success: true });
+        if (r.success) expect(r.warning).toMatch(/releases filed under it could not all be moved/);
+    });
+});
+
+describe("taking back an addition when the history can't be read (B6)", () => {
+    it("is refused, not allowed through", async () => {
+        const s = seedSuggestion({
+            suggestion_type: "addition",
+            field_changes: { item_type: "plastic_release", title: "Bay Pinto", maker: "Breyer" },
+        });
+        expect((await decideSuggestion(s.id, { reviewer: MOD, verdict: "approved" })).success).toBe(true);
+        const add = db.tables.registry_actions.find((a) => a.kind === "add")!;
+        // The "who edited it since" read fails (here: a column the query names is refused).
+        db.missingColumns.registry_actions = ["actor_id"];
+        const r = await undoAction(OWNER, String(add.id), "It was already in the Registry");
+        expect(r).toMatchObject({
+            success: false,
+            error: "We couldn't check whether others edited this; try again.",
+        });
+        expect(db.tables.catalog_items.some((x) => x.id === add.catalog_item_id)).toBe(true);
+    });
+});
+
+describe("releaseSuggestionClaim says why nothing was let go (B7)", () => {
+    it("someone else's claim, a decided suggestion, and a free one", async () => {
+        const s = seedSuggestion();
+        await claimSuggestion(MOD, s.id);
+        expect(await releaseSuggestionClaim(MOD2, s.id)).toMatchObject({
+            success: false,
+            code: "forbidden",
+            error: "It isn't yours to release.",
+        });
+        expect(suggestion(s.id).claimed_by).toBe(MOD.userId);
+
+        const decided = seedSuggestion({ status: "approved" });
+        expect(await releaseSuggestionClaim(MOD, decided.id)).toMatchObject({
+            success: false,
+            code: "invalid",
+            error: "It was already decided.",
+        });
+
+        // Nobody holds it: nothing to let go, and nothing wrong.
+        const free = seedSuggestion();
+        expect(await releaseSuggestionClaim(MOD, free.id)).toEqual({ success: true });
+    });
+});
+
+describe("one open merge per duplicate (B8)", () => {
+    it("a merge already under way (the owner's, pending) refuses a second request in words", async () => {
+        const keep = seed({ title: "Adios" });
+        const dup = seed({ title: "Adios (dup)", slug: "adios-dup" });
+        db.tables.registry_actions.push({
+            id: fakeId(),
+            kind: "merge",
+            status: "pending",
+            actor_id: OWNER.userId,
+            actor_role: "owner",
+            catalog_item_id: dup.id,
+            related_item_id: keep.id,
+            summary: "x",
+        });
+        const r = await requestMerge(MOD, { keepId: keep.id, removeId: dup.id, note: "same" });
+        expect(r).toMatchObject({ success: false, code: "invalid" });
+        if (!r.success) expect(r.error).toMatch(/already under way or waits for a second look/);
+        expect(db.tables.registry_actions.filter((a) => a.kind === "merge")).toHaveLength(1);
     });
 });

@@ -805,17 +805,25 @@ async function markUndone(actor: RegistryActor, actionId: string): Promise<void>
  * entry still in the state this caller left it in (a pending entry, or a
  * merge still waiting for its second look) and never one the database
  * already applied. A second "Confirm" that finds the merge done can never
- * mark the applied merge failed and lose its undo.
+ * mark the applied merge failed and lose its undo. Returns whether it
+ * marked the entry: false means someone else got there first (it was
+ * applied, declined or already marked), so the caller must not act as if
+ * this attempt was the one that failed.
  */
-async function markFailed(actionId: string | null, from: "pending" | "awaiting_second_look"): Promise<void> {
-    if (!actionId) return;
-    const { error } = await db()
+async function markFailed(actionId: string | null, from: "pending" | "awaiting_second_look"): Promise<boolean> {
+    if (!actionId) return false;
+    const { data, error } = await db()
         .from("registry_actions")
         .update({ status: "failed" })
         .eq("id", actionId)
         .eq("status", from)
-        .is("applied_at", null);
-    if (error) logger.error("RegistryWrite", "Marking a History entry failed did not save (continuing)", error);
+        .is("applied_at", null)
+        .select("id");
+    if (error) {
+        logger.error("RegistryWrite", "Marking a History entry failed did not save (continuing)", error);
+        return false;
+    }
+    return Array.isArray(data) && data.length > 0;
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -881,7 +889,7 @@ export interface UpdateItemInput {
 export async function updateItem(
     actor: RegistryActor,
     input: UpdateItemInput,
-): Promise<WriteResult<{ item: CatalogRow; actionId: string | null; touched: string[] }>> {
+): Promise<WriteResult<{ item: CatalogRow; actionId: string | null; touched: string[]; warning?: string }>> {
     const limit = await checkRegistryLimit(actor, "edit");
     if (!limit.ok) return fail("limit", limit.error);
 
@@ -927,11 +935,21 @@ export async function updateItem(
 
     // A mold's scale is its releases' scale: they move with it, in the
     // same History entry, so one undo puts all of them back.
+    // Not one transaction with the mold's own update: if the move stops
+    // part way, the releases already moved are in this History entry (one
+    // undo puts them back) and the caller is told the rest did not move.
     let followers: { catalog_item_id: string; before: unknown; after: unknown }[] = [];
+    let warning: string | undefined;
     if (updated.item_type === "plastic_mold" && v.touched.includes("scale")) {
-        const moved = await moveReleasesToScale(row.id, (v.columns.scale as string | null) ?? null);
+        const newScale = (v.columns.scale as string | null) ?? null;
+        const moved = await moveReleasesToScale(row.id, newScale);
         followers = moved.rows;
-        if (moved.error) logger.error("RegistryWrite", "Moving releases to the mold's new scale stopped", moved.error);
+        if (moved.error) {
+            logger.error("RegistryWrite", "Moving releases to the mold's new scale stopped", moved.error);
+            warning =
+                `The mold is saved, but the releases filed under it could not all be moved to ${newScale ?? "no scale"}` +
+                `${followers.length ? ` (${followers.length} moved)` : ""}. Undo this change in the History and try again, or set the rest one by one.`;
+        }
     }
     const followWords = followers.length
         ? ` (and ${followers.length} release${followers.length === 1 ? "" : "s"} filed under it)`
@@ -944,7 +962,7 @@ export async function updateItem(
         itemId: row.id,
         itemTitle: updated.title,
         suggestionId: input.suggestionId ?? null,
-        summary: `${updated.title}: ${described}${followWords}`,
+        summary: `${updated.title}: ${described}${followWords}${warning ? " (some releases did not move)" : ""}`,
         note: input.note ?? null,
         rows: [{ catalog_item_id: row.id, before: v.before, after: v.after }, ...followers],
     });
@@ -957,7 +975,7 @@ export async function updateItem(
         contributor: input.contributor ?? null,
     });
     await finishWrite(actor);
-    return { success: true, item: updated, actionId, touched: v.touched };
+    return { success: true, item: updated, actionId, touched: v.touched, ...(warning ? { warning } : {}) };
 }
 
 export interface InsertItemInput {
@@ -1308,7 +1326,16 @@ async function legacyMerge(
     // take its scale (a release always has its mold's scale).
     if (keep.item_type === "plastic_mold" && keep.scale) {
         const moved = await moveReleasesToScale(dup.id, keep.scale);
-        if (moved.error) return dbFailure("Moving releases to the kept mold's scale failed", moved.error);
+        if (moved.error) {
+            const failure = dbFailure("Moving releases to the kept mold's scale failed", moved.error);
+            if (!moved.rows.length) return failure;
+            // Not one transaction: say what already changed, so nobody is surprised.
+            const n = moved.rows.length;
+            return fail(
+                "failed",
+                `The merge stopped before anything was merged, but ${n} release${n === 1 ? "" : "s"} under the duplicate already took the kept mold's scale (${keep.scale}). Please try again.`,
+            );
+        }
     }
 
     let moved = 0;
@@ -1391,7 +1418,11 @@ async function applyMerge(
         suggestionId?: string | null;
         contributor?: { userId: string; alias: string } | null;
     },
-): Promise<WriteResult<{ moved: number; rescaled: number; summary: string }>> {
+): Promise<
+    | { success: true; moved: number; rescaled: number; summary: string }
+    /** `raised`: what registry_merge raised; `markedFailed`: this call marked the History entry failed. */
+    | { success: false; failure: WriteFailure; raised: string; markedFailed: boolean }
+> {
     const { data, error } = await db().rpc("registry_merge", {
         p_keep: keep.id,
         p_remove: dup.id,
@@ -1401,11 +1432,15 @@ async function applyMerge(
     });
     if (error) {
         const raised = error.message ?? "";
+        const refused = (failure: WriteFailure, markedFailed = false) =>
+            ({ success: false, failure, raised, markedFailed }) as const;
         if (raised === "already_applied")
-            return fail("invalid", "This merge has already been applied. Nothing more to do.");
-        if (raised === "not_waiting") return fail("invalid", "This merge is no longer waiting for a second look.");
-        if (opts.from === "pending" || MERGE_DEFINITIVE.has(raised)) await markFailed(actionId, opts.from);
-        return rpcFailure("Merge failed", error);
+            return refused(fail("invalid", "This merge has already been applied. Nothing more to do."));
+        if (raised === "not_waiting")
+            return refused(fail("invalid", "This merge is no longer waiting for a second look."));
+        const marked =
+            opts.from === "pending" || MERGE_DEFINITIVE.has(raised) ? await markFailed(actionId, opts.from) : false;
+        return refused(rpcFailure("Merge failed", error), marked);
     }
     const d = (data ?? {}) as { moved?: number; rescaled?: number };
     const moved = Number(d.moved ?? 0);
@@ -1432,9 +1467,14 @@ async function moveSuggestion(
     suggestionId: string,
     fields: Record<string, unknown>,
     fromStatuses: string[],
+    /** Also only while this person is the one who decided it. */
+    reviewedBy?: string,
 ): Promise<boolean> {
-    const run = (payload: Record<string, unknown>) =>
-        db().from("catalog_suggestions").update(payload).eq("id", suggestionId).in("status", fromStatuses).select("id");
+    const run = (payload: Record<string, unknown>) => {
+        let q = db().from("catalog_suggestions").update(payload).eq("id", suggestionId).in("status", fromStatuses);
+        if (reviewedBy) q = q.eq("reviewed_by", reviewedBy);
+        return q.select("id");
+    };
     let { data, error } = await run(fields);
     if (error && isMissingSchema(error)) {
         const { claimed_by: _by, claimed_until: _until, ...legacy } = fields;
@@ -1464,6 +1504,41 @@ export async function waitingMergeFor(
     if (error || !Array.isArray(data) || data.length === 0) return null;
     const a = data[0] as { id: string; actor_id: string | null; summary: string };
     return { id: a.id, actorId: a.actor_id, summary: a.summary };
+}
+
+/**
+ * The merge of this duplicate that is still open: a moderator's waiting
+ * for its second look, or the owner's being run right now (pending).
+ * Migration 242's unique index allows one of these per duplicate.
+ */
+async function openMergeFor(dupId: string): Promise<{
+    id: string;
+    status: ActionStatus;
+    actor_id: string | null;
+    related_item_id: string | null;
+} | null> {
+    const { data } = await db()
+        .from("registry_actions")
+        .select("id, status, actor_id, related_item_id")
+        .eq("kind", "merge")
+        .in("status", ["awaiting_second_look", "pending"])
+        .eq("catalog_item_id", dupId)
+        .limit(1);
+    return (Array.isArray(data) ? data[0] : null) ?? null;
+}
+
+function openMergeWords(title: string): string {
+    return `A merge of "${title}" is already under way or waits for a second look. Confirm or decline that one first.`;
+}
+
+/**
+ * The History entry for a new merge was not written. Usually that is the
+ * unique index refusing a second open merge of the same duplicate (two
+ * requests at the same moment): say so; otherwise the generic words.
+ */
+async function notRecordedMerge(dup: CatalogRow): Promise<WriteFailure> {
+    if (await openMergeFor(dup.id)) return fail("invalid", openMergeWords(dup.title));
+    return fail("failed", GENERIC_REFUSAL);
 }
 
 /**
@@ -1501,6 +1576,16 @@ export async function requestMerge(
         note: string;
         suggestionId?: string | null;
         contributor?: { userId: string; alias: string } | null;
+        /**
+         * The suggestion pipeline (decideSuggestion → applyTaken) has just
+         * taken this duplicate report out of the queue as "approved", with
+         * nothing credited yet, and asks for its merge. Only then may a
+         * moderator's request move an approved report (the one this actor
+         * just took) back to under_review to wait with its merge. Without
+         * it, an approved report is never moved, so a report credited once
+         * can't come back and be credited again by finishMergedSuggestion.
+         */
+        fromApproval?: boolean;
     },
 ): Promise<
     WriteResult<{
@@ -1524,22 +1609,18 @@ export async function requestMerge(
     if (!ready && actor.role !== "owner") return fail("not_ready", MERGE_REMOVE_NOT_READY);
 
     if (ready) {
-        // One open merge per duplicate. The owner asking for the same merge
-        // that already waits is its second look; anyone else is pointed at it.
-        const { data: open } = await db()
-            .from("registry_actions")
-            .select("id, actor_id, related_item_id")
-            .eq("kind", "merge")
-            .eq("status", "awaiting_second_look")
-            .eq("catalog_item_id", dup.id)
-            .limit(1);
-        const waiting = (Array.isArray(open) ? open[0] : null) as {
-            id: string;
-            actor_id: string | null;
-            related_item_id: string | null;
-        } | null;
+        // One open merge per duplicate (also a unique index in 242, so two
+        // requests at the same moment can't both be written). The owner
+        // asking for the same merge that already waits is its second look;
+        // anyone else is pointed at it.
+        const waiting = await openMergeFor(dup.id);
         if (waiting) {
-            if (actor.role === "owner" && waiting.related_item_id === keep.id && waiting.actor_id !== actor.userId) {
+            if (
+                actor.role === "owner" &&
+                waiting.status === "awaiting_second_look" &&
+                waiting.related_item_id === keep.id &&
+                waiting.actor_id !== actor.userId
+            ) {
                 const confirmed = await confirmMerge(actor, waiting.id);
                 if (!confirmed.success) return confirmed;
                 return {
@@ -1550,10 +1631,7 @@ export async function requestMerge(
                     legacy: false,
                 };
             }
-            return fail(
-                "invalid",
-                `A merge of "${dup.title}" already waits for a second look. Confirm or decline that one first.`,
-            );
+            return fail("invalid", openMergeWords(dup.title));
         }
     }
 
@@ -1585,14 +1663,14 @@ export async function requestMerge(
             summary: `Merge "${dup.title}" into "${keep.title}"`,
             note: note || null,
         });
-        if (!actionId) return fail("failed", GENERIC_REFUSAL);
+        if (!actionId) return notRecordedMerge(dup);
         const merged = await applyMerge(actor, actionId, keep, dup, {
             reason: note,
             from: "pending",
             suggestionId: input.suggestionId,
             contributor: input.contributor,
         });
-        if (!merged.success) return merged;
+        if (!merged.success) return merged.failure;
         await finishWrite(actor);
         return { success: true, actionId, status: "applied", summary: merged.summary, legacy: false };
     }
@@ -1607,14 +1685,15 @@ export async function requestMerge(
         summary: `Merge "${dup.title}" into "${keep.title}"`,
         note: note || null,
     });
-    if (!actionId) return fail("failed", GENERIC_REFUSAL);
+    if (!actionId) return notRecordedMerge(dup);
     if (input.suggestionId) {
         // The report waits with its merge; nobody holds a claim on it now.
-        await moveSuggestion(input.suggestionId, { status: "under_review", claimed_by: null, claimed_until: null }, [
-            "pending",
-            "under_review",
-            "approved",
-        ]);
+        // An approved report moves only when the pipeline has just taken
+        // it for this merge (fromApproval), and only the one this
+        // moderator took: never a report decided and credited before.
+        const waits = { status: "under_review", claimed_by: null, claimed_until: null };
+        if (input.fromApproval) await moveSuggestion(input.suggestionId, waits, ["approved"], actor.userId);
+        else await moveSuggestion(input.suggestionId, waits, ["pending", "under_review"]);
     }
     await alertOwner(
         "merge_requested",
@@ -1706,8 +1785,16 @@ export async function confirmMerge(
     const requester = { userId: action.actor_id ?? actor.userId, alias: await aliasOf(action.actor_id) };
     // A member's duplicate report keeps its credit: the changelog names them.
     const contributor = rules.author ?? requester;
-    const gone = async (): Promise<WriteFailure> => {
-        await markFailed(action.id, "awaiting_second_look");
+    // An entry is gone. Only the confirm that actually marks the request
+    // failed sends the report back: when two confirms race, the loser
+    // finds the duplicate gone because the winner merged it, and must not
+    // put an applied merge's report back to pending with a false note.
+    const gone = async (markedFailed: boolean): Promise<WriteFailure> => {
+        if (!markedFailed) {
+            const now = await readAction(action.id);
+            if (!now) return fail("not_found", "That merge request is not in the history.");
+            return fail("invalid", notWaitingWords(now.status));
+        }
         if (action.suggestion_id) {
             await moveSuggestion(
                 action.suggestion_id,
@@ -1728,7 +1815,7 @@ export async function confirmMerge(
         readRow(action.related_item_id ?? ""),
         readRow(action.catalog_item_id ?? ""),
     ]);
-    if (!keep || !dup) return gone();
+    if (!keep || !dup) return gone(await markFailed(action.id, "awaiting_second_look"));
 
     const merged = await applyMerge(actor, action.id, keep, dup, {
         reason: action.note ?? "",
@@ -1737,8 +1824,10 @@ export async function confirmMerge(
         contributor,
     });
     if (!merged.success) {
-        if (merged.code === "not_found") return gone();
-        return merged;
+        // "missing": registry_merge found the kept row or the duplicate gone
+        // (applyMerge has already tried to mark the entry failed, guarded).
+        if (merged.raised === "missing" || merged.failure.code === "not_found") return gone(merged.markedFailed);
+        return merged.failure;
     }
 
     if (action.suggestion_id) {
@@ -2007,6 +2096,8 @@ async function undoFields(
     let restoredCount = 0;
     const drifted: string[] = [];
     const undoRows: { catalog_item_id: string | null; before: unknown; after: unknown; outcome: string }[] = [];
+    // The releases followed the mold's scale; they go back only with it.
+    let moldScaleRestored = false;
 
     for (const r of rows) {
         const item = r.catalog_item_id ? await readRow(r.catalog_item_id) : null;
@@ -2061,14 +2152,26 @@ async function undoFields(
         }
         restoredCount += Object.keys(putBack).length;
         undoRows.push({ catalog_item_id: item.id, before: wasNow, after: putBack, outcome: "restored" });
+        if (item.id === action.catalog_item_id && "scale" in putBack) moldScaleRestored = true;
     }
 
-    if (followers.length) {
+    if (followers.length && !moldScaleRestored) {
+        // The mold keeps its current scale, so its releases keep theirs:
+        // a release never has a scale other than its mold's.
+        const n = followers.length;
+        drifted.push(
+            `${n} release${n === 1 ? "" : "s"} filed under it keep${n === 1 ? "s its" : " their"} scale, because the mold's scale was not put back`,
+        );
+    } else if (followers.length) {
         const back = await undoScaleFollowers(followers);
         if (back.error) logger.error("RegistryWrite", "Putting releases' scales back stopped", back.error);
         restoredCount += back.restored.length;
         undoRows.push(...back.restored);
-        if (back.left > 0)
+        if (back.error && back.left > 0)
+            drifted.push(
+                `${back.left} release${back.left === 1 ? "" : "s"} could not be put back just now (left as ${back.left === 1 ? "it is" : "they are"}; set ${back.left === 1 ? "it" : "them"} by hand)`,
+            );
+        else if (back.left > 0)
             drifted.push(
                 `${back.left} release${back.left === 1 ? "" : "s"} whose scale changed again since (left as ${back.left === 1 ? "it is" : "they are"})`,
             );
@@ -2107,7 +2210,7 @@ async function undoFields(
  * Changes other people made to a row since it was added: taking the
  * addition back out would throw their work away with it.
  */
-async function laterEditsByOthers(action: ActionRow, itemId: string): Promise<string[]> {
+async function laterEditsByOthers(action: ActionRow, itemId: string): Promise<string[] | null> {
     let q = db()
         .from("registry_actions")
         .select("id, actor_id")
@@ -2117,7 +2220,11 @@ async function laterEditsByOthers(action: ActionRow, itemId: string): Promise<st
         .neq("id", action.id);
     if (action.actor_id) q = q.or(`actor_id.is.null,actor_id.neq.${action.actor_id}`);
     const { data, error } = await q.limit(20);
-    if (error || !Array.isArray(data)) return [];
+    // Fails closed: null means "couldn't tell", and the undo is refused.
+    if (error || !Array.isArray(data)) {
+        if (error) logger.error("RegistryWrite", "Reading later edits failed", error);
+        return null;
+    }
     const who = [...new Set((data as { actor_id: string | null }[]).map((r) => r.actor_id))];
     return Promise.all(who.map((id) => aliasOf(id)));
 }
@@ -2175,6 +2282,7 @@ export async function undoAction(
             const row = await readRow(action.catalog_item_id ?? "");
             if (!row) return fail("not_found", "That entry is no longer in the Registry.");
             const others = await laterEditsByOthers(action, row.id);
+            if (others === null) return fail("failed", "We couldn't check whether others edited this; try again.");
             if (others.length) {
                 const names = others.map((a) => `@${a}`).join(", ");
                 return fail(
@@ -2404,12 +2512,25 @@ export async function releaseSuggestionClaim(actor: RegistryActor, id: string): 
         : { status: "pending", claimed_by: null, claimed_until: null };
     let q = db().from("catalog_suggestions").update(fields).eq("id", id).eq("status", "under_review");
     if (actor.role !== "owner") q = q.eq("claimed_by", actor.userId);
-    const { error } = await q.select("id");
+    const { data, error } = await q.select("id");
     if (error) {
         if (isMissingSchema(error)) return { success: true };
         return dbFailure("Letting go of the claim failed", error);
     }
-    return { success: true };
+    if (Array.isArray(data) && data.length > 0) return { success: true };
+
+    // Nothing let go: say why.
+    const { data: row } = await db()
+        .from("catalog_suggestions")
+        .select("id, status, claimed_by")
+        .eq("id", id)
+        .maybeSingle();
+    const s = row as { status: string; claimed_by: string | null } | null;
+    if (!s) return fail("not_found", "That suggestion is no longer on the site.");
+    if (s.status !== "pending" && s.status !== "under_review") return fail("invalid", "It was already decided.");
+    // Nobody holds it: there was nothing to let go.
+    if (!s.claimed_by) return { success: true };
+    return fail("forbidden", "It isn't yours to release.");
 }
 
 /**

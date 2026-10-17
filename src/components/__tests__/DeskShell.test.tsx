@@ -88,6 +88,12 @@ describe("History", () => {
         expect(screen.queryByText("In")).toBeNull();
         expect(screen.getByRole("link", { name: "Open" }).getAttribute("href")).toBe("/catalog/desk/mold/r1");
     });
+
+    it("calls a merge or removal that has not run yet Waiting to run, never Done", () => {
+        render(<HistoryRow entry={{ ...base, kind: "merge", status: "pending", canUndo: false }} />);
+        expect(screen.getByText("Waiting to run")).toBeTruthy();
+        expect(screen.queryByText("Done")).toBeNull();
+    });
 });
 
 describe("to-do rows", () => {

@@ -130,6 +130,30 @@ describe("sendRegistryDigest", () => {
         expect(sent[0][0].content).toContain("3 member suggestions waiting in the Queue.");
     });
 
+    it("names every moderator whose term ended since the last digest, and that alone is worth a ring", async () => {
+        const db = setup({ actions: [] });
+        db.on("registry_actions", (q: FakeQuery) =>
+            q.filters.some((f) => f[0] === "eq") ? ({ data: null, error: null, count: 0 } as never) : OK,
+        );
+        db.on("registry_moderators", () => ({
+            data: [{ user_id: "u-maple", term_ends_at: "2026-10-16T09:30:00Z" }],
+            error: null,
+        }));
+        expect(await sendRegistryDigest(db as never, NOW)).toMatchObject({ sent: true });
+        expect(sent[0][0].content).toContain("@Maple's moderator term ended on Oct 16, 2026.");
+        // Only terms that ended inside the window: after the last digest, up to now.
+        const read = db.queries.find((q) => q.table === "registry_moderators")!;
+        expect(db.filter(read, "gte", "term_ends_at")).toBe("2026-10-16T06:00:00.000Z");
+        expect(typeof db.filter(read, "lte", "term_ends_at")).toBe("string");
+    });
+
+    it("leaves the term line out when no term ended, or before update 242", async () => {
+        const db = setup({ actions: [action("a1", "edit", "Fixed colour")] });
+        db.on("registry_moderators", () => ({ data: null, error: { code: "PGRST205", message: "missing" } }));
+        expect(await sendRegistryDigest(db as never, NOW)).toMatchObject({ sent: true });
+        expect(sent[0][0].content).not.toMatch(/term ended/);
+    });
+
     it("waits for update 244, then for 242", async () => {
         expect(await sendRegistryDigest(setup({ missing: "registry_digests" }) as never, NOW)).toMatchObject({
             sent: false,
@@ -155,7 +179,22 @@ describe("digestText", () => {
         suggestionsWaiting: 0,
         rulesProposed: 0,
         rulesInEffect: 0,
+        termsEnded: [],
     };
+
+    it("says whose moderator term ended, and when", () => {
+        expect(
+            digestText({
+                ...base,
+                termsEnded: [
+                    { alias: "Maple", endedAt: "2026-10-16T09:30:00Z" },
+                    { alias: "BayLeaf", endedAt: "2026-10-15T23:59:00Z" },
+                ],
+            }),
+        ).toBe(
+            "Registry Desk, last 24 hours: no changes. @Maple's moderator term ended on Oct 16, 2026. @BayLeaf's moderator term ended on Oct 15, 2026.",
+        );
+    });
 
     it("counts members' suggestions waiting in the Queue (where the per-suggestion pings went)", () => {
         expect(digestText({ ...base, suggestionsWaiting: 1 })).toMatch(/1 member suggestion waiting in the Queue\./);

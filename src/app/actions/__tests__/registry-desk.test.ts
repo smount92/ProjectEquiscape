@@ -119,10 +119,8 @@ const write = vi.hoisted(() => ({
     linkCounts: vi.fn(),
     knownAttributeKeys: vi.fn(() => new Set(["model_number", "cast_medium", "materials"])),
 }));
-vi.mock("@/lib/catalog/write", () => write);
-
-// The engine interfaces the Desk codes against (r3-engine-fixes). At merge
-// this mock moves to @/lib/catalog/write and @/lib/catalog/suggestionApply.
+// The engine's claim, merge and decision calls the Desk makes, from the
+// two real modules (write.ts and suggestionApply.ts).
 const engine = vi.hoisted(() => ({
     undoReady: vi.fn(),
     claimSuggestion: vi.fn(),
@@ -131,9 +129,19 @@ const engine = vi.hoisted(() => ({
     decideSuggestion: vi.fn(),
     additionDrops: vi.fn(),
 }));
-vi.mock("@/lib/catalog/desk-engine-interfaces", () => engine);
+vi.mock("@/lib/catalog/write", () => ({
+    ...write,
+    undoReady: engine.undoReady,
+    claimSuggestion: engine.claimSuggestion,
+    releaseSuggestionClaim: engine.releaseSuggestionClaim,
+    requestMerge: engine.requestMerge,
+}));
 const apply = vi.hoisted(() => ({ applySuggestion: vi.fn() }));
-vi.mock("@/lib/catalog/suggestionApply", () => apply);
+vi.mock("@/lib/catalog/suggestionApply", () => ({
+    ...apply,
+    decideSuggestion: engine.decideSuggestion,
+    additionDrops: engine.additionDrops,
+}));
 
 import { AuthError } from "@/lib/auth";
 import * as desk from "@/app/actions/registry-desk";
@@ -308,6 +316,15 @@ describe("claims", () => {
     it("lets go of a hold through the engine", async () => {
         expect(await desk.releaseClaim("s1")).toEqual({ success: true });
         expect(engine.releaseSuggestionClaim).toHaveBeenCalledWith(expect.objectContaining({ userId: ME }), "s1");
+    });
+
+    it("says why when there was nothing of yours to let go, in the engine's words", async () => {
+        engine.releaseSuggestionClaim.mockResolvedValue({
+            success: false,
+            code: "forbidden",
+            error: "It isn't yours to release.",
+        });
+        expect(await desk.releaseClaim("s1")).toEqual({ success: false, error: "It isn't yours to release." });
     });
 
     it("never lets a moderator pick up, approve or reject their own suggestion", async () => {
@@ -667,6 +684,14 @@ describe("saving", () => {
         // The Desk's pages are not re-rendered for a save; the writer clears the reference cache.
         const { revalidatePath } = await import("next/cache");
         expect(revalidatePath).not.toHaveBeenCalled();
+    });
+
+    it("passes on the writer's warning when a mold's releases did not all follow its new scale", async () => {
+        const saved = catalogRow({ id: "r1", item_type: "plastic_mold", title: "Saddlebred" });
+        const warning = "The mold is saved, but the releases filed under it could not all be moved.";
+        write.updateItem.mockResolvedValue({ success: true, item: saved, actionId: "a", touched: ["scale"], warning });
+        const r = await desk.saveItem({ id: "r1", updatedAt: "u", changes: { scale: "Classic (1:12)" } });
+        expect(r).toMatchObject({ success: true, warning });
     });
 
     it("refuses an empty save without calling the writer", async () => {

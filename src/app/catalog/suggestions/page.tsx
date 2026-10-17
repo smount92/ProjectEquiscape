@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { BRONZE_THRESHOLD, CONTRIBUTOR_THRESHOLD, GOLD_THRESHOLD, SILVER_THRESHOLD } from "@/lib/catalog/corrections";
 import { getAdminClient } from "@/lib/supabase/admin";
+import { SUGGESTION_STATUS_LABELS, statusFilterValues } from "@/lib/catalog/suggestionStatus";
 import Link from "next/link";
 import type { Metadata } from "next";
 import ExplorerLayout from "@/components/layouts/ExplorerLayout";
@@ -31,8 +32,10 @@ export default async function SuggestionsPage({ searchParams }: Props) {
         .order("created_at", { ascending: false })
         .limit(50);
 
-    if (statusFilter && statusFilter !== "all") {
-        query = query.eq("status", statusFilter);
+    // "Pending" shows every waiting one, including those a moderator is looking at.
+    const statuses = statusFilterValues(statusFilter);
+    if (statuses) {
+        query = query.in("status", statuses);
     }
     if (itemFilter) {
         query = query.eq("catalog_item_id", itemFilter);
@@ -78,13 +81,7 @@ export default async function SuggestionsPage({ searchParams }: Props) {
     ];
 
     // Friendly status labels — status.replace(/_/g,"") printed "autoapproved".
-    const statusLabels: Record<string, string> = {
-        pending: "Under review",
-        under_review: "Under review",
-        approved: "Approved",
-        auto_approved: "Auto-approved",
-        rejected: "Rejected",
-    };
+    const statusLabels = SUGGESTION_STATUS_LABELS;
 
     return (
         <ExplorerLayout noHeader>
@@ -144,7 +141,7 @@ export default async function SuggestionsPage({ searchParams }: Props) {
                                   : "🗑";
 
                     const statusBadge =
-                        s.status === "pending"
+                        s.status === "pending" || s.status === "under_review"
                             ? "ref-status-pending"
                             : s.status === "approved"
                               ? "ref-status-approved"
