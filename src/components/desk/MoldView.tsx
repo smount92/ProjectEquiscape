@@ -1,24 +1,31 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Plus } from "lucide-react";
+import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/lib/context/ToastContext";
 import { buildDeskFields, deskChanges, type DeskSource } from "@/lib/catalog/editableFields";
 import { addItem, getItemForEdit, saveItem, type DeskRelease } from "@/app/actions/registry-desk";
+import { undoAction } from "@/app/actions/registry-desk-lists";
 import FlagChips from "@/components/desk/FlagChips";
 import ItemEditor from "@/components/desk/ItemEditor";
+import LeaveDialog from "@/components/desk/LeaveDialog";
 import MergeDialog from "@/components/desk/MergeDialog";
+import MoldMergeDialog from "@/components/desk/MoldMergeDialog";
 import ReleaseRail, { type RailEntry } from "@/components/desk/ReleaseRail";
 import RemoveDialog from "@/components/desk/RemoveDialog";
 import useDeskKeys from "@/components/desk/useDeskKeys";
+import useLeaveGuard from "@/components/desk/useLeaveGuard";
 
-type Filter = "all" | "needs" | "good";
+export type MoldFilter = "all" | "needs" | "good";
 type Drafts = Record<string, Record<string, string>>;
+type FieldError = { field: string | null; message: string };
 
-const text = (v: unknown) => (v == null ? "" : String(v));
+const text = (v: unknown) => (v == null ? "" : Array.isArray(v) ? v.join(", ") : String(v));
+const UNDO_TOAST_MS = 9000;
 
 function railEntry(e: DeskRelease, dirty: boolean): RailEntry {
     const a = e.row.attributes ?? {};
@@ -52,7 +59,9 @@ function rememberRelease(id: string | null, moldId: string | null) {
  * The Mold view: pick a mold, click through its releases one by one, and
  * each release's full record opens below to edit and save (owner,
  * 2026-10-16). Unsaved changes are kept per release while moving around,
- * marked with a dot, and leaving the page with any unsaved asks first.
+ * marked with a dot, and leaving with any unsaved (a link, Back, or
+ * closing the tab) asks first. Save, Prev and Next sit in one bar under
+ * the editor, outside it, so they keep focus from release to release.
  */
 export default function MoldView({
     mold: initialMold,
@@ -60,6 +69,9 @@ export default function MoldView({
     initialReleaseId,
     role,
     parentTitle: standaloneParentTitle = null,
+    fieldKeys = [],
+    initialFilter = "all",
+    backHref = null,
 }: {
     /** Null when one entry is shown on its own (not filed under a mold). */
     mold: DeskRelease | null;
@@ -67,23 +79,38 @@ export default function MoldView({
     initialReleaseId: string | null;
     role: "owner" | "moderator";
     parentTitle?: string | null;
+    /** Every attribute key the Registry keeps, for "Add a field". */
+    fieldKeys?: readonly string[];
+    initialFilter?: MoldFilter;
+    /** Where "Back to the list" goes (a to-do list), when opened from one. */
+    backHref?: string | null;
 }) {
     const { toast } = useToast();
     const router = useRouter();
     const [mold, setMold] = useState(initialMold);
     const [releases, setReleases] = useState(initialReleases);
-    const [filter, setFilter] = useState<Filter>("all");
+    const [filter, setFilter] = useState<MoldFilter>(initialFilter);
     const [selectedId, setSelectedId] = useState<string | null>(() => {
         const all = [...(initialMold ? [initialMold] : []), ...initialReleases];
         if (initialReleaseId && all.some((e) => e.row.id === initialReleaseId)) return initialReleaseId;
-        return initialReleases[0]?.row.id ?? initialMold?.row.id ?? null;
+        const first =
+            initialFilter === "needs"
+                ? (initialReleases.find((e) => e.flags.length > 0) ?? initialReleases[0])
+                : initialReleases[0];
+        return first?.row.id ?? initialMold?.row.id ?? null;
     });
+    // A release just saved (or opened from a list) stays in view under its
+    // filter until the moderator moves on, so Next carries on from it.
+    const [stay, setStay] = useState<string | null>(initialReleaseId);
     const [drafts, setDrafts] = useState<Drafts>({});
     const [displays, setDisplays] = useState<Drafts>({});
+    const [added, setAdded] = useState<Record<string, string[]>>({});
     const [conflicts, setConflicts] = useState<Record<string, DeskSource>>({});
+    const [fieldErrors, setFieldErrors] = useState<Record<string, FieldError>>({});
     const [saving, setSaving] = useState(false);
     const [checked, setChecked] = useState<Set<string>>(new Set());
     const [mergeOpen, setMergeOpen] = useState(false);
+    const [moldMergeOpen, setMoldMergeOpen] = useState(false);
     const [removeOpen, setRemoveOpen] = useState(false);
     const [adding, setAdding] = useState(false);
     const [newRelease, setNewRelease] = useState({ title: "", model_number: "", color_description: "" });
@@ -93,44 +120,38 @@ export default function MoldView({
     const all = useMemo(() => [...(mold ? [mold] : []), ...releases], [mold, releases]);
     const byId = useMemo(() => new Map(all.map((e) => [e.row.id, e])), [all]);
 
+    const fieldsFor = useCallback(
+        (row: DeskSource) =>
+            buildDeskFields(row, { parentTitle: row.id === moldId ? null : parentTitle, added: added[row.id] }),
+        [added, moldId, parentTitle],
+    );
     const changesFor = useCallback(
-        (e: DeskRelease) =>
-            deskChanges(
-                buildDeskFields(e.row, { parentTitle: e.row.id === moldId ? null : parentTitle }),
-                drafts[e.row.id] ?? {},
-            ),
-        [drafts, moldId, parentTitle],
+        (row: DeskSource) => deskChanges(fieldsFor(row), drafts[row.id] ?? {}),
+        [drafts, fieldsFor],
     );
     const dirtyIds = useMemo(
         () =>
-            new Set(all.filter((e) => drafts[e.row.id] && Object.keys(changesFor(e)).length > 0).map((e) => e.row.id)),
+            new Set(
+                all.filter((e) => drafts[e.row.id] && Object.keys(changesFor(e.row)).length > 0).map((e) => e.row.id),
+            ),
         [all, drafts, changesFor],
     );
 
     const needs = releases.filter((e) => e.flags.length > 0);
     const good = releases.filter((e) => e.flags.length === 0);
-    const shown = filter === "needs" ? needs : filter === "good" ? good : releases;
+    const shown = releases.filter((e) =>
+        e.row.id === stay ? true : filter === "needs" ? e.flags.length > 0 : filter === "good" ? !e.flags.length : true,
+    );
     const entries = [...(mold ? [mold] : []), ...shown];
     const index = entries.findIndex((e) => e.row.id === selectedId);
     const selected = selectedId ? (byId.get(selectedId) ?? null) : null;
 
-    const select = useCallback(
-        (id: string | null) => {
-            setSelectedId(id);
-            rememberRelease(id, moldId);
-        },
-        [moldId],
-    );
-
-    const step = (by: number) => {
-        if (entries.length === 0) return;
-        const from = index < 0 ? (by > 0 ? -1 : entries.length) : index;
-        const next = Math.min(entries.length - 1, Math.max(0, from + by));
-        select(entries[next].row.id);
-    };
-
-    // Leaving with unsaved changes asks first.
+    // Leaving with unsaved changes asks first: links and Back in the app...
     const anyDirty = dirtyIds.size > 0;
+    const guard = useLeaveGuard(anyDirty);
+    const { noteHere } = guard;
+
+    // ... and reloading or closing the tab (the browser's own question).
     useEffect(() => {
         if (!anyDirty) return;
         const warn = (e: BeforeUnloadEvent) => {
@@ -141,21 +162,51 @@ export default function MoldView({
         return () => window.removeEventListener("beforeunload", warn);
     }, [anyDirty]);
 
+    const select = useCallback(
+        (id: string | null) => {
+            setSelectedId(id);
+            setStay((s) => (s === id ? s : null));
+            rememberRelease(id, moldId);
+            noteHere();
+        },
+        [moldId, noteHere],
+    );
+
+    const step = (by: number) => {
+        if (entries.length === 0) return;
+        const from = index < 0 ? (by > 0 ? -1 : entries.length) : index;
+        const next = Math.min(entries.length - 1, Math.max(0, from + by));
+        select(entries[next].row.id);
+    };
+
     function setField(id: string, key: string, value: string, display?: string) {
         setDrafts((d) => ({ ...d, [id]: { ...(d[id] ?? {}), [key]: value } }));
         if (display !== undefined) setDisplays((d) => ({ ...d, [id]: { ...(d[id] ?? {}), [key]: display } }));
+        setFieldErrors((f) => {
+            if (f[id]?.field !== key) return f;
+            const next = { ...f };
+            delete next[id];
+            return next;
+        });
     }
 
-    function replaceRow(row: DeskSource, patch: Partial<DeskRelease> = {}) {
-        if (mold && row.id === mold.row.id) {
-            setMold({ ...mold, ...patch, row });
+    function replaceEntry(entry: DeskRelease) {
+        const id = entry.row.id;
+        if (mold && id === mold.row.id) {
+            setMold(entry);
             return;
         }
-        setReleases((list) => list.map((e) => (e.row.id === row.id ? { ...e, ...patch, row } : e)));
+        setReleases((list) => list.map((e) => (e.row.id === id ? entry : e)));
+    }
+
+    function replaceRow(row: DeskSource) {
+        const old = byId.get(row.id);
+        if (old) replaceEntry({ ...old, row });
     }
 
     function forget(id: string) {
         const drop = <T,>(m: Record<string, T>) => {
+            if (!(id in m)) return m;
             const next = { ...m };
             delete next[id];
             return next;
@@ -163,6 +214,8 @@ export default function MoldView({
         setDrafts(drop);
         setDisplays(drop);
         setConflicts(drop);
+        setAdded(drop);
+        setFieldErrors(drop);
     }
 
     function dropRows(ids: string[]) {
@@ -177,39 +230,103 @@ export default function MoldView({
         }
     }
 
+    /** Undo a save from its toast: the History's own undo, then the row as it is now. */
+    async function undoSave(actionId: string, id: string) {
+        const r = await undoAction(actionId, "Undone on the Desk right after saving.");
+        if (!r.success) {
+            toast(r.error, "error");
+            return;
+        }
+        const fresh = await getItemForEdit(id);
+        if (fresh.success) {
+            const back = fresh.item;
+            if (moldId && back.row.id !== moldId && back.row.parent_id === moldId && !byId.has(back.row.id)) {
+                setReleases((list) => [...list, back]);
+            } else {
+                replaceEntry(back);
+            }
+        }
+        toast(
+            r.drifted.length
+                ? `Undone, except what changed since: ${r.drifted.join("; ")}.`
+                : "Undone. It is as it was.",
+            "success",
+        );
+    }
+
+    /** Save one release's unsaved changes. True when there was nothing to save or it saved. */
+    async function saveRow(id: string, base?: DeskSource): Promise<boolean> {
+        const current = byId.get(id);
+        if (!current) return true;
+        const row = base ?? current.row;
+        const changes = deskChanges(fieldsFor(row), drafts[id] ?? {});
+        if (Object.keys(changes).length === 0) return true;
+        const r = await saveItem({ id, updatedAt: row.updated_at, changes });
+        if (!r.success) {
+            if ("conflict" in r && r.conflict) {
+                setConflicts((c) => ({ ...c, [id]: r.conflict as DeskSource }));
+                return false;
+            }
+            const field = "field" in r && r.field ? r.field : null;
+            setFieldErrors((f) => ({ ...f, [id]: { field, message: r.error } }));
+            if (!field) toast(r.error, "error");
+            return false;
+        }
+        forget(id);
+        const undo =
+            "actionId" in r && r.actionId
+                ? { label: "Undo", onClick: () => void undoSave(r.actionId as string, id) }
+                : undefined;
+        const movedAway = id !== moldId && moldId !== null && r.item.parent_id !== moldId;
+        if (movedAway) {
+            dropRows([id]);
+            toast(
+                `Saved and moved “${r.item.title}” to another mold. It no longer shows here.`,
+                "success",
+                UNDO_TOAST_MS,
+                undo,
+            );
+            return true;
+        }
+        if ("entry" in r && r.entry) replaceEntry(r.entry);
+        else replaceRow(r.item);
+        setStay(id);
+        toast(`Saved “${r.item.title}”. Recorded in the history with your name.`, "success", UNDO_TOAST_MS, undo);
+        return true;
+    }
+
     async function save(base?: DeskSource) {
         if (!selected || saving) return;
-        const row = base ?? selected.row;
-        const isMoldRow = row.id === moldId;
-        const fields = buildDeskFields(row, { parentTitle: isMoldRow ? null : parentTitle });
-        const changes = deskChanges(fields, drafts[row.id] ?? {});
-        if (Object.keys(changes).length === 0) {
+        const id = selected.row.id;
+        if (!base && Object.keys(changesFor(selected.row)).length === 0) {
             toast("Nothing to save on this one yet.", "info");
             return;
         }
         setSaving(true);
-        const r = await saveItem({ id: row.id, updatedAt: row.updated_at, changes });
+        await saveRow(id, base);
         setSaving(false);
-        if (!r.success) {
-            if ("conflict" in r && r.conflict) {
-                setConflicts((c) => ({ ...c, [row.id]: r.conflict as DeskSource }));
-                return;
+    }
+
+    /** "Save all and leave": every unsaved release, one after another; stops at the first that can't save. */
+    async function saveAll(): Promise<boolean> {
+        setSaving(true);
+        try {
+            for (const id of [...dirtyIds]) {
+                const ok = await saveRow(id);
+                if (!ok) {
+                    guard.stay();
+                    select(id);
+                    toast(
+                        "That one couldn't be saved, so you're still here. Fix it, or leave without saving.",
+                        "error",
+                    );
+                    return false;
+                }
             }
-            toast(r.error, "error");
-            return;
+            return true;
+        } finally {
+            setSaving(false);
         }
-        forget(row.id);
-        const movedAway = !isMoldRow && moldId !== null && r.item.parent_id !== moldId;
-        if (movedAway) {
-            dropRows([row.id]);
-            toast(`Saved and moved “${r.item.title}” to another mold. It no longer shows here.`, "success");
-            return;
-        }
-        replaceRow(r.item);
-        toast(`Saved “${r.item.title}”. Recorded in the history with your name.`, "success");
-        // Fresh flags for what was just fixed.
-        const fresh = await getItemForEdit(row.id);
-        if (fresh.success) replaceRow(fresh.item.row, { flags: fresh.item.flags, fixes: fresh.item.fixes });
     }
 
     useDeskKeys({ onNext: () => step(1), onPrev: () => step(-1), onSave: () => void save() });
@@ -231,11 +348,38 @@ export default function MoldView({
         toast("Added. Fill in the rest below and save.", "success");
     }
 
+    async function undoRemove(actionId: string, id: string, wasMold: boolean) {
+        const r = await undoAction(actionId, "Put back on the Desk right after removing.");
+        if (!r.success) {
+            toast(r.error, "error");
+            return;
+        }
+        if (wasMold) {
+            router.push(`/catalog/desk/mold/${id}`);
+        } else {
+            const fresh = await getItemForEdit(id);
+            if (fresh.success && fresh.item.row.parent_id === moldId) {
+                setReleases((list) => (list.some((e) => e.row.id === id) ? list : [...list, fresh.item]));
+            }
+        }
+        toast("Put back, as it was.", "success");
+    }
+
     const checkedRows = releases.filter((e) => checked.has(e.row.id));
     const moldAttrs = mold?.row.attributes ?? {};
+    const isMoldSelected = !!selected && selected.row.id === moldId;
+    const releaseIndex = shown.findIndex((e) => e.row.id === selectedId);
+    const dirtyTitles = all.filter((e) => dirtyIds.has(e.row.id)).map((e) => e.row.title || "Untitled");
+    const standalone = !mold ? (releases[0] ?? null) : null;
 
     return (
         <div className="flex flex-col gap-4">
+            {backHref && (
+                <Link href={backHref} className="self-start text-sm font-semibold text-forest">
+                    ← Back to the list
+                </Link>
+            )}
+
             {mold ? (
                 <section
                     aria-label="The mold"
@@ -265,16 +409,21 @@ export default function MoldView({
                     </div>
                     <div className="flex flex-col items-start gap-2">
                         <FlagChips flags={mold.flags} />
-                        <Button type="button" variant="secondary" size="sm" onClick={() => select(mold.row.id)}>
-                            Edit the mold itself
-                        </Button>
+                        <div className="flex flex-wrap gap-2">
+                            <Button type="button" variant="secondary" size="sm" onClick={() => select(mold.row.id)}>
+                                Edit the mold itself
+                            </Button>
+                            <Button type="button" variant="secondary" size="sm" onClick={() => setMoldMergeOpen(true)}>
+                                Merge this mold into ...
+                            </Button>
+                        </div>
                     </div>
                 </section>
-            ) : (
+            ) : standalone?.row.item_type === "plastic_release" ? (
                 <p className="m-0 rounded-lg bg-warning/10 px-3 py-2 text-sm text-warning">
-                    This entry is not filed under a mold. Pick one in “Filed under mold” below and save.
+                    This release is not filed under a mold. Pick one in “Filed under mold” below and save.
                 </p>
-            )}
+            ) : null}
 
             {mold && (
                 <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-input bg-card px-3 py-2">
@@ -284,7 +433,7 @@ export default function MoldView({
                                 ["all", `All ${releases.length}`],
                                 ["needs", `Needs work ${needs.length}`],
                                 ["good", `Looks right ${good.length}`],
-                            ] as [Filter, string][]
+                            ] as [MoldFilter, string][]
                         ).map(([key, label]) => (
                             <Button
                                 key={key}
@@ -402,8 +551,6 @@ export default function MoldView({
                     onUseFix={(changes) => {
                         for (const [k, v] of Object.entries(changes)) setField(selected.row.id, k, v);
                     }}
-                    onSave={() => void save()}
-                    saving={saving}
                     conflict={conflicts[selected.row.id] ?? null}
                     onKeepMine={() => {
                         const theirs = conflicts[selected.row.id];
@@ -422,15 +569,78 @@ export default function MoldView({
                         replaceRow(theirs);
                         forget(selected.row.id);
                     }}
-                    position={{ index: Math.max(index, 0), total: entries.length }}
-                    onPrev={() => step(-1)}
-                    onNext={() => step(1)}
                     onRemove={() => setRemoveOpen(true)}
+                    fieldKeys={fieldKeys}
+                    added={added[selected.row.id] ?? []}
+                    onAddField={(key) =>
+                        setAdded((a) => ({
+                            ...a,
+                            [selected.row.id]: [...(a[selected.row.id] ?? []), key],
+                        }))
+                    }
+                    error={fieldErrors[selected.row.id] ?? null}
                 />
             ) : (
                 <p className="m-0 rounded-lg border border-dashed border-input bg-card p-6 text-center text-muted-foreground">
                     No releases are filed under this mold yet. Add one above, or edit the mold itself.
                 </p>
+            )}
+
+            {selected && (
+                <div
+                    className="sticky bottom-0 z-10 flex flex-wrap items-center justify-between gap-2 rounded-md border border-input bg-card/95 px-2 py-2 backdrop-blur sm:px-3"
+                    data-testid="editor-bar"
+                >
+                    <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => step(-1)}
+                        disabled={index <= 0}
+                        aria-label="Previous release"
+                        className="max-sm:px-3"
+                    >
+                        <ChevronLeft aria-hidden="true" />
+                        <span className="hidden sm:inline">Prev</span>
+                    </Button>
+                    <span
+                        aria-live="polite"
+                        aria-atomic="true"
+                        className="min-w-0 flex-1 truncate text-center text-xs text-muted-foreground tabular-nums"
+                        data-testid="editor-position"
+                    >
+                        {isMoldSelected ? (
+                            <>
+                                The mold itself<span className="sr-only">: {selected.row.title}</span>
+                            </>
+                        ) : (
+                            <>
+                                <span className="sr-only">Release </span>
+                                {releaseIndex >= 0 ? `${releaseIndex + 1} of ${shown.length}` : "Not in this list"}
+                                <span className="sr-only">: {selected.row.title}</span>
+                            </>
+                        )}
+                    </span>
+                    <div className="flex items-center gap-2">
+                        <Button
+                            type="button"
+                            onClick={() => void save()}
+                            disabled={saving || !dirtyIds.has(selected.row.id)}
+                        >
+                            {saving ? "Saving ..." : "Save"}
+                        </Button>
+                        <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => step(1)}
+                            disabled={index >= entries.length - 1}
+                            aria-label="Next release"
+                            className="max-sm:px-3"
+                        >
+                            <span className="hidden sm:inline">Next</span>
+                            <ChevronRight aria-hidden="true" />
+                        </Button>
+                    </div>
+                </div>
             )}
 
             {mergeOpen && (
@@ -439,7 +649,7 @@ export default function MoldView({
                     onOpenChange={setMergeOpen}
                     rows={checkedRows}
                     role={role}
-                    onDone={({ keepId, merged, waiting }) => {
+                    onDone={({ keepId, merged, waiting, legacy }) => {
                         setMergeOpen(false);
                         setChecked(new Set());
                         const keepTitle = byId.get(keepId)?.row.title ?? "the one you kept";
@@ -447,25 +657,74 @@ export default function MoldView({
                             toast("Merge sent for a second look. Another moderator will confirm it.", "success");
                         } else {
                             dropRows(merged);
-                            toast(`Merged into “${keepTitle}”. Members' horses moved with it.`, "success");
+                            toast(
+                                legacy
+                                    ? `Merged for good into “${keepTitle}”. Members' horses moved with it. This merge can't be undone.`
+                                    : `Merged into “${keepTitle}”. Members' horses moved with it. Undo it from History for 30 days.`,
+                                "success",
+                            );
                         }
                     }}
                 />
             )}
 
-            <RemoveDialog
-                open={removeOpen}
-                onOpenChange={setRemoveOpen}
-                item={selected ? { id: selected.row.id, title: selected.row.title } : null}
-                onDone={(id) => {
-                    setRemoveOpen(false);
-                    toast("Removed. Hidden now; it can be put back for 30 days from History.", "success");
-                    if (id === moldId) {
-                        router.push("/catalog/desk/mold");
-                        return;
-                    }
-                    dropRows([id]);
-                }}
+            {mold && moldMergeOpen && (
+                <MoldMergeDialog
+                    open={moldMergeOpen}
+                    onOpenChange={setMoldMergeOpen}
+                    mold={mold}
+                    releaseCount={releases.length}
+                    role={role}
+                    onDone={({ keep, waiting, legacy }) => {
+                        setMoldMergeOpen(false);
+                        if (waiting) {
+                            toast("Mold merge sent for a second look. Another moderator will confirm it.", "success");
+                            return;
+                        }
+                        toast(
+                            legacy
+                                ? `Merged for good into “${keep.title}”. This merge can't be undone.`
+                                : `Merged into “${keep.title}”. Its releases moved with it. Undo it from History for 30 days.`,
+                            "success",
+                        );
+                        router.push(`/catalog/desk/mold/${keep.id}`);
+                    }}
+                />
+            )}
+
+            {removeOpen && selected && (
+                <RemoveDialog
+                    key={`remove-${selected.row.id}`}
+                    open={removeOpen}
+                    onOpenChange={setRemoveOpen}
+                    item={{ id: selected.row.id, title: selected.row.title }}
+                    onDone={(id, actionId) => {
+                        setRemoveOpen(false);
+                        const wasMold = id === moldId;
+                        toast(
+                            "Removed. Hidden now; it can be put back for 30 days from History.",
+                            "success",
+                            UNDO_TOAST_MS,
+                            actionId
+                                ? { label: "Undo", onClick: () => void undoRemove(actionId, id, wasMold) }
+                                : undefined,
+                        );
+                        if (wasMold) {
+                            router.push("/catalog/desk/mold");
+                            return;
+                        }
+                        dropRows([id]);
+                    }}
+                />
+            )}
+
+            <LeaveDialog
+                open={!!guard.target}
+                count={dirtyIds.size}
+                titles={dirtyTitles}
+                onStay={guard.stay}
+                onLeave={guard.leave}
+                onSaveAll={saveAll}
             />
         </div>
     );

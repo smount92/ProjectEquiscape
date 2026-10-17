@@ -6,6 +6,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogTitle } f
 import { Input } from "@/components/ui/input";
 import { previewMerge, requestMerge, type DeskRelease } from "@/app/actions/registry-desk";
 import { linkWords } from "@/components/desk/linkWords";
+import { canMerge, mergeButton, mergeNote, type Readiness } from "@/components/desk/mergeWords";
 
 function sub(r: DeskRelease): string {
     const a = r.row.attributes ?? {};
@@ -23,7 +24,8 @@ function sub(r: DeskRelease): string {
 /**
  * Merge ticked releases into one. Pick the one to keep; everything that
  * points at the others moves onto it and their old addresses forward.
- * A moderator's merge waits for a second look; the owner's applies.
+ * A moderator's merge waits for a second look; the owner's applies. Before
+ * update 243 it says first that the merge can't be undone.
  */
 export default function MergeDialog({
     open,
@@ -36,13 +38,14 @@ export default function MergeDialog({
     onOpenChange: (open: boolean) => void;
     rows: DeskRelease[];
     role: "owner" | "moderator";
-    onDone: (result: { keepId: string; merged: string[]; waiting: boolean }) => void;
+    onDone: (result: { keepId: string; merged: string[]; waiting: boolean; legacy: boolean }) => void;
 }) {
     const [keepId, setKeepId] = useState<string>(rows[0]?.row.id ?? "");
     const [note, setNote] = useState("");
     const [busy, setBusy] = useState(false);
     const [error, setError] = useState("");
     const [moving, setMoving] = useState<string[] | null>(null);
+    const [ready, setReady] = useState<Readiness>(null);
 
     const keep = rows.find((r) => r.row.id === keepId) ? keepId : (rows[0]?.row.id ?? "");
     const others = rows.filter((r) => r.row.id !== keep);
@@ -53,16 +56,20 @@ export default function MergeDialog({
         let live = true;
         (async () => {
             const totals: Record<string, number> = {};
+            let undoReady: boolean | null = null;
             for (const o of rest) {
                 const r = await previewMerge(keep, o.row.id);
                 if (!r.success) continue;
+                undoReady = undoReady === null ? r.undoReady : undoReady && r.undoReady;
                 for (const [k, n] of Object.entries((r.remove.links ?? {}) as Record<string, number>)) {
                     // Set pieces are read from titles; a merge moves links, not titles.
                     if (k === "total" || k === "set_mentions" || k === "set_siblings") continue;
                     totals[k] = (totals[k] ?? 0) + (Number(n) || 0);
                 }
             }
-            if (live) setMoving(linkWords(totals));
+            if (!live) return;
+            setMoving(linkWords(totals));
+            setReady(undoReady ?? false);
         })();
         return () => {
             live = false;
@@ -74,21 +81,24 @@ export default function MergeDialog({
         setError("");
         const merged: string[] = [];
         let waiting = false;
+        let legacy = false;
         for (const o of others) {
             const r = await requestMerge(keep, o.row.id, note);
             if (!r.success) {
                 setError(r.error);
                 setBusy(false);
-                if (merged.length > 0) onDone({ keepId: keep, merged, waiting });
+                if (merged.length > 0) onDone({ keepId: keep, merged, waiting, legacy });
                 return;
             }
             merged.push(o.row.id);
             if (r.status !== "applied") waiting = true;
+            if (r.legacy) legacy = true;
         }
         setBusy(false);
-        onDone({ keepId: keep, merged, waiting });
+        onDone({ keepId: keep, merged, waiting, legacy });
     }
 
+    const notice = mergeNote(role, ready);
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent>
@@ -135,11 +145,18 @@ export default function MergeDialog({
                         placeholder="Same release listed twice"
                     />
                 </label>
-                <p className="m-0 rounded-lg bg-warning/10 px-3 py-2 text-sm text-warning">
-                    {role === "owner"
-                        ? "As the site owner your merge happens at once. It can be undone for 30 days."
-                        : "Merges get a second look: another moderator or the site owner confirms it before it happens. Undoable for 30 days."}
-                </p>
+                {ready === null ? (
+                    <p className="m-0 text-sm text-muted-foreground">Checking ...</p>
+                ) : (
+                    <p
+                        className={`m-0 rounded-lg px-3 py-2 text-sm ${
+                            notice.tone === "bad" ? "bg-destructive/10 text-destructive" : "bg-warning/10 text-warning"
+                        }`}
+                        data-testid="merge-note"
+                    >
+                        {notice.text}
+                    </p>
+                )}
                 {error && (
                     <p role="alert" className="m-0 text-sm text-destructive">
                         {error}
@@ -149,8 +166,13 @@ export default function MergeDialog({
                     <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
                         Cancel
                     </Button>
-                    <Button type="button" onClick={send} disabled={busy || others.length === 0}>
-                        {busy ? "Sending ..." : role === "owner" ? "Merge" : "Ask for a second look"}
+                    <Button
+                        type="button"
+                        variant={ready === false ? "destructive" : "default"}
+                        onClick={send}
+                        disabled={busy || others.length === 0 || !canMerge(role, ready)}
+                    >
+                        {mergeButton(role, ready, busy)}
                     </Button>
                 </DialogFooter>
             </DialogContent>

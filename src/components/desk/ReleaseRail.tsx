@@ -35,7 +35,8 @@ function UnsavedDot() {
 /**
  * The releases on a mold, one row each: click one and its full record
  * opens in the editor below. Tick rows to merge several. On a phone the
- * table becomes a list to pick from, above the editor.
+ * table becomes a list to pick from, above the editor, with a tick for
+ * the release in view, so merging works there too.
  */
 export default function ReleaseRail({
     entries,
@@ -56,13 +57,15 @@ export default function ReleaseRail({
     }, [selectedId]);
 
     const index = entries.findIndex((e) => e.id === selectedId);
+    const picked = index >= 0 ? entries[index] : null;
+    const tickedCount = entries.filter((e) => checked.has(e.id)).length;
 
     return (
         <>
-            {/* Phones: a list to pick from. */}
+            {/* Phones: a list to pick from, and a tick for merging. */}
             <div className="flex flex-col gap-1 md:hidden">
                 <label htmlFor="desk-release-pick" className="text-sm font-semibold text-foreground">
-                    Release {index >= 0 ? `${index + 1} of ${entries.length}` : ""}
+                    Pick a release
                 </label>
                 <NativeSelect
                     id="desk-release-pick"
@@ -73,12 +76,28 @@ export default function ReleaseRail({
                     {entries.map((e) => (
                         <option key={e.id} value={e.id}>
                             {e.dirty ? "• " : ""}
+                            {checked.has(e.id) ? "✓ " : ""}
                             {e.isMold ? `The mold: ${e.title}` : e.title}
                             {e.number ? ` #${e.number}` : ""}
                             {e.flags.length ? ` (${e.flags.length} to look at)` : ""}
                         </option>
                     ))}
                 </NativeSelect>
+                {picked && !picked.isMold && (
+                    <label className="flex min-h-11 items-center gap-2 text-sm text-foreground">
+                        <input
+                            type="checkbox"
+                            checked={checked.has(picked.id)}
+                            onChange={() => onToggle(picked.id)}
+                            className="size-5 accent-[var(--color-forest)]"
+                            data-testid="mobile-tick"
+                        />
+                        <span>
+                            Tick this one to merge
+                            {tickedCount > 0 ? ` (${tickedCount} ticked; pick another, tick it, then Merge)` : ""}
+                        </span>
+                    </label>
+                )}
             </div>
 
             {/* Wider screens: the table. */}

@@ -14,9 +14,15 @@ function readableDate(iso: string): string {
     return d.toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" });
 }
 
+/** The id of a field's box (for a mold, its "Move to another mold" button): where focus goes. */
+export function deskFieldId(idPrefix: string, key: string): string {
+    return `${idPrefix}-${key}`;
+}
+
 /**
  * One field in the Desk editor: a box, a list or the mold picker, with its
- * label and help, marked when it holds an unsaved change.
+ * label and help, marked when it holds an unsaved change, and with the
+ * Registry's words beside it when a save refused its value.
  */
 export default function DeskField({
     field,
@@ -24,6 +30,8 @@ export default function DeskField({
     display,
     onChange,
     idPrefix,
+    dirty: dirtyProp,
+    error,
 }: {
     field: DeskFieldEdit;
     value: string;
@@ -31,11 +39,19 @@ export default function DeskField({
     display?: string;
     onChange: (value: string, display?: string) => void;
     idPrefix: string;
+    /** Holds an unsaved change (the editor decides; by default, the box differs from what is stored). */
+    dirty?: boolean;
+    /** Why the last save refused this field's value. */
+    error?: string | null;
 }) {
-    const id = `${idPrefix}-${field.key}`;
-    const dirty = !field.readOnly && value.trim() !== field.original.trim();
+    const id = deskFieldId(idPrefix, field.key);
+    const dirty = dirtyProp ?? (!field.readOnly && value.trim() !== field.original.trim());
     const helpId = field.help ? `${id}-help` : undefined;
+    const errorId = error ? `${id}-error` : undefined;
+    const describedBy = [errorId, helpId].filter(Boolean).join(" ") || undefined;
+    const invalid = error ? true : undefined;
     const [picking, setPicking] = useState(false);
+    const [confirmOff, setConfirmOff] = useState(false);
 
     const label = (
         <span className="flex items-center gap-2">
@@ -68,24 +84,70 @@ export default function DeskField({
         );
     }
 
-    const ring = dirty ? "rounded-lg ring-2 ring-forest/40" : "";
+    const ring = error ? "" : dirty ? "rounded-lg ring-2 ring-forest/40" : "";
     let control: React.ReactNode;
     if (field.kind === "mold") {
+        const moldWords = value ? display || "A mold" : "Not filed under a mold";
         control = (
             <div className="flex flex-col gap-2">
                 <div className="flex flex-wrap items-center gap-2">
-                    <span id={id} className="text-sm font-semibold text-foreground">
-                        {value ? display || "A mold" : "Not filed under a mold"}
-                    </span>
-                    <Button type="button" variant="outline" size="sm" onClick={() => setPicking((p) => !p)}>
+                    <span className="text-sm font-semibold text-foreground">{moldWords}</span>
+                    <Button
+                        id={id}
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        aria-invalid={invalid}
+                        aria-describedby={describedBy}
+                        onClick={() => {
+                            setConfirmOff(false);
+                            setPicking((p) => !p);
+                        }}
+                    >
                         {picking ? "Keep it here" : "Move to another mold ..."}
                     </Button>
-                    {value && (
-                        <Button type="button" variant="ghost" size="sm" onClick={() => onChange("", "")}>
-                            Take it off this mold
+                    {value && !confirmOff && (
+                        <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                                setPicking(false);
+                                setConfirmOff(true);
+                            }}
+                        >
+                            Take it off this mold ...
                         </Button>
                     )}
                 </div>
+                {confirmOff && (
+                    <div
+                        role="group"
+                        aria-label="Take it off this mold?"
+                        className="flex flex-col gap-2 rounded-lg border border-warning/40 bg-warning/10 p-3"
+                    >
+                        <p className="m-0 text-sm text-foreground">
+                            Take it off “{moldWords}”? It won&apos;t be filed under any mold until you pick one, and it
+                            drops off this mold&apos;s list when you save.
+                        </p>
+                        <div className="flex flex-wrap gap-2">
+                            <Button
+                                type="button"
+                                size="sm"
+                                variant="destructive-outline"
+                                onClick={() => {
+                                    onChange("", "");
+                                    setConfirmOff(false);
+                                }}
+                            >
+                                Take it off
+                            </Button>
+                            <Button type="button" size="sm" variant="outline" onClick={() => setConfirmOff(false)}>
+                                Keep it on this mold
+                            </Button>
+                        </div>
+                    </div>
+                )}
                 {picking && (
                     <div className="rounded-lg border border-input bg-card p-3">
                         <MoldPicker
@@ -107,7 +169,8 @@ export default function DeskField({
             <NativeSelect
                 id={id}
                 value={value}
-                aria-describedby={helpId}
+                aria-describedby={describedBy}
+                aria-invalid={invalid}
                 onChange={(e) => onChange(e.target.value)}
                 className={ring || undefined}
             >
@@ -126,7 +189,8 @@ export default function DeskField({
                 id={id}
                 value={value}
                 placeholder={field.placeholder}
-                aria-describedby={helpId}
+                aria-describedby={describedBy}
+                aria-invalid={invalid}
                 onChange={(e) => onChange(e.target.value)}
                 className={ring}
             />
@@ -137,8 +201,9 @@ export default function DeskField({
                 id={id}
                 value={value}
                 inputMode={field.kind === "number" ? "numeric" : undefined}
-                placeholder={field.placeholder}
-                aria-describedby={helpId}
+                placeholder={field.placeholder ?? (field.kind === "list" ? "First, second, third" : undefined)}
+                aria-describedby={describedBy}
+                aria-invalid={invalid}
                 onChange={(e) => onChange(e.target.value)}
                 className={ring}
             />
@@ -156,6 +221,18 @@ export default function DeskField({
                 </label>
             )}
             {control}
+            {error && (
+                <span id={errorId} className="text-sm font-semibold text-destructive" data-testid="field-error">
+                    {error}
+                </span>
+            )}
+            {field.storedAsText && !dirty && !error && (
+                <span className="text-xs text-muted-foreground">
+                    {/^\d{4}$/.test(field.original.trim())
+                        ? "Stored as text. Saving this release stores it as a number."
+                        : "Stored as text, not as a year. Type the year to fix it."}
+                </span>
+            )}
             {field.help && (
                 <span id={helpId} className="text-xs text-muted-foreground">
                     {field.help}

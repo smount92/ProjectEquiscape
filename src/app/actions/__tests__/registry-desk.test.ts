@@ -113,15 +113,25 @@ vi.mock("@/lib/auth", async (importOriginal) => ({
 const write = vi.hoisted(() => ({
     updateItem: vi.fn(),
     insertItem: vi.fn(),
-    requestMerge: vi.fn(),
     confirmMerge: vi.fn(),
     declineMerge: vi.fn(),
     removeItem: vi.fn(),
     linkCounts: vi.fn(),
+    knownAttributeKeys: vi.fn(() => new Set(["model_number", "cast_medium", "materials"])),
 }));
 vi.mock("@/lib/catalog/write", () => write);
 
-const apply = vi.hoisted(() => ({ applySuggestion: vi.fn(), decideSuggestion: vi.fn() }));
+// The engine interfaces the Desk codes against (r3-engine-fixes). At merge
+// this mock moves to @/lib/catalog/write and @/lib/catalog/suggestionApply.
+const engine = vi.hoisted(() => ({
+    undoReady: vi.fn(),
+    claimSuggestion: vi.fn(),
+    releaseSuggestionClaim: vi.fn(),
+    requestMerge: vi.fn(),
+    decideSuggestion: vi.fn(),
+}));
+vi.mock("@/lib/catalog/desk-engine-interfaces", () => engine);
+const apply = vi.hoisted(() => ({ applySuggestion: vi.fn() }));
 vi.mock("@/lib/catalog/suggestionApply", () => apply);
 
 import { AuthError } from "@/lib/auth";
@@ -190,8 +200,17 @@ beforeEach(() => {
     });
     // decideSuggestion does the whole decision (it applies through
     // applySuggestion itself); the Desk never calls applySuggestion.
-    apply.decideSuggestion.mockResolvedValue({ success: true, status: "approved" });
+    engine.decideSuggestion.mockResolvedValue({ success: true, status: "approved" });
+    engine.undoReady.mockResolvedValue(true);
+    engine.claimSuggestion.mockImplementation(async () => ({
+        success: true,
+        claimedUntil: new Date(Date.now() + 30 * 60 * 1000).toISOString(),
+    }));
+    engine.releaseSuggestionClaim.mockResolvedValue({ success: true });
 });
+
+const asOwner = () =>
+    auth.requireRegistryModerator.mockResolvedValue({ supabase: {}, user: { id: ME }, role: "owner", alias: "Owner" });
 
 describe("every export checks the role first", () => {
     const source = readFileSync(path.join(process.cwd(), "src", "app", "actions", "registry-desk.ts"), "utf8");
@@ -227,8 +246,8 @@ describe("every export checks the role first", () => {
         }
         expect(db.touched).toEqual([]);
         for (const f of Object.values(write)) expect(f).not.toHaveBeenCalled();
+        for (const f of Object.values(engine)) expect(f).not.toHaveBeenCalled();
         expect(apply.applySuggestion).not.toHaveBeenCalled();
-        expect(apply.decideSuggestion).not.toHaveBeenCalled();
     });
 
     it("says log in to someone logged out, and the suspension words to a suspended account", async () => {
@@ -241,39 +260,48 @@ describe("every export checks the role first", () => {
 });
 
 describe("claims", () => {
-    it("holds a suggestion for 30 minutes for whoever opened it", async () => {
-        const before = Date.now();
+    it("holds a suggestion through the engine for whoever opened it, and says until when", async () => {
         const r = await desk.claimSuggestion("s1");
-        expect(r).toMatchObject({ success: true, claimed: true });
-        const row = db.tables.catalog_suggestions[0];
-        expect(row.claimed_by).toBe(ME);
-        const until = new Date(String(row.claimed_until)).getTime();
-        expect(until - before).toBeGreaterThanOrEqual(30 * 60 * 1000 - 1000);
-        expect(until - before).toBeLessThanOrEqual(30 * 60 * 1000 + 5000);
+        expect(r).toMatchObject({ success: true, claimed: true, until: expect.any(String) });
+        expect(engine.claimSuggestion).toHaveBeenCalledWith(
+            { userId: ME, alias: "ProjectCheapie", role: "moderator" },
+            "s1",
+        );
+        // The Desk no longer writes claim columns itself.
+        expect(db.updates).toEqual([]);
     });
 
-    it("refuses while another moderator holds it, by name, and changes nothing", async () => {
+    it("refuses while another moderator holds it, by name, and asks the engine nothing", async () => {
         db.tables.catalog_suggestions[0].claimed_by = OTHER;
         db.tables.catalog_suggestions[0].claimed_until = new Date(Date.now() + 10 * 60 * 1000).toISOString();
         const r = await desk.claimSuggestion("s1");
         expect(r).toMatchObject({ success: false, error: expect.stringMatching(/^@BayLeaf is looking at this one/) });
-        expect(db.updates).toEqual([]);
-        expect(db.tables.catalog_suggestions[0].claimed_by).toBe(OTHER);
+        expect(engine.claimSuggestion).not.toHaveBeenCalled();
     });
 
     it("lets anyone take it once the 30 minutes are up", async () => {
         db.tables.catalog_suggestions[0].claimed_by = OTHER;
         db.tables.catalog_suggestions[0].claimed_until = new Date(Date.now() - 60 * 1000).toISOString();
-        const r = await desk.claimSuggestion("s1");
-        expect(r).toMatchObject({ success: true, claimed: true });
-        expect(db.tables.catalog_suggestions[0].claimed_by).toBe(ME);
+        expect(await desk.claimSuggestion("s1")).toMatchObject({ success: true, claimed: true });
+        expect(engine.claimSuggestion).toHaveBeenCalledTimes(1);
     });
 
-    it("guards the write, so of two moderators clicking at once only one gets it", async () => {
-        db.loseRace = true;
-        const r = await desk.claimSuggestion("s1");
-        expect(r).toEqual({ success: false, error: "Another moderator picked this one up a moment ago." });
-        expect(db.updates[0].or).toMatch(/claimed_by\.is\.null,claimed_until\.lt\..+,claimed_by\.eq\./);
+    it("says so when another moderator won the race for it", async () => {
+        engine.claimSuggestion.mockResolvedValue({ success: false, code: "conflict", error: "taken" });
+        expect(await desk.claimSuggestion("s1")).toEqual({
+            success: false,
+            error: "Another moderator picked this one up a moment ago.",
+        });
+    });
+
+    it("opens it without a hold before update 242", async () => {
+        engine.claimSuggestion.mockResolvedValue({ success: false, code: "not_ready", error: "later" });
+        expect(await desk.claimSuggestion("s1")).toEqual({ success: true, claimed: false, until: null });
+    });
+
+    it("lets go of a hold through the engine", async () => {
+        expect(await desk.releaseClaim("s1")).toEqual({ success: true });
+        expect(engine.releaseSuggestionClaim).toHaveBeenCalledWith(expect.objectContaining({ userId: ME }), "s1");
     });
 
     it("never lets a moderator pick up, approve or reject their own suggestion", async () => {
@@ -282,7 +310,18 @@ describe("claims", () => {
         expect(await desk.claimSuggestion("s1")).toEqual(own);
         expect(await desk.approveSuggestion("s1")).toEqual(own);
         expect(await desk.rejectSuggestion("s1", "Not this one, sorry.")).toEqual(own);
-        expect(apply.decideSuggestion).not.toHaveBeenCalled();
+        expect(engine.decideSuggestion).not.toHaveBeenCalled();
+    });
+
+    it("lets the site owner decide their own, as the engine allows", async () => {
+        asOwner();
+        db.tables.catalog_suggestions[0].user_id = ME;
+        expect(await desk.claimSuggestion("s1")).toMatchObject({ success: true, claimed: true });
+        expect(await desk.approveSuggestion("s1")).toMatchObject({ success: true, status: "applied" });
+        expect(engine.decideSuggestion).toHaveBeenCalledWith(
+            "s1",
+            expect.objectContaining({ reviewer: expect.objectContaining({ role: "owner" }) }),
+        );
     });
 
     it("refuses to approve one another moderator holds", async () => {
@@ -290,39 +329,70 @@ describe("claims", () => {
         db.tables.catalog_suggestions[0].claimed_until = new Date(Date.now() + 60 * 1000).toISOString();
         const r = await desk.approveSuggestion("s1");
         expect(r).toMatchObject({ success: false, error: expect.stringMatching(/@BayLeaf/) });
-        expect(apply.decideSuggestion).not.toHaveBeenCalled();
+        expect(engine.decideSuggestion).not.toHaveBeenCalled();
     });
 });
 
 describe("deciding", () => {
-    it("approves as the reviewer, with the moderator's fixed copy, in one decision, and lets go of the claim", async () => {
+    const seen = { fieldChanges: { release_year_end: { from: "", to: "1988" } }, catalogItemId: "r1" };
+
+    it("approves as the reviewer, with the moderator's fixed copy and what the card showed, and lets go of the claim", async () => {
         db.tables.catalog_suggestions[0].claimed_by = ME;
         db.tables.catalog_suggestions[0].claimed_until = new Date(Date.now() + 60 * 1000).toISOString();
         const edited = { release_year_end: { from: "", to: "1988" } };
-        const r = await desk.approveSuggestion("s1", edited, "Checked against JAH.");
-        expect(r).toEqual({ success: true, status: "applied" });
+        const r = await desk.approveSuggestion("s1", edited, "Checked against JAH.", seen);
+        expect(r).toEqual({ success: true, status: "applied", dropped: [] });
         const actor = { userId: ME, alias: "ProjectCheapie", role: "moderator" };
         // One call does it all: apply, status, one notice to the member.
-        expect(apply.decideSuggestion).toHaveBeenCalledTimes(1);
-        expect(apply.decideSuggestion).toHaveBeenCalledWith("s1", {
+        expect(engine.decideSuggestion).toHaveBeenCalledTimes(1);
+        expect(engine.decideSuggestion).toHaveBeenCalledWith("s1", {
             reviewer: actor,
             verdict: "approved",
             note: "Checked against JAH.",
             edited,
+            expected: seen,
         });
         expect(apply.applySuggestion).not.toHaveBeenCalled();
-        expect(db.tables.catalog_suggestions[0].claimed_by).toBeNull();
+        expect(engine.releaseSuggestionClaim).toHaveBeenCalledWith(actor, "s1");
+    });
+
+    it("says no with what the card showed, too", async () => {
+        engine.decideSuggestion.mockResolvedValue({ success: true, status: "rejected" });
+        expect(await desk.rejectSuggestion("s1", "The 1998 release is a different horse.", seen)).toEqual({
+            success: true,
+        });
+        expect(engine.decideSuggestion).toHaveBeenCalledWith(
+            "s1",
+            expect.objectContaining({ verdict: "rejected", expected: seen }),
+        );
+    });
+
+    it("decides nothing when the member changed the suggestion meanwhile, and says so", async () => {
+        engine.decideSuggestion.mockResolvedValue({ success: false, code: "changed", error: "changed" });
+        const r = await desk.approveSuggestion("s1", null, null, seen);
+        expect(r).toMatchObject({
+            success: false,
+            changed: true,
+            error: expect.stringMatching(/changed this suggestion/),
+        });
+        expect(engine.releaseSuggestionClaim).not.toHaveBeenCalled();
+    });
+
+    it("hands back the values the Registry left out of a new entry", async () => {
+        const dropped = [{ key: "run_type", error: '"Store Special" is not a run type the Registry knows.' }];
+        engine.decideSuggestion.mockResolvedValue({ success: true, status: "approved", dropped });
+        expect(await desk.approveSuggestion("s1")).toEqual({ success: true, status: "applied", dropped });
     });
 
     it("leaves a duplicate waiting for its second look undecided", async () => {
-        apply.decideSuggestion.mockResolvedValue({ success: true, status: "awaiting_second_look" });
+        engine.decideSuggestion.mockResolvedValue({ success: true, status: "awaiting_second_look" });
         const r = await desk.approveSuggestion("s1");
-        expect(r).toEqual({ success: true, status: "awaiting_second_look" });
-        expect(apply.decideSuggestion).toHaveBeenCalledWith("s1", expect.objectContaining({ verdict: "approved" }));
+        expect(r).toEqual({ success: true, status: "awaiting_second_look", dropped: [] });
+        expect(engine.decideSuggestion).toHaveBeenCalledWith("s1", expect.objectContaining({ verdict: "approved" }));
     });
 
     it("passes the writer's refusal on in its own words", async () => {
-        apply.decideSuggestion.mockResolvedValue({ success: false, error: "You can't approve your own piece." });
+        engine.decideSuggestion.mockResolvedValue({ success: false, error: "You can't approve your own piece." });
         expect(await desk.approveSuggestion("s1")).toEqual({
             success: false,
             error: "You can't approve your own piece.",
@@ -334,10 +404,10 @@ describe("deciding", () => {
             success: false,
             error: "Say why in a few words. The member reads it.",
         });
-        expect(apply.decideSuggestion).not.toHaveBeenCalled();
-        apply.decideSuggestion.mockResolvedValue({ success: true, status: "rejected" });
+        expect(engine.decideSuggestion).not.toHaveBeenCalled();
+        engine.decideSuggestion.mockResolvedValue({ success: true, status: "rejected" });
         expect(await desk.rejectSuggestion("s1", "The 1998 release is a different horse.")).toEqual({ success: true });
-        expect(apply.decideSuggestion).toHaveBeenCalledWith("s1", expect.objectContaining({ verdict: "rejected" }));
+        expect(engine.decideSuggestion).toHaveBeenCalledWith("s1", expect.objectContaining({ verdict: "rejected" }));
     });
 
     it("refuses one already decided", async () => {
@@ -370,6 +440,68 @@ describe("the Queue", () => {
         });
         expect(item.changes).toEqual([{ key: "release_year_end", label: "Last year", from: "", to: "1988" }]);
     });
+
+    it("carries the entry's values now, so Edit then approve can add a field the member didn't touch", async () => {
+        db.tables.catalog_items = [
+            catalogRow({ id: "r1", title: "#5038 Morgan Mare", attributes: { color_description: "Bay" } }),
+        ];
+        const r = await desk.getQueue("corrections");
+        if (!r.success) throw new Error(r.error);
+        expect(r.queue.items[0].current).toMatchObject({
+            title: "#5038 Morgan Mare",
+            model_number: "",
+            color_description: "Bay",
+        });
+    });
+
+    it("counts the Desk's tabs: open suggestions, second looks, proposed rules", async () => {
+        db.tables.catalog_suggestions.push(suggestion({ id: "s2", suggestion_type: "addition" }));
+        db.tables.registry_actions = [{ id: "a1", status: "awaiting_second_look" }];
+        db.tables.registry_style_rules = [
+            { id: "x1", status: "proposed" },
+            { id: "x2", status: "in_effect" },
+        ];
+        expect(await desk.getDeskCounts()).toEqual({
+            success: true,
+            counts: { queue: 2, secondLooks: 1, rules: 1 },
+        });
+    });
+});
+
+describe("finding any entry", () => {
+    beforeEach(() => {
+        db.tables.catalog_items = [
+            catalogRow({ id: "sb", item_type: "plastic_mold", title: "Saddlebred" }),
+            catalogRow({ id: "r1", parent_id: "sb", title: "Saddlebred", attributes: { model_number: "5002" } }),
+            catalogRow({ id: "lone", title: "Saddlebred keychain", attributes: { model_number: "711198" } }),
+            catalogRow({ id: "res", item_type: "artist_resin", title: "Little Bit", attributes: {} }),
+        ];
+    });
+
+    it("finds releases with no mold and other kinds by name, each opening in the Desk editor", async () => {
+        const r = await desk.searchEntries("saddle");
+        if (!r.success) throw new Error(r.error);
+        const byId = Object.fromEntries(r.entries.map((e) => [e.id, e]));
+        expect(Object.keys(byId).sort()).toEqual(["lone", "r1", "sb"]);
+        expect(byId.r1).toMatchObject({ href: "/catalog/desk/mold/sb?release=r1", moldTitle: "Saddlebred" });
+        expect(byId.lone).toMatchObject({ href: "/catalog/desk/mold/lone", moldTitle: null, modelNumber: "711198" });
+    });
+
+    it("finds an entry by its model number, with or without the #", async () => {
+        for (const term of ["711198", "#711198"]) {
+            const r = await desk.searchEntries(term);
+            if (!r.success) throw new Error(r.error);
+            expect(r.entries.map((e) => e.id)).toEqual(["lone"]);
+        }
+        const resin = await desk.searchEntries("little");
+        expect(resin).toMatchObject({ success: true, entries: [{ id: "res", itemType: "artist_resin" }] });
+    });
+
+    it("says yes to the Desk link only for a moderator or the owner", async () => {
+        expect(await desk.canOpenDesk()).toEqual({ success: true, role: "moderator" });
+        auth.requireRegistryModerator.mockRejectedValue(new AuthError("The Registry Desk is for Registry moderators."));
+        expect(await desk.canOpenDesk()).toMatchObject({ success: false });
+    });
 });
 
 describe("the Mold view", () => {
@@ -397,6 +529,8 @@ describe("the Mold view", () => {
         expect(r.view.releases.map((x) => x.row.id).sort()).toEqual(["r1", "r2"]);
         expect(r.view.releases.find((x) => x.row.id === "r1")).toMatchObject({ horses: 2, wantLists: 0 });
         expect(r.view.releases.find((x) => x.row.id === "r2")).toMatchObject({ horses: 0, wantLists: 1 });
+        // "Add a field" is fed by every key the Registry keeps.
+        expect(r.view.fieldKeys).toEqual(["cast_medium", "materials", "model_number"]);
     });
 
     it("reads each same-number row's mold, so a set piece filed under its own mold is not missing", async () => {
@@ -441,6 +575,15 @@ describe("the Mold view", () => {
 });
 
 describe("saving", () => {
+    beforeEach(() => {
+        db.tables.catalog_items = [
+            catalogRow({ id: "sb", item_type: "plastic_mold", title: "Saddlebred" }),
+            catalogRow({ id: "r1", parent_id: "sb", title: "Saddlebred", attributes: { model_number: "5002" } }),
+            catalogRow({ id: "r2", parent_id: "sb", title: "Pinto Saddlebred", attributes: { model_number: "5002" } }),
+        ];
+        db.tables.user_horses = [{ catalog_id: "r1" }];
+    });
+
     it("hands back the other version when someone saved first", async () => {
         const current = catalogRow({ id: "r1", title: "Saddlebred (G1)", updated_at: "2026-10-16T12:00:00Z" });
         write.updateItem.mockResolvedValue({ success: false, code: "conflict", error: "changed", current });
@@ -471,6 +614,38 @@ describe("saving", () => {
         );
     });
 
+    it("passes a list on as its values", async () => {
+        write.updateItem.mockResolvedValue({
+            success: true,
+            item: catalogRow({ id: "r1", title: "t" }),
+            actionId: null,
+        });
+        await desk.saveItem({ id: "r1", updatedAt: "u", changes: { materials: [" Leather ", "", "Brass"] } });
+        expect(write.updateItem).toHaveBeenLastCalledWith(
+            expect.anything(),
+            expect.objectContaining({ changes: { materials: ["Leather", "Brass"] } }),
+        );
+    });
+
+    it("hands back the saved row with its fresh flags and links, and its History entry, in one trip", async () => {
+        const saved = catalogRow({
+            id: "r1",
+            parent_id: "sb",
+            title: "Saddlebred",
+            attributes: { model_number: "5002" },
+        });
+        write.updateItem.mockResolvedValue({ success: true, item: saved, actionId: "act-9", touched: ["title"] });
+        const r = await desk.saveItem({ id: "r1", updatedAt: "u", changes: { title: "Saddlebred" } });
+        if (!r.success) throw new Error(r.error);
+        expect(r.actionId).toBe("act-9");
+        expect(r.entry).toMatchObject({ row: { id: "r1" }, horses: 1, wantLists: 0 });
+        // Judged against the rows beside it: r2 shares its number.
+        expect(r.entry!.flags.map((f) => f.key)).toContain("number_clash");
+        // The Desk's pages are not re-rendered for a save; the writer clears the reference cache.
+        const { revalidatePath } = await import("next/cache");
+        expect(revalidatePath).not.toHaveBeenCalled();
+    });
+
     it("refuses an empty save without calling the writer", async () => {
         expect(await desk.saveItem({ id: "r1", updatedAt: "u", changes: {} })).toEqual({
             success: false,
@@ -479,7 +654,7 @@ describe("saving", () => {
         expect(write.updateItem).not.toHaveBeenCalled();
     });
 
-    it("passes a refused value on in the writer's words", async () => {
+    it("passes a refused value on in the writer's words, naming its field", async () => {
         write.updateItem.mockResolvedValue({
             success: false,
             code: "invalid",
@@ -489,13 +664,26 @@ describe("saving", () => {
         expect(await desk.saveItem({ id: "r1", updatedAt: "u", changes: { scale: "huge" } })).toEqual({
             success: false,
             error: "Scale must be one of the Registry's scales.",
+            field: "scale",
         });
     });
 });
 
 describe("merging and removing, through the one writer", () => {
+    const none = {
+        horses: 0,
+        wishlists: 0,
+        children: 0,
+        id_suggestions: 0,
+        pending_suggestions: 0,
+        sale_reports: 0,
+        price_flags: 0,
+        set_mentions: 0,
+        set_siblings: 0,
+    };
+
     it("hands back the merge's status, summary and whether it was the one-way merge", async () => {
-        write.requestMerge.mockResolvedValue({
+        engine.requestMerge.mockResolvedValue({
             success: true,
             actionId: "act1",
             status: "awaiting_second_look",
@@ -509,7 +697,7 @@ describe("merging and removing, through the one writer", () => {
             summary: 'Merged "a" into "b"',
             legacy: false,
         });
-        write.requestMerge.mockResolvedValue({
+        engine.requestMerge.mockResolvedValue({
             success: false,
             code: "not_ready",
             error: "Merging and removing open once the owner adds update 243.",
@@ -520,22 +708,52 @@ describe("merging and removing, through the one writer", () => {
         });
     });
 
+    it("merges a mold into another mold through the same engine call", async () => {
+        engine.requestMerge.mockResolvedValue({
+            success: true,
+            actionId: "act2",
+            status: "applied",
+            summary: 'Merged "Saddlebred" into "Saddlebred (G1)"',
+            legacy: false,
+        });
+        asOwner();
+        const r = await desk.requestMerge("g1", "sb", "Same mold twice");
+        expect(r).toMatchObject({ success: true, status: "applied" });
+        expect(engine.requestMerge).toHaveBeenCalledWith(expect.objectContaining({ role: "owner" }), {
+            keepId: "g1",
+            removeId: "sb",
+            note: "Same mold twice",
+        });
+    });
+
+    it("tells the merge dialog whether update 243 is in", async () => {
+        db.tables.catalog_items = [catalogRow({ id: "k1", title: "A" }), catalogRow({ id: "r1", title: "B" })];
+        write.linkCounts.mockResolvedValue({ ...none, total: 0 });
+        expect(await desk.previewMerge("k1", "r1")).toMatchObject({ success: true, undoReady: true });
+        engine.undoReady.mockResolvedValue(false);
+        expect(await desk.previewMerge("k1", "r1")).toMatchObject({ success: true, undoReady: false });
+    });
+
     it("says a row can be removed only when nothing at all points at it", async () => {
         db.tables.catalog_items = [catalogRow({ id: "r1", title: "Saddlebred" })];
-        const none = {
-            horses: 0,
-            wishlists: 0,
-            children: 0,
-            id_suggestions: 0,
-            pending_suggestions: 0,
-            sale_reports: 0,
-            price_flags: 0,
-            set_mentions: 0,
-            set_siblings: 0,
-        };
         write.linkCounts.mockResolvedValue({ ...none, total: 0 });
-        expect(await desk.previewRemove("r1")).toMatchObject({ success: true, canRemove: true });
+        expect(await desk.previewRemove("r1")).toMatchObject({ success: true, ready: true, canRemove: true });
         write.linkCounts.mockResolvedValue({ ...none, set_siblings: 2, total: 2 });
-        expect(await desk.previewRemove("r1")).toMatchObject({ success: true, canRemove: false });
+        expect(await desk.previewRemove("r1")).toMatchObject({ success: true, ready: true, canRemove: false });
+    });
+
+    it("says first, before any reason is typed, that removing waits for update 243", async () => {
+        engine.undoReady.mockResolvedValue(false);
+        db.tables.catalog_items = [catalogRow({ id: "r1", title: "Saddlebred" })];
+        expect(await desk.previewRemove("r1")).toEqual({
+            success: true,
+            ready: false,
+            message: "Removing opens once the site owner adds update 243. Until then nothing can be removed.",
+        });
+        expect(write.linkCounts).not.toHaveBeenCalled();
+        asOwner();
+        expect(await desk.previewRemove("r1")).toMatchObject({
+            message: expect.stringMatching(/once you add update 243 \(Admin › Ops\)/),
+        });
     });
 });

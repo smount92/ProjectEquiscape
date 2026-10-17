@@ -25,6 +25,7 @@ const actions = vi.hoisted(() => ({
     searchMolds: vi.fn(),
 }));
 vi.mock("@/app/actions/registry-desk", () => actions);
+vi.mock("@/app/actions/registry-desk-lists", () => ({ undoAction: vi.fn() }));
 const toast = vi.hoisted(() => vi.fn());
 vi.mock("@/lib/context/ToastContext", () => ({ useToast: () => ({ toast }) }));
 
@@ -162,7 +163,9 @@ describe("the Mold view editor", () => {
                 changes: { title: "Saddlebred (G1)" },
             }),
         );
-        await waitFor(() => expect(toast).toHaveBeenCalledWith(expect.stringMatching(/^Saved/), "success"));
+        await waitFor(() =>
+            expect(toast.mock.calls.some(([m, v]) => /^Saved/.test(String(m)) && v === "success")).toBe(true),
+        );
 
         fireEvent.change(screen.getByLabelText(/^Run details/), { target: { value: "Sears Holiday Catalog" } });
         fireEvent.keyDown(window, { key: "s", metaKey: true });
@@ -257,8 +260,9 @@ describe("the Mold view editor", () => {
         expect(window.location.search).toBe("");
     });
 
-    it("only offers the releases that need work when asked", () => {
-        renderView();
+    it("only offers the releases that need work when asked, keeping the one in view until you move on", () => {
+        renderView("r-set");
+        fireEvent.click(screen.getByRole("button", { name: "Edit the mold itself" }));
         fireEvent.click(screen.getByRole("button", { name: "Needs work 1" }));
         const rows = within(screen.getByTestId("release-rail")).getAllByTestId("rail-row");
         expect(rows.map((r) => r.textContent?.slice(0, 20))).toEqual([

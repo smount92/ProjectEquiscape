@@ -11,8 +11,10 @@ import {
     DESK_FIELDS,
     DESK_GROUP_ORDER,
     HIDDEN_ATTRIBUTES,
+    addableFields,
     buildDeskFields,
     deskChanges,
+    deskFieldFor,
     type DeskSource,
 } from "@/lib/catalog/editableFields";
 import { CATALOG_REAL_COLUMNS } from "@/lib/catalog/corrections";
@@ -133,17 +135,25 @@ describe("buildDeskFields: a release", () => {
         expect(by.parent_id.kind).toBe("mold");
     });
 
-    it("puts every other attribute under Everything else, editable", () => {
-        const fields = buildDeskFields(row({ attributes: { finish: "Matte", fits_molds: ["a", "b"], blank: "" } }));
+    it("puts every other attribute under Everything else, editable, lists included", () => {
+        const fields = buildDeskFields(
+            row({ attributes: { finish: "Matte", fits_molds: ["a", "b"], odd_key: "x", blank: "" } }),
+        );
         const finish = fields.find((f) => f.key === "finish")!;
         expect(finish.group).toBe("extras");
         expect(finish.readOnly).toBeFalsy();
         expect(finish.original).toBe("Matte");
-        // A list can't be typed into one box without breaking it: shown, not editable.
+        expect(finish.label).toBe("Finish");
+        // A list is typed as comma-separated words; the writer checks it.
         const list = fields.find((f) => f.key === "fits_molds")!;
         expect(list.group).toBe("extras");
-        expect(list.readOnly).toBe(true);
+        expect(list.readOnly).toBeFalsy();
+        expect(list.kind).toBe("list");
+        expect(list.original).toBe("a, b");
+        expect(fields.find((f) => f.key === "odd_key")).toMatchObject({ group: "extras", label: "Odd key" });
         expect(fields.find((f) => f.key === "blank")).toBeUndefined();
+        // Nobody is told the owner has to do it by hand any more.
+        expect(fields.some((f) => /by hand/.test(f.help ?? ""))).toBe(false);
     });
 
     it("keeps the import details editable, folded away", () => {
@@ -207,7 +217,101 @@ describe("deskChanges", () => {
     });
 
     it("never sends a read-only field", () => {
-        const fields = buildDeskFields(row({ attributes: { fits_molds: ["a"] } }));
-        expect(deskChanges(fields, { id: "x", updated_at: "y", fits_molds: "z" })).toEqual({});
+        const fields = buildDeskFields(row({ attributes: { nested: { a: 1 } } }));
+        expect(deskChanges(fields, { id: "x", updated_at: "y", nested: "z" })).toEqual({});
+    });
+
+    it("sends a list as its values, and nothing when only the spacing changed", () => {
+        const fields = buildDeskFields(row({ attributes: { materials: ["Leather", "Brass"] } }));
+        expect(deskChanges(fields, { materials: "Leather,Brass " })).toEqual({});
+        expect(deskChanges(fields, { materials: "Leather, Brass, Silver" })).toEqual({
+            materials: ["Leather", "Brass", "Silver"],
+        });
+        expect(deskChanges(fields, { materials: "" })).toEqual({ materials: "" });
+    });
+
+    it("counts a year stored as text as a change once touched, so saving stores a number", () => {
+        const fields = buildDeskFields(row({ attributes: { release_year_start: "1975", release_year_end: 1988 } }));
+        expect(fields.find((f) => f.key === "release_year_start")!.storedAsText).toBe(true);
+        expect(fields.find((f) => f.key === "release_year_end")!.storedAsText).toBeFalsy();
+        // Untouched and nothing else changed: no save.
+        expect(deskChanges(fields, {})).toEqual({});
+        // "Use this" fills the same text: that is a change.
+        expect(deskChanges(fields, { release_year_start: "1975" })).toEqual({ release_year_start: "1975" });
+        // Any other change carries the plain year along.
+        expect(deskChanges(fields, { color_description: "Bay" })).toEqual({
+            color_description: "Bay",
+            release_year_start: "1975",
+        });
+    });
+
+    it("leaves an unusual year stored as text for a person", () => {
+        const fields = buildDeskFields(row({ attributes: { release_year_start: "1975-1988" } }));
+        expect(deskChanges(fields, { color_description: "Bay" })).toEqual({ color_description: "Bay" });
+    });
+});
+
+describe("resin, tack and prop fields", () => {
+    const resinKeys = ["cast_medium", "edition_size", "finish", "finish_type", "coa", "auction_sale_price", "species"];
+    const tackKeys = ["tack_type", "discipline", "materials", "fits_molds", "working_parts"];
+    const propKeys = ["prop_category", "dimensions", "terrain_setting", "materials"];
+    const sceneKeys = ["scene_theme", "components", "base_dimensions", "documentation_notes", "discipline"];
+
+    it("shows each kind's own keys by default, empty, under Everything else", () => {
+        const cases: [string, string[]][] = [
+            ["artist_resin", resinKeys],
+            ["factory_resin", resinKeys],
+            ["tack", tackKeys],
+            ["prop", propKeys],
+            ["diorama", sceneKeys],
+        ];
+        for (const [type, keys] of cases) {
+            const fields = buildDeskFields(row({ item_type: type, parent_id: null }));
+            for (const k of keys) {
+                const f = fields.find((x) => x.key === k);
+                expect(f, `${type} ${k}`).toBeDefined();
+                expect(f!.group).toBe("extras");
+                expect(f!.readOnly).toBeFalsy();
+            }
+        }
+    });
+
+    it("keeps them off a plastic release unless it carries one", () => {
+        const keys = keysOf(row());
+        for (const k of [...resinKeys, ...tackKeys, ...propKeys, ...sceneKeys]) expect(keys, k).not.toContain(k);
+        expect(keysOf(row({ attributes: { edition_size: "50" } }))).toContain("edition_size");
+    });
+
+    it("edits materials and working parts as lists", () => {
+        const fields = buildDeskFields(row({ item_type: "tack", parent_id: null }));
+        expect(fields.find((f) => f.key === "materials")!.kind).toBe("list");
+        expect(fields.find((f) => f.key === "working_parts")!.kind).toBe("list");
+    });
+});
+
+describe("Add a field", () => {
+    it("offers every key the Registry keeps that the editor doesn't show, in words, A to Z", () => {
+        const shown = buildDeskFields(row());
+        const known = ["model_number", "cast_medium", "edition_size", "source", "brand_new_key", "page_address"];
+        const offered = addableFields(shown, known);
+        expect(offered.map((o) => o.key)).toEqual(["brand_new_key", "cast_medium", "edition_size"]);
+        expect(offered.find((o) => o.key === "cast_medium")!.label).toBe("Cast in");
+        expect(offered.find((o) => o.key === "brand_new_key")!.label).toBe("Brand new key");
+    });
+
+    it("never offers a column or a fact of the record", () => {
+        const offered = addableFields([], ["title", "maker", "parent_id", "id", "created_at", "updated_at", "slug"]);
+        expect(offered).toEqual([]);
+    });
+
+    it("adds the field empty, ready to type into, and saves it like any other", () => {
+        const fields = buildDeskFields(row(), { added: ["cast_medium", "materials"] });
+        const added = fields.find((f) => f.key === "cast_medium")!;
+        expect(added).toMatchObject({ original: "", group: "extras", label: "Cast in" });
+        expect(deskFieldFor("materials").kind).toBe("list");
+        expect(deskChanges(fields, { cast_medium: "Resin", materials: "Leather, Brass" })).toEqual({
+            cast_medium: "Resin",
+            materials: ["Leather", "Brass"],
+        });
     });
 });
