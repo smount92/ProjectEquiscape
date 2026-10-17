@@ -17,6 +17,13 @@ const admin = vi.hoisted(() => ({
 vi.mock("@/app/actions/admin", () => admin);
 vi.mock("@/components/AdminModerationCard", () => ({ default: () => null }));
 vi.mock("@/components/AdminDisputesCard", () => ({ default: () => null }));
+vi.mock("next/link", () => ({
+    default: ({ href, children, ...rest }: { href: string; children: React.ReactNode }) => (
+        <a href={href} {...rest}>
+            {children}
+        </a>
+    ),
+}));
 
 import AdminMembersTab from "@/components/AdminMembersTab";
 
@@ -62,8 +69,45 @@ describe("AdminMembersTab: Registry moderators", () => {
         expect(screen.getByText("Registry moderator")).toBeTruthy(); // Maple's chip
         expect(screen.getAllByRole("button", { name: "Make moderator" })).toHaveLength(1);
 
+        // It asks first, saying what the seat gives.
         fireEvent.click(screen.getByRole("button", { name: "Make moderator" }));
+        expect(admin.grantRegistryModerator).not.toHaveBeenCalled();
+        const ask = screen.getByRole("group", { name: "Make @Bay a Registry moderator?" });
+        expect(ask.textContent).toContain("This gives @Bay the Registry Desk and a public Registry moderator badge.");
+        fireEvent.click(screen.getByRole("button", { name: "Confirm" }));
         await waitFor(() => expect(admin.grantRegistryModerator).toHaveBeenCalledWith("u-2"));
+    });
+
+    it("lets Cancel back out of making a moderator", async () => {
+        render(<AdminMembersTab />);
+        await screen.findByText("@Bay");
+        fireEvent.click(screen.getByRole("button", { name: "Make moderator" }));
+        fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
+        expect(screen.queryByRole("group", { name: /Registry moderator\?/ })).toBeNull();
+        expect(admin.grantRegistryModerator).not.toHaveBeenCalled();
+    });
+
+    it("says a failed load failed, not that update 242 is missing, and can try again", async () => {
+        admin.listRegistryModerators.mockResolvedValueOnce({
+            success: false,
+            error: "Could not read the moderator list.",
+        });
+        render(<AdminMembersTab />);
+        await screen.findByText("@Bay");
+        expect((await screen.findByRole("alert")).textContent).toMatch(/Could not read the moderator list/);
+        expect(screen.queryByText(/update 242/)).toBeNull();
+        fireEvent.click(screen.getByRole("button", { name: "Try again" }));
+        await waitFor(() => expect(screen.queryByRole("alert")).toBeNull());
+        expect(admin.listRegistryModerators).toHaveBeenCalledTimes(2);
+    });
+
+    it("links to the Registry Desk and the moderators' guide", async () => {
+        render(<AdminMembersTab />);
+        await screen.findByText("@Bay");
+        expect(screen.getByRole("link", { name: "Open the Registry Desk" }).getAttribute("href")).toBe("/catalog/desk");
+        expect(screen.getByRole("link", { name: "The moderators' guide" }).getAttribute("href")).toBe(
+            "/catalog/desk/guide",
+        );
     });
 
     it("ends a seat with a private reason", async () => {

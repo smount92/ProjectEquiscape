@@ -16,6 +16,7 @@
  */
 
 import { useCallback, useEffect, useState, useTransition } from "react";
+import Link from "next/link";
 
 import {
     grantRegistryModerator,
@@ -104,20 +105,42 @@ function RemoveSeat({ userId, alias, onChanged }: { userId: string; alias: strin
 /** The seats, at the top of the tab: who moderates the Registry now. */
 function ModeratorsStrip({
     ready,
+    loadError,
     moderators,
     onChanged,
+    onRetry,
 }: {
     ready: boolean;
+    /** The list could not be read (not the same as update 242 missing). */
+    loadError: string | null;
     moderators: RegistryModeratorRow[];
     onChanged: () => void;
+    onRetry: () => void;
 }) {
     const seated = moderators.filter((m) => m.status === "active" || m.status === "resting");
     return (
         <section aria-labelledby="registry-moderators-heading">
-            <h3 id="registry-moderators-heading" className="mt-0 mb-1 flex items-center gap-2 text-base font-bold">
-                🗂️ Registry moderators
-            </h3>
-            {!ready ? (
+            <div className="mb-1 flex flex-wrap items-baseline justify-between gap-2">
+                <h3 id="registry-moderators-heading" className="m-0 flex items-center gap-2 text-base font-bold">
+                    🗂️ Registry moderators
+                </h3>
+                <span className="flex flex-wrap gap-3 text-xs">
+                    <Link href="/catalog/desk" className="font-semibold text-forest no-underline hover:underline">
+                        Open the Registry Desk
+                    </Link>
+                    <Link href="/catalog/desk/guide" className="font-semibold text-forest no-underline hover:underline">
+                        The moderators&apos; guide
+                    </Link>
+                </span>
+            </div>
+            {loadError ? (
+                <div role="alert" className="flex flex-wrap items-center gap-2">
+                    <p className="m-0 text-xs font-semibold text-destructive">{loadError}</p>
+                    <Button variant="outline" size="sm" onClick={onRetry}>
+                        Try again
+                    </Button>
+                </div>
+            ) : !ready ? (
                 <p className="m-0 text-xs text-muted-foreground">
                     Registry moderators open once you add update 242 (Admin › Ops lists it).
                 </p>
@@ -168,6 +191,7 @@ function MemberRow({
 }) {
     const [reason, setReason] = useState("");
     const [showReason, setShowReason] = useState(false);
+    const [confirmSeat, setConfirmSeat] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [pending, startTransition] = useTransition();
     const seated = seat?.status === "active" || seat?.status === "resting";
@@ -180,6 +204,7 @@ function MemberRow({
                 setError(result.error ?? "Something went wrong.");
                 return;
             }
+            setConfirmSeat(false);
             onChanged();
         });
 
@@ -246,8 +271,8 @@ function MemberRow({
                 </div>
 
                 <div className="flex shrink-0 flex-wrap gap-2">
-                    {moderatorsReady && !member.isSuspended && !seated && (
-                        <Button variant="outline" size="sm" disabled={pending} onClick={makeModerator}>
+                    {moderatorsReady && !member.isSuspended && !seated && !confirmSeat && (
+                        <Button variant="outline" size="sm" disabled={pending} onClick={() => setConfirmSeat(true)}>
                             Make moderator
                         </Button>
                     )}
@@ -276,6 +301,26 @@ function MemberRow({
                     )}
                 </div>
             </div>
+
+            {confirmSeat && !seated && (
+                <div
+                    role="group"
+                    aria-label={`Make @${member.alias} a Registry moderator?`}
+                    className="mt-2 flex flex-col gap-2 rounded-lg border border-input bg-muted/40 p-3 sm:flex-row sm:items-center sm:justify-between"
+                >
+                    <p className="m-0 text-sm text-foreground">
+                        This gives @{member.alias} the Registry Desk and a public Registry moderator badge.
+                    </p>
+                    <div className="flex shrink-0 gap-2">
+                        <Button size="sm" disabled={pending} onClick={makeModerator}>
+                            {pending ? "Working…" : "Confirm"}
+                        </Button>
+                        <Button variant="outline" size="sm" disabled={pending} onClick={() => setConfirmSeat(false)}>
+                            Cancel
+                        </Button>
+                    </div>
+                </div>
+            )}
 
             {seated && (
                 <div className="mt-2">
@@ -324,12 +369,22 @@ export default function AdminMembersTab({ initialQuery = "" }: { initialQuery?: 
     const [loading, setLoading] = useState(true);
     const [moderators, setModerators] = useState<RegistryModeratorRow[]>([]);
     const [moderatorsReady, setModeratorsReady] = useState(false);
+    const [moderatorsError, setModeratorsError] = useState<string | null>(null);
 
     const loadModerators = useCallback(async () => {
-        const result = await listRegistryModerators();
+        let result: Awaited<ReturnType<typeof listRegistryModerators>>;
+        try {
+            result = await listRegistryModerators();
+        } catch {
+            result = { success: false, error: "" };
+        }
         if (result.success) {
             setModerators(result.moderators);
             setModeratorsReady(result.ready);
+            setModeratorsError(null);
+        } else {
+            // A failed read is not "update 242 is missing": say what happened.
+            setModeratorsError(`${result.error || "The moderator list didn't load."} Nothing has changed; try again.`);
         }
     }, []);
 
@@ -366,7 +421,13 @@ export default function AdminMembersTab({ initialQuery = "" }: { initialQuery?: 
                 the dispute bell and the pulse tile both land here. */}
             <AdminDisputesCard />
 
-            <ModeratorsStrip ready={moderatorsReady} moderators={moderators} onChanged={() => void loadModerators()} />
+            <ModeratorsStrip
+                ready={moderatorsReady}
+                loadError={moderatorsError}
+                moderators={moderators}
+                onChanged={() => void loadModerators()}
+                onRetry={() => void loadModerators()}
+            />
 
             <div>
                 <h3 className="mt-0 mb-1 flex items-center gap-2 text-base font-bold">👤 Members</h3>

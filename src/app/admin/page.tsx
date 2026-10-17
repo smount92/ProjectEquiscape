@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { redirect } from "next/navigation";
@@ -129,9 +130,17 @@ export default async function AdminPage() {
             }
             description="Founder's Command Center — Full system overview"
             headerActions={
-                <div className="inline-flex items-center gap-2 rounded-full border border-forest/20 bg-forest/10 px-3 py-1.5 text-xs font-semibold text-forest">
-                    <Shield className="h-3.5 w-3.5" />
-                    Service Role Access
+                <div className="flex flex-wrap items-center gap-2">
+                    <Link
+                        href="/catalog/desk"
+                        className="inline-flex items-center gap-1.5 rounded-full border border-input bg-card px-3 py-1.5 text-xs font-semibold text-forest no-underline hover:border-forest max-md:min-h-11"
+                    >
+                        🗂️ Registry Desk
+                    </Link>
+                    <div className="inline-flex items-center gap-2 rounded-full border border-forest/20 bg-forest/10 px-3 py-1.5 text-xs font-semibold text-forest">
+                        <Shield className="h-3.5 w-3.5" />
+                        Service Role Access
+                    </div>
                 </div>
             }
             mainContent={

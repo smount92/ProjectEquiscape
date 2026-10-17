@@ -30,6 +30,7 @@ import MoldTimeline from "@/components/reference/MoldTimeline";
 import { getMoldCustoms } from "@/lib/catalog/moldCustoms";
 import { deriveAttribution } from "@/lib/catalog/taxonomy";
 import ViewBeacon from "@/components/metrics/ViewBeacon";
+import EditInDeskLink from "@/components/desk/EditInDeskLink";
 
 interface Props {
     params: Promise<{ maker: string; slug: string }>;
@@ -935,6 +936,8 @@ export default async function ReferencePage({ params }: Props) {
                         <Link href="/catalog/changelog" className="text-secondary-foreground hover:text-foreground">
                             📋 Change history
                         </Link>
+                        {/* Moderators and the owner only, decided in the browser so this page stays cached. */}
+                        <EditInDeskLink itemId={item.id} className="font-semibold text-forest hover:text-foreground" />
                     </div>
                 </section>
             </div>
